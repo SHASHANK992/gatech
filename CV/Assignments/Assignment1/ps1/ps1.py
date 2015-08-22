@@ -1,11 +1,13 @@
 import cv2
 import numpy as np
 
-np.set_printoptions(threshold=np.nan)
-
 # Save off image 1 and 2
 image1 = cv2.imread('.\input\ps1-1-a-1.png')
 image2 = cv2.imread('.\input\ps1-1-a-2.png')
+
+# Split into channels
+blue1, green1, red1 = cv2.split(image1)
+blue2, green2, red2 = cv2.split(image2)
 
 # Question 2
 # Part a - Swap red and blue pixels of image 1
@@ -60,10 +62,15 @@ cv2.imwrite('.\output\ps1-4-c-1.png', green1L)
 # Part d - Subtract the shifted version of image 1 green from the original one
 #green1_diff = (green1 - green1L) + (green1L - green1)
 green1_diff = green_temp.astype('float') - green1L.astype('float')
-#print green1_diff[100:200,100:200]
 cv2.imwrite('.\output\ps1-4-d-1.png', abs(green1_diff))
 
 # Question 5
+# Save off image 1 and 2
+image1 = cv2.imread('.\input\ps1-1-a-1.png')
+
+# Split into channels
+blue1, green1, red1 = cv2.split(image1)
+
 # Part a - Take original colored image 1 and add Gaussian noise to pixels in green channel
 sigma = 10
 noise = np.random.normal(0, sigma, image1.shape[0:2])
