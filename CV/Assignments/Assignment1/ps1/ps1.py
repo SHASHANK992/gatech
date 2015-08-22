@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+np.set_printoptions(threshold=np.nan)
+
 # Save off image 1 and 2
 image1 = cv2.imread('.\input\ps1-1-a-1.png')
 image2 = cv2.imread('.\input\ps1-1-a-2.png')
@@ -49,12 +51,17 @@ green1_manip = (10*(green1 - mean1)/std1) + mean1
 cv2.imwrite('.\output\ps1-4-b-1.png', green1_manip)
 
 # Part c - Shift image 1 green to the left by 2 pixels
-
-#cv2.imwrite('.\output\ps1-4-c-1.png', )
+blue_temp, green_temp, red_temp = cv2.split(image1)
+green1L = green1
+shift = 2
+green1L[ :, 0:green1.shape[1]-shift ] = green1L[ : , shift:green1.shape[1] ]
+cv2.imwrite('.\output\ps1-4-c-1.png', green1L)
 
 # Part d - Subtract the shifted version of image 1 green from the original one
-
-#cv2.imwrite('.\output\ps1-4-d-1.png', )
+#green1_diff = (green1 - green1L) + (green1L - green1)
+green1_diff = green_temp.astype('float') - green1L.astype('float')
+#print green1_diff[100:200,100:200]
+cv2.imwrite('.\output\ps1-4-d-1.png', abs(green1_diff))
 
 # Question 5
 # Part a - Take original colored image 1 and add Gaussian noise to pixels in green channel
