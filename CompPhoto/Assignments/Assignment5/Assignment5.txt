@@ -1,0 +1,30 @@
+Assignment #5: Experiencing a Camera Obscura
+
+We have discussed Camera Obscura or a Pinhole Camera in lectures. The best way to learn about this is to experience it yourself. Hence, this assignment. 
+You will turn a room (or any other place you can control) into a camera obscura or pinhole camera by letting light pass into the room only through a small hole (ie. a pinhole). An image of the outside world will then be projected upside-down onto a wall in your room -- it should be dim (VERY dim), but visible to the naked eye, so it is essential that you can make this room very dark. Your job is to
+
+Build a Camera Obscura in a room (as in this setup and this one). Remember the room has to be very dark and the hole (pinhole) very small. And the outside scene you are capturing, very bright.
+Take a picture of the scene outside window (on the other side of the pinhole) that you are trying to capture (let's call it the "Scene"). Note that brighter the outside scene, the better. 
+Take a digital photograph of the image being projected onto your wall (let's call it the "Image") by using a very long exposure (for example, 15 seconds). Be sure to keep the digital camera still during the entire exposure time (use/borrow a tripod! or put it on a table!). You are alllowed to do some editing/enhancement to make this image viewable, but in that case specify what steps you took to make it better.
+Take an image (or a series of images as appropriate) of the setup, (call this the "Setup"). ??
+Part of your task is to experiment to get the best setup. It may involve attempting a variety of things in terms of how to control the light in the room. If your walls have dark paint, try holding up a white sheet of paper closer to the pinhole to reveal the image. ??If your room or digital camera absolutely won't work for this task, look for a different room and a digital camera from someone else. 
+
+If interested you can see some example results of this assignment from the previous students, see the attached model answers on the T-square site. 
+
+If you are having trouble getting a room to work, this is an alternative that students had success with last semester:
+Building a Simple Camera Obscura - www.youtube.com/watch?v=Y0wenfVfHuo
+
+What to submit?
+LastName_FirstInitial_A5.pdf - A PDF based on the template for doing this assignment provided here.  Submitted PDF should have the "Scene" "Image" and "Setup" images with the information listed below. As usual, please feel free to add more details, but the template is basically aimed at the minimum of what is required. Keep the size limit of the PDF to 6MB. If you need to compress your PDF before submitting, you can use http://smallpdf.com/compress-pdf.
+
+In the report you should answer the following questions in brief.  
+What was the site of your camera obscura experiment?
+Why was it appropriate? What did you have to do to make it appropriate?
+Was the image visible to naked eye?
+Who helped you with this assignment? In what way? (this will address the GT Honor Pledge).
+What NOT to do! 
+A simplist way to get a Pinhole Camera for those with a removeable lens camera is to just make a small hole in a lens-cover and put where the lens is.  This IS NOT ACCEPTABLE.  We need a room, or a BOX, which is also an option, where you can make a large box into a camera, the problem here is how to see the image inside and how to take its picture, but there are solutions to that too (put the camera inside the box on a 15 second timer, reseal box so no light comes in)
+ 
+
+NOTES:
+We are aware that this is NOT an easy assignment to do, but it is aimed at giving you insights about cameras, the old-fashioned way, and also about planing and capturing images. We are also aware that this assigment reminds some of you of your early schooling days, but every class since 2008 that has done this assignment has enjoyed it.  Start early and plan ahead. This assignment will also be open for peer-feedabck.  Please do not share any images you don't want anyone to see. The assignment is graded more on seeing how you went about doing it, than the final Image. We understand the final image ("Image") is going to be hard to see, try your best.

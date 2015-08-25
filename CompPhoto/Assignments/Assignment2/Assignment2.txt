@@ -1,0 +1,26 @@
+Assignment #2: Image I/O and Python Setup.
+
+Part 1: Installing Python, OpenCV, Numpy & Scipy.
+To start off this assignment, we will be setting up Python with three libraries, OpenCV, Numpy, and Scipy. Get started on this as soon as possible by looking at our installation tutorial. If you are having trouble with the tutorial, please post any errors / questions you have on Piazza. Due to the diverse set of abilities in this, and the diversity of computing platforms out there, we expect that this will be a breeze for some, but harder for others. We expect that everyone will help each other setup and get started on this assignmemt.  So, please, if you are having problems, look for information on Piazza, as someone may have resolved it, if not, post a question with detailed specifics of your problem, and someone will try to help. Again, please help each other set up. We want to emphasize the goal of this assignment is to get you all setup so we can do more in later weeks.  Yes, for some this would be trivial, those folks should step up to help others.  
+
+Part 2: Assignment Deliverables
+The second part of the assignment requires you to build on the setup that you have created in Part 1. We want you to program five imaging functions. You may download the assignment files (zip file) that include the python template and a basic test file that will verify your functions output the correct type after you have written them (Note: simply because the tests succeed does not mean your function is doing the correct thing, you must verify this yourself, the test serves as a very basic check). Download the assignment files under Resources > Assignments > Assignment 2. 
+
+This zipped folder contains the following files in a folder labeled assignment2:
+
+assignment2.py - This is where you will write the code for the five functions we provide.
+assignment2_test.py - This can be used to test if your code is outputting the correct data type.
+README - Some basic instructions on how to run the unit test and how to read and write images.
+test_image.jpg - A basic test image.
+test_image_2.jpg - Another test image. This is the same as test_image.jpg but horizontally flipped -- you may use this image to get a sense of whether your flipHorizontal function is functioning correctly.
+The function documentation details exactly what you need to do, but a basic description is provided here:
+numberOfPixels: This function takes in a grayscale image, and you must output an integer which represents the number of pixels in this grayscale image.
+averagePixel: This function takes in a grayscale image ad outputs the average pixel value of that image as an integer.
+convertToBlackAndWhite: This function converts a grayscale image to a 1-bit black and white image. Details are provided in the function description.
+averageTwoImages: This function requires you to average two input images into the output. Further details are provided in the function description.
+flipHorizontal: This function flips an image along the horizontal axis. Further details are provided in the function description.
+Please turn in the following files. Keep the size limit of each file to 6MB. If you need to compress your PDF before submitting, you can use http://smallpdf.com/compress-pdf: 
+assignment2.py
+Please put your name and GTID at the top of this assignment.
+assignment2.pdf
+In the PDF we want you to write how you approached each of the five functions above (a brief description), and we want you to include input / output images (of your choosing) for functions 3, 4, and 5. Please include your name and GTID in this PDF.
