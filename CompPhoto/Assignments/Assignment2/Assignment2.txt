@@ -13,9 +13,10 @@ assignment2_test.py - This can be used to test if your code is outputting the co
 README - Some basic instructions on how to run the unit test and how to read and write images.
 test_image.jpg - A basic test image.
 test_image_2.jpg - Another test image. This is the same as test_image.jpg but horizontally flipped -- you may use this image to get a sense of whether your flipHorizontal function is functioning correctly.
+
 The function documentation details exactly what you need to do, but a basic description is provided here:
 numberOfPixels: This function takes in a grayscale image, and you must output an integer which represents the number of pixels in this grayscale image.
-averagePixel: This function takes in a grayscale image ad outputs the average pixel value of that image as an integer.
+averagePixel: This function takes in a grayscale image and outputs the average pixel value of that image as an integer.
 convertToBlackAndWhite: This function converts a grayscale image to a 1-bit black and white image. Details are provided in the function description.
 averageTwoImages: This function requires you to average two input images into the output. Further details are provided in the function description.
 flipHorizontal: This function flips an image along the horizontal axis. Further details are provided in the function description.
