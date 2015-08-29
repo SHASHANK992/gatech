@@ -113,71 +113,23 @@ def hough_lines_draw(img_out, peaks, rho, theta):
         peaks: Px2 matrix where each row is a (rho_idx, theta_idx) index pair
         rho: vector of rho values, such that rho[rho_idx] is a valid rho value
         theta: vector of theta values, such that theta[theta_idx] is a valid theta value
-    """
-    
-    #height, width, channel = img_out.shape
-    #max_d = np.ceil( np.sqrt( height**2 + width**2 ) )
-    
-    # For each peak, generate a line
-    # I have a d and a theta. I need an x and y
+    """   
+        
     for peak in peaks:
-               
-        # We can't solve for x and y directly. We first have to set one,
-        # and then we can solve for the other        
-        x_start = 0
-        y_start = 0
+        a = cos( theta[ peak[1] ] )
+        b = sin( theta[ peak[1] ] )
         
-        x_end = 0
-        y_end = 0
-                
-        # Horizontal line (i.e., theta = pi/2)
-        if theta[ peak[1] ] == pi/2 or theta[ peak[1] ] == -pi/2:
-            #print 'Theta is pi/2'
-            # Find the value for x (it will be fixed) 
-            x_start = rho[ peak[0] ]
-            x_end = rho[ peak[0] ]
-            
-            # The y value will go from top to bottom
-            y_start = 0
-            y_end = img_out.shape[0]
-            
-        # Vertical line (theta = 0 or -pi)
-        # Due to numerical imprecision, need to have a range
-        elif theta[ peak[1] ] <= 0.1 or theta[peak[1]] >= -0.1 :
-            #print 'theta is 0'
-            # Find the value for y (it will be fixed)
-            y_start = rho[ peak[0] ]
-            y_end = rho[ peak[0] ]
-            
-            # The x value will from left to right
-            x_start = 0
-            x_end = img_out.shape[1]
-                    
-        # Diagonal line
-        else:
-            # The x values will go from side to side
-            x_start = 0
-            x_end = img_out.shape[1]
-            
-            # Calculate the y values
-            y_start = (-rho[ peak[0] ])/ (sin( theta[ peak[1] ] ))
-            y_end = x_end*cos( rho[ peak[0] ] ) - rho[ peak[0] ]*sin( theta[ peak[1] ] )
+        x0 = a*rho[ peak[0] ]
+        y0 = b*rho[ peak[0] ]
+        x1 = int( x0 + 1000*(-b) )
+        y1 = int(y0 + 1000*a)
+        x2 = int(x0-1000*(-b))
+        y2 = int(y0-1000*a)
         
-        #endif
-        
-        x_start = abs(int(x_start))
-        x_end = abs(int(x_end))
-        y_start = abs(int(y_start))
-        y_end = abs(int(y_end))
-        
-        #print x_start, x_end, y_start, y_end
-        
-        cv2.line( img_out, (x_start, y_start), (x_end, y_end), (0, 255, 0) )
-        
+        cv2.line( img_out, (x1,y1), (x2,y2), (0,255,0), 2)       
     #endfor
-    
-    
-    pass  # TODO: Your code here (nothing to return, just draw on img_out directly)
+        
+    pass
 
 def normalize_accum_array(H):
     """ Normalize a Hough Accumulator array
