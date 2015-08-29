@@ -33,7 +33,7 @@ def hough_lines_acc(img_edges, rho_res=1, theta_res=pi/90):
     height, width = img_edges.shape
     max_d = np.ceil( np.sqrt( height**2 + width**2 ) )
     rho = np.arange(-max_d, max_d, rho_res)  
-    theta = np.arange(-pi, pi, theta_res)
+    theta = np.arange(-pi/2, pi/2, theta_res)
     H = np.zeros( (len(rho), len(theta)) )
     
     y_vals, x_vals = np.nonzero(img_edges)
@@ -52,8 +52,25 @@ def hough_lines_acc(img_edges, rho_res=1, theta_res=pi/90):
 
 
 def hough_circles_acc(img_edges, radius):
+    # Create accumulator array (same size as original image)
+    H = np.zeros( img_edges.shape )
+    theta_res = pi/90
+    theta = np.arange(-pi, pi, theta_res)
+    
+    y_vals, x_vals = np.nonzero(img_edges)
+    
+    for i in range( len(x_vals) ):
+        x = x_vals[i]
+        y = y_vals[i]
+        
+        for t in range( len(theta) ):
+            a = x - r*cos(t)
+            b = y + r*sin(t)
+            H[a,b] += 1
+        #endfor
+    #endfor    
 
-    pass
+    return H
 #end hough_circles_acc
 
 
@@ -97,6 +114,7 @@ def hough_lines_draw(img_out, peaks, rho, theta):
         rho: vector of rho values, such that rho[rho_idx] is a valid rho value
         theta: vector of theta values, such that theta[theta_idx] is a valid theta value
     """
+    
     #height, width, channel = img_out.shape
     #max_d = np.ceil( np.sqrt( height**2 + width**2 ) )
     
@@ -113,8 +131,8 @@ def hough_lines_draw(img_out, peaks, rho, theta):
         y_end = 0
                 
         # Horizontal line (i.e., theta = pi/2)
-        if theta[ peak[1] ] == pi/2:
-            print 'Theta is pi/2'
+        if theta[ peak[1] ] == pi/2 or theta[ peak[1] ] == -pi/2:
+            #print 'Theta is pi/2'
             # Find the value for x (it will be fixed) 
             x_start = rho[ peak[0] ]
             x_end = rho[ peak[0] ]
@@ -124,8 +142,9 @@ def hough_lines_draw(img_out, peaks, rho, theta):
             y_end = img_out.shape[0]
             
         # Vertical line (theta = 0 or -pi)
-        elif theta[ peak[1] ] == 0 or theta [ peak[1] ] == -pi:
-            print 'theta is 0'
+        # Due to numerical imprecision, need to have a range
+        elif theta[ peak[1] ] <= 0.1 or theta[peak[1]] >= -0.1 :
+            #print 'theta is 0'
             # Find the value for y (it will be fixed)
             y_start = rho[ peak[0] ]
             y_end = rho[ peak[0] ]
@@ -135,21 +154,23 @@ def hough_lines_draw(img_out, peaks, rho, theta):
             x_end = img_out.shape[1]
                     
         # Diagonal line
-        #else:
+        else:
             # The x values will go from side to side
-        #    x_start = 0
-        #    x_end = img_out.shape[1]
+            x_start = 0
+            x_end = img_out.shape[1]
             
             # Calculate the y values
+            y_start = (-rho[ peak[0] ])/ (sin( theta[ peak[1] ] ))
+            y_end = x_end*cos( rho[ peak[0] ] ) - rho[ peak[0] ]*sin( theta[ peak[1] ] )
         
         #endif
         
-        x_start = int(x_start)
-        x_end = int(x_end)
-        y_start = int(y_start)
-        y_end = int(y_end)
+        x_start = abs(int(x_start))
+        x_end = abs(int(x_end))
+        y_start = abs(int(y_start))
+        y_end = abs(int(y_end))
         
-        print x_start, x_end, y_start, y_end
+        #print x_start, x_end, y_start, y_end
         
         cv2.line( img_out, (x_start, y_start), (x_end, y_end), (0, 255, 0) )
         
@@ -185,10 +206,8 @@ def highlight_peaks(H, peaks, rho, theta):
     
     H_copy = np.copy(H)
     
-    #for peak in peaks:
-    #    center_x = rho()
-        
-    #    H_copy = cv2.circle( H_copy, ( int(center[0]), int(center[1]) ), 5, 255 )
+    for peak in peaks:
+        H_copy = cv2.circle( H_copy, ( int(peak[1]), int(peak[0]) ), 5, 255 )
         
     return H_copy    
 #end highlight_peaks
@@ -216,7 +235,8 @@ def main():
     # 2-b
     # Find peaks (local maxima) in accumulator array
     peaks = hough_peaks(H, 10)  # TODO: implement this, try different parameters
-    print peaks
+    
+    #lines = cv2.HoughLines(img_edges, 1, pi/180, 200)
 
     # TODO: Store a copy of accumulator array image (from 2-a), with peaks highlighted, as ps2-2-b-1.png 
     cv2.imwrite( os.path.join( output_dir, 'ps2-2-b-1.png'), highlight_peaks(H, peaks, rho, theta) )
