@@ -1,6 +1,6 @@
 # ASSIGNMENT 2
-# Your Name
-# GTID
+# Jacob Kilver
+# jkilver3
 
 import cv2
 import numpy as np
@@ -75,10 +75,6 @@ def averagePixel(image):
     
     # Divide by the number of pixels in the image
     imageAvg = imageSum/numberOfPixels(image)
-
-    #imageAvg = imageAvg.astype(0)
-    #print type(0)
-    #print type(imageAvg)
     
     return int(imageAvg)
     # END OF FUNCTION.
