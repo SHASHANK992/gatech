@@ -64,8 +64,8 @@ def hough_circles_acc(img_edges, radius):
         y = y_vals[i]
         
         for t in range( len(theta) ):
-            a = x - r*cos(t)
-            b = y + r*sin(t)
+            a = x - radius*cos(t)
+            b = y + radius*sin(t)
             H[a,b] += 1
         #endfor
     #endfor    
@@ -101,6 +101,19 @@ def hough_peaks(H, Q):
     
     peaks = np.reshape(peaks, (Q,2))
     
+    real_peaks = np.array([])
+    filter_size = 10
+    
+    # Find peaks that are close to each other. Eliminate the
+    # one with the fewest votes
+    '''
+    for i in range(Q):
+        for j in range(Q):
+            # If there is another peak within a box of dimensions
+            # filter_size, then eliminate the peak with the fewest votes
+            if (peaks[i,0]):
+     '''           
+    
     return peaks
 
 
@@ -130,6 +143,31 @@ def hough_lines_draw(img_out, peaks, rho, theta):
     #endfor
         
     pass
+    
+def hough_circles_draw(img_out, peaks, radius):
+    """ Draw circles on image corresponding to accumulator peaks"""
+    
+    for peak in peaks:
+        a = peak[0]
+        b = peak[1]
+        
+        img_out = cv2.circle( img_out, ( int(a), int(b) ), radius, 255 )
+    #endfor
+    
+    pass
+    
+def find_circles( img_edges, radii ):
+    """ Iterate through edges and find circles """
+    
+    r_vector = np.arange( radii[0], radii[1]+1, 1)
+        
+    for r in r_vector:
+        # Generate Hough accumulator array
+        H = hough_circles_acc(img_edges, r)
+        centers = hough_peaks( H, 10 )
+    
+    
+    return centers, r_vector
 
 def normalize_accum_array(H):
     """ Normalize a Hough Accumulator array
@@ -200,13 +238,14 @@ def main():
     hough_lines_draw(img_out, peaks, rho, theta)  # TODO: implement this
     cv2.imwrite( os.path.join(output_dir, 'ps2-2-c-1.png'), img_out )  # save as ps2-2-c-1.png
     
-
+    #***********************************************************************************
     # 3-a
     # TODO: Read ps2-input0-noise.png, compute smoothed image using a Gaussian filter
     img_noise = cv2.imread(os.path.join(input_dir, 'ps2-input0-noise.png'), 0)
     img_smoothed =  cv2.GaussianBlur(img_noise, (5,5), 5)
     cv2.imwrite( os.path.join(output_dir, 'ps2-3-a-1.png'), img_smoothed )
 
+    #************************************
     # 3-b
     # TODO: Compute binary edge images for both original image and smoothed version
     img_edges_noise = cv2.Canny(img_noise, 100, 300)
@@ -214,6 +253,7 @@ def main():
     img_edges_smooth = cv2.Canny(img_smoothed, 100, 250)
     cv2.imwrite( os.path.join(output_dir, 'ps2-3-b-2.png'), img_edges_smooth )
 
+    #************************************
     # 3-c
     # TODO: Apply Hough methods to smoothed image, tweak parameters to find best lines
     H, rho, theta = hough_lines_acc(img_edges_smooth)
@@ -224,6 +264,7 @@ def main():
     hough_lines_draw(img_noise, peaks, rho, theta)
     cv2.imwrite( os.path.join(output_dir, 'ps2-3-c-2.png'), img_noise )    
 
+    #****************************************************************************
     # 4
     # TODO: Like problem 3 above, but using ps2-input1.png
     # 4a
@@ -243,18 +284,86 @@ def main():
     
     hough_lines_draw(img, peaks, rho, theta)
     cv2.imwrite( os.path.join(output_dir, 'ps2-4-c-2.png'), img)
+    #********************************************************************************
 
     # 5
-    # TODO: Implement Hough Transform for circles
+    # 5a
+    #read
+    img = cv2.imread( os.path.join(input_dir, 'ps2-input1.png'), 0 )
+    # Smooth
+    img_smoothed = cv2.GaussianBlur( img, (5,5), 3)
+    cv2.imwrite( os.path.join(output_dir, 'ps2-5-a-1.png'), img_smoothed )
+    #edges
+    img_edges = cv2.Canny( img_smoothed, 100, 200 )
+    cv2.imwrite( os.path.join(output_dir, 'ps2-5-a-2.png'), img_smoothed )
+    # Find and draw circles
+    '''
+    H = hough_circles_acc(img_edges, 20)
+    peaks = hough_peaks(H,10)    
+    hough_circles_draw(img, peaks, 20)  
+    ''' 
+    #******************************* 
+    
+    # 5b
+    #centers, radii = find_circles(img_edges, (20,50))
+    
+    #***********************************************************************************
 
     # 6
     # TODO: Find lines a more realtistic image, ps2-input2.png
+    # 6a
+    img = cv2.imread( os.path.join(input_dir, 'ps2-input2.png'), 0 )
+    # Smooth 
+    img_smoothed = cv2.GaussianBlur( img, (5,5), 3)
+    # Edges
+    img_edges = cv2.Canny( img_smoothed, 100, 200)
+    # Save copy for my experimentation
+    cv2.imwrite( os.path.join(output_dir, 'jrk_test.png'), img_edges )
+    # Find and draw lines
+    H, rho, theta = hough_lines_acc( img_edges )
+    peaks = hough_peaks(H, 10)
+    hough_lines_draw( img_smoothed, peaks, rho, theta )
+    cv2.imwrite( os.path.join(output_dir, 'ps2-6-a-1.png'), img_smoothed )
+    
+    #*******************************
+    # 6c - better part to 6a
+    img = cv2.imread( os.path.join(input_dir, 'ps2-input2.png'), 0 )
+    # Smooth 
+    img_smoothed = cv2.GaussianBlur( img, (5,5), 3)
+    # Edges
+    img_edges = cv2.Canny( img_smoothed, 100, 200)
+    # Save copy for my experimentation
+    #cv2.imwrite( os.path.join(output_dir, 'jrk_test.png'), img_edges )
+    # Find and draw lines
+    H, rho, theta = hough_lines_acc( img_edges )
+    peaks = hough_peaks(H, 10)
+    hough_lines_draw( img_smoothed, peaks, rho, theta )
+    cv2.imwrite( os.path.join(output_dir, 'ps2-6-a-2.png'), img_smoothed )
 
+    #*************************************************************************************
     # 7
     # TODO: Find circles in the same realtistic image, ps2-input2.png
+    # centers, radii = find_circles(img_edges, (20,50) )
+    #*************************************************************************************
 
     # 8
     # TODO: Find lines and circles in distorted image, ps2-input3.png
+    img = cv2.imread( os.path.join(input_dir, 'ps2-input3.png'), 0 )
+    # Smooth 
+    img_smoothed = cv2.GaussianBlur( img, (5,5), 3)
+    # Edges
+    img_edges = cv2.Canny( img_smoothed, 100, 200)
+    # Save copy for my experimentation
+    #cv2.imwrite( os.path.join(output_dir, 'jrk_test.png'), img_edges )
+    # Find and lines
+    H, rho, theta = hough_lines_acc( img_edges )
+    peaks = hough_peaks(H, 10)
+    # Find circles
+    
+    # Draw circles and lines
+    hough_lines_draw( img_smoothed, peaks, rho, theta )
+    cv2.imwrite( os.path.join(output_dir, 'ps2-8-a-1.png'), img_smoothed )
+    
 
 if __name__ == "__main__":
     main()
