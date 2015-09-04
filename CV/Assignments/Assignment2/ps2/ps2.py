@@ -94,15 +94,15 @@ def hough_peaks(H, Q, threshold = 0):
     # to return 10. I only want to return 5
     
     # First, threshold the accumulator array
-    #H[ H <= threshold ] = 0  
+    H[ H <= threshold ] = 0  
     
     indices = H.ravel().argsort()[-Q:]
     indices = (np.unravel_index(i,H.shape) for i in indices)
     
     peaks = np.array([])
     for i in indices:
-        #if i[0] != 0 and i[1] != 0:
-        peaks = np.append( peaks, [ i[0], i[1] ] )
+        if  H[i[0], i[1]] != 0:
+            peaks = np.append( peaks, [ i[0], i[1] ] )
     
     peaks = np.reshape( peaks, (len(peaks)/2 ,2) )          
     
@@ -238,20 +238,18 @@ def main():
     
     # 2-b
     # Find peaks (local maxima) in accumulator array
-    peaks = hough_peaks(H, 10)  # TODO: implement this, try different parameters
-    
+    peaks = hough_peaks(H, 10, 100)  # TODO: implement this, try different parameters
     #lines = cv2.HoughLines(img_edges, 1, pi/180, 200)
 
     # TODO: Store a copy of accumulator array image (from 2-a), with peaks highlighted, as ps2-2-b-1.png 
     cv2.imwrite( os.path.join( output_dir, 'ps2-2-b-1.png'), highlight_peaks(H, peaks, rho, theta) )
-    '''
 
     # 2-c
     # Draw lines corresponding to accumulator peaks
     img_out = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)  # copy & convert to color image
     hough_lines_draw(img_out, peaks, rho, theta)  # TODO: implement this
     cv2.imwrite( os.path.join(output_dir, 'ps2-2-c-1.png'), img_out )  # save as ps2-2-c-1.png
-    
+   
     #***********************************************************************************
     # 3-a
     # TODO: Read ps2-input0-noise.png, compute smoothed image using a Gaussian filter
@@ -271,13 +269,13 @@ def main():
     # 3-c
     # TODO: Apply Hough methods to smoothed image, tweak parameters to find best lines
     H, rho, theta = hough_lines_acc(img_edges_smooth)
-    peaks = hough_peaks(H,10)
-    
+    peaks = hough_peaks(H,10, 80)
+   
     cv2.imwrite( os.path.join(output_dir, 'ps2-3-c-1.png'), highlight_peaks(H, peaks, rho, theta) )
     
     hough_lines_draw(img_noise, peaks, rho, theta)
     cv2.imwrite( os.path.join(output_dir, 'ps2-3-c-2.png'), img_noise )    
-
+    
     #****************************************************************************
     # 4
     # TODO: Like problem 3 above, but using ps2-input1.png
@@ -292,14 +290,14 @@ def main():
     
     # 4c
     H, rho, theta = hough_lines_acc(img_edges)
-    peaks = hough_peaks(H, 10)
+    peaks = hough_peaks(H, 10, 75)
     
     cv2.imwrite( os.path.join(output_dir, 'ps2-4-c-1.png'), highlight_peaks(H, peaks, rho, theta) )
     
     hough_lines_draw(img, peaks, rho, theta)
     cv2.imwrite( os.path.join(output_dir, 'ps2-4-c-2.png'), img)
     #********************************************************************************
-    
+    '''
     # 5
     # 5a
     #read
