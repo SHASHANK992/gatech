@@ -52,6 +52,7 @@ def hough_lines_acc(img_edges, rho_res=1, theta_res=pi/90):
 
 
 def hough_circles_acc(img_edges, radius):
+    print radius
     # Create accumulator array (same size as original image)
     H = np.zeros( img_edges.shape )
     theta_res = pi/90
@@ -65,9 +66,10 @@ def hough_circles_acc(img_edges, radius):
         y = y_vals[i]
         # For every possible gradient direction
         for t in range( len(theta) ):
-            a = x - radius*cos(t)
-            b = y + radius*sin(t)
-            H[b,a] += 1
+            a = x - radius*cos( theta[t] )
+            b = y + radius*sin( theta[t] )
+            if not(a >= img_edges.shape[1] or b >= img_edges.shape[0]):         
+                H[b,a] += 1
         #endfor
     #endfor    
 
@@ -153,31 +155,29 @@ def find_circles( img_edges, radii ):
     
     # Create vector of radii (inclusive)
     r_vector = np.arange( radii[0], radii[1]+1, 1)
-    centers_exist = np.array([])
+    centers_exist = []
     
-    r_exist = np.array([])
+    r_exist = []
     j = 0
         
     for i in range(len(r_vector)):
         # Generate Hough accumulator array
         r = r_vector[i]
         H = hough_circles_acc(img_edges, r)
-        centers = hough_peaks( H, 10 )
+        centers = hough_peaks( H, 10, 55 )
         
-        if centers != None:
-            r_exist = np.append( r_exist, r )
+        if len(centers) > 0:
+            r_exist.append( r )
             
-            temp = np.array([])
+            temp = []
         
             # We have the centers as a numpy array
             # To return it, I want to take the centers and turn them into tuples
             # putting all the centers for a given radius in the same row
-            for j in range( centers.shape[1] ):
-                #print centers[j,0], centers[j,1]
-                print centers
-                temp = np.append( temp, (centers[j,0], centers[j,1]) )
+            for j in range( centers.shape[0] ):
+                temp.append( (centers[j,0], centers[j,1]) )
             #end for 
-            centers_exist = np.append( centers_exist, [ temp ] )            
+            centers_exist.append(  temp  )            
         #end if       
     #end for   
     
@@ -297,7 +297,7 @@ def main():
     hough_lines_draw(img, peaks, rho, theta)
     cv2.imwrite( os.path.join(output_dir, 'ps2-4-c-2.png'), img)
     #********************************************************************************
-    '''
+ 
     # 5
     # 5a
     #read
@@ -310,7 +310,7 @@ def main():
     cv2.imwrite( os.path.join(output_dir, 'ps2-5-a-2.png'), img_edges )
     # Find and draw circles    
     H = hough_circles_acc(img_edges, 20)
-    peaks = hough_peaks(H,10)    
+    peaks = hough_peaks(H,10,55)   
     hough_circles_draw(img, peaks, 20) 
     cv2.imwrite( os.path.join(output_dir, 'ps2-5-a-3.png'), img ) 
     
@@ -321,15 +321,26 @@ def main():
     img = cv2.imread( os.path.join(input_dir, 'ps2-input1.png'), 0 )
     # Smooth
     img_smoothed = cv2.GaussianBlur( img, (5,5), 3)
-    cv2.imwrite( os.path.join(output_dir, 'ps2-5-a-1.png'), img_smoothed )
+    cv2.imwrite( os.path.join(output_dir, 'ps2-5-b-1.png'), img_smoothed )
     #edges
     img_edges = cv2.Canny( img_smoothed, 100, 200 )
-    cv2.imwrite( os.path.join(output_dir, 'ps2-5-a-2.png'), img_edges )
-    centers, radii = find_circles(img_edges, (20,25))
+    cv2.imwrite( os.path.join(output_dir, 'ps2-5-b-2.png'), img_edges )
+    centers, radii = find_circles(img_edges, (20,50))
     
-    print centers
-    print radii
+    # For each radius, draw the circles
+    for i in range(len(radii)):
+        # Convert centers list to numpy array
+        c_array = np.zeros( ( len(centers[i]), 2 ) )       
+        for j in range( len(centers[i]) ):
+            c_array[j,0] = centers[i][j][0]
+            c_array[j,1] = centers[i][j][1]
+        #end for  
+        hough_circles_draw( img, c_array, radii[i] )
+    #end for
     
+    cv2.imwrite( os.path.join(output_dir, 'ps2-5-b-3.png'), img )
+    
+    '''
     #***********************************************************************************
     
     # 6
