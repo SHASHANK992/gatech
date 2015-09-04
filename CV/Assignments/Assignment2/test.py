@@ -4,7 +4,7 @@ import cv2
 import os
 from math import pi
 
-H = np.array([ [0, 1, 10],
+'''H = np.array([ [0, 1, 10],
                [5, 6, 7],
                [ 20, 2, 4] ])
 Q = 3
@@ -16,3 +16,11 @@ print indices
     
 peaks = [ (H[i], i) for i in indices ]
 print peaks
+'''
+
+myArray = np.array([])
+print myArray
+myArray = np.append(myArray, [(5, 6, 7)])
+print myArray
+myArray = np.append(myArray, [(10,11,12)])
+print myArray

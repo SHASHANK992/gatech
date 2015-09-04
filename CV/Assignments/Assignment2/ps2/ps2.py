@@ -55,18 +55,19 @@ def hough_circles_acc(img_edges, radius):
     # Create accumulator array (same size as original image)
     H = np.zeros( img_edges.shape )
     theta_res = pi/90
-    theta = np.arange(-pi, pi, theta_res)
+    theta = np.arange(0, 2*pi, theta_res)
     
     y_vals, x_vals = np.nonzero(img_edges)
     
+    # For every edge pixel
     for i in range( len(x_vals) ):
         x = x_vals[i]
         y = y_vals[i]
-        
+        # For every possible gradient direction
         for t in range( len(theta) ):
             a = x - radius*cos(t)
             b = y + radius*sin(t)
-            H[a,b] += 1
+            H[b,a] += 1
         #endfor
     #endfor    
 
@@ -74,7 +75,7 @@ def hough_circles_acc(img_edges, radius):
 #end hough_circles_acc
 
 
-def hough_peaks(H, Q):
+def hough_peaks(H, Q, threshold = 0):
     """Find peaks (local maxima) in accumulator array.
 
     Parameters
@@ -92,27 +93,18 @@ def hough_peaks(H, Q):
     # If I ask for 10 peaks, but there are only 5, I don't want
     # to return 10. I only want to return 5
     
+    # First, threshold the accumulator array
+    #H[ H <= threshold ] = 0  
+    
     indices = H.ravel().argsort()[-Q:]
     indices = (np.unravel_index(i,H.shape) for i in indices)
     
     peaks = np.array([])
     for i in indices:
+        #if i[0] != 0 and i[1] != 0:
         peaks = np.append( peaks, [ i[0], i[1] ] )
     
-    peaks = np.reshape(peaks, (Q,2))
-    
-    real_peaks = np.array([])
-    filter_size = 10
-    
-    # Find peaks that are close to each other. Eliminate the
-    # one with the fewest votes
-    '''
-    for i in range(Q):
-        for j in range(Q):
-            # If there is another peak within a box of dimensions
-            # filter_size, then eliminate the peak with the fewest votes
-            if (peaks[i,0]):
-     '''           
+    peaks = np.reshape( peaks, (len(peaks)/2 ,2) )          
     
     return peaks
 
@@ -151,7 +143,7 @@ def hough_circles_draw(img_out, peaks, radius):
         a = peak[0]
         b = peak[1]
         
-        img_out = cv2.circle( img_out, ( int(a), int(b) ), radius, 255 )
+        cv2.circle( img_out, ( int(b), int(a) ), radius, 255 )
     #endfor
     
     pass
@@ -159,15 +151,37 @@ def hough_circles_draw(img_out, peaks, radius):
 def find_circles( img_edges, radii ):
     """ Iterate through edges and find circles """
     
+    # Create vector of radii (inclusive)
     r_vector = np.arange( radii[0], radii[1]+1, 1)
+    centers_exist = np.array([])
+    
+    r_exist = np.array([])
+    j = 0
         
-    for r in r_vector:
+    for i in range(len(r_vector)):
         # Generate Hough accumulator array
+        r = r_vector[i]
         H = hough_circles_acc(img_edges, r)
         centers = hough_peaks( H, 10 )
+        
+        if centers != None:
+            r_exist = np.append( r_exist, r )
+            
+            temp = np.array([])
+        
+            # We have the centers as a numpy array
+            # To return it, I want to take the centers and turn them into tuples
+            # putting all the centers for a given radius in the same row
+            for j in range( centers.shape[1] ):
+                #print centers[j,0], centers[j,1]
+                print centers
+                temp = np.append( temp, (centers[j,0], centers[j,1]) )
+            #end for 
+            centers_exist = np.append( centers_exist, [ temp ] )            
+        #end if       
+    #end for   
     
-    
-    return centers, r_vector
+    return centers_exist, r_exist
 
 def normalize_accum_array(H):
     """ Normalize a Hough Accumulator array
@@ -205,7 +219,7 @@ def highlight_peaks(H, peaks, rho, theta):
 
 def main():
     """Run code/call functions to solve problems."""
-
+    
     # 1-a
     # Load the input grayscale image
     img = cv2.imread(os.path.join(input_dir, 'ps2-input0.png'), 0)  # flags=0 ensures grayscale
@@ -230,7 +244,7 @@ def main():
 
     # TODO: Store a copy of accumulator array image (from 2-a), with peaks highlighted, as ps2-2-b-1.png 
     cv2.imwrite( os.path.join( output_dir, 'ps2-2-b-1.png'), highlight_peaks(H, peaks, rho, theta) )
-    
+    '''
 
     # 2-c
     # Draw lines corresponding to accumulator peaks
@@ -285,7 +299,7 @@ def main():
     hough_lines_draw(img, peaks, rho, theta)
     cv2.imwrite( os.path.join(output_dir, 'ps2-4-c-2.png'), img)
     #********************************************************************************
-
+    
     # 5
     # 5a
     #read
@@ -295,20 +309,31 @@ def main():
     cv2.imwrite( os.path.join(output_dir, 'ps2-5-a-1.png'), img_smoothed )
     #edges
     img_edges = cv2.Canny( img_smoothed, 100, 200 )
-    cv2.imwrite( os.path.join(output_dir, 'ps2-5-a-2.png'), img_smoothed )
-    # Find and draw circles
-    '''
+    cv2.imwrite( os.path.join(output_dir, 'ps2-5-a-2.png'), img_edges )
+    # Find and draw circles    
     H = hough_circles_acc(img_edges, 20)
     peaks = hough_peaks(H,10)    
-    hough_circles_draw(img, peaks, 20)  
-    ''' 
-    #******************************* 
+    hough_circles_draw(img, peaks, 20) 
+    cv2.imwrite( os.path.join(output_dir, 'ps2-5-a-3.png'), img ) 
     
+    #******************************* 
+ 
     # 5b
-    #centers, radii = find_circles(img_edges, (20,50))
+    #read
+    img = cv2.imread( os.path.join(input_dir, 'ps2-input1.png'), 0 )
+    # Smooth
+    img_smoothed = cv2.GaussianBlur( img, (5,5), 3)
+    cv2.imwrite( os.path.join(output_dir, 'ps2-5-a-1.png'), img_smoothed )
+    #edges
+    img_edges = cv2.Canny( img_smoothed, 100, 200 )
+    cv2.imwrite( os.path.join(output_dir, 'ps2-5-a-2.png'), img_edges )
+    centers, radii = find_circles(img_edges, (20,25))
+    
+    print centers
+    print radii
     
     #***********************************************************************************
-
+    
     # 6
     # TODO: Find lines a more realtistic image, ps2-input2.png
     # 6a
@@ -363,7 +388,7 @@ def main():
     # Draw circles and lines
     hough_lines_draw( img_smoothed, peaks, rho, theta )
     cv2.imwrite( os.path.join(output_dir, 'ps2-8-a-1.png'), img_smoothed )
-    
+    '''
 
 if __name__ == "__main__":
     main()
