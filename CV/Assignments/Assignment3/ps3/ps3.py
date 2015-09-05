@@ -28,7 +28,7 @@ def disparity_ssd(L, R):
         
         
 
-    pass  # TODO: Your code here
+    return D
 
 
 def disparity_ncorr(L, R):
@@ -40,8 +40,10 @@ def disparity_ncorr(L, R):
 
     Returns: Disparity map, same size as L, R
     """
-
-    pass  # TODO: Your code here
+    D = np.zero(L.shape)
+    D = cv2.matchTemplate(L, R, CV_TM_CCORR_NORMED)
+    
+    return D
 
 
 def main():
