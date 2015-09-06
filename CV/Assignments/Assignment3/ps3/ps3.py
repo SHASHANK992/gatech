@@ -20,8 +20,8 @@ def disparity_ssd(L, R):
     
     D = np.zeros(L.shape)
     window_size = 1
-    for j in range(0. L.shape[0]-window_size):
-        for i in range(0, L.shape[1]-window_size):
+    for j in range(L.shape[0]-window_size):
+        for i in range( L.shape[1]-window_size):
             
         #end for
     #end for
