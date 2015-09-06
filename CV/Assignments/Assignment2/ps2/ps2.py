@@ -272,6 +272,7 @@ def main():
    
     cv2.imwrite( os.path.join(output_dir, 'ps2-3-c-1.png'), highlight_peaks(H, peaks, rho, theta) )
     
+    img_noise = cv2.cvtColor( img_noise, cv2.COLOR_GRAY2BGR )
     hough_lines_draw(img_noise, peaks, rho, theta)
     cv2.imwrite( os.path.join(output_dir, 'ps2-3-c-2.png'), img_noise )    
     
@@ -293,6 +294,7 @@ def main():
     
     cv2.imwrite( os.path.join(output_dir, 'ps2-4-c-1.png'), highlight_peaks(H, peaks, rho, theta) )
     
+    img = cv2.cvtColor( img, cv2.COLOR_GRAY2BGR )
     hough_lines_draw(img, peaks, rho, theta)
     cv2.imwrite( os.path.join(output_dir, 'ps2-4-c-2.png'), img)
     #********************************************************************************
@@ -355,6 +357,7 @@ def main():
     # Find and draw lines
     H, rho, theta = hough_lines_acc( img_edges )
     peaks = hough_peaks(H, 12)
+    img_smoothed = cv2.cvtColor( img_smoothed, cv2.COLOR_GRAY2BGR )
     hough_lines_draw( img_smoothed, peaks, rho, theta )
     cv2.imwrite( os.path.join(output_dir, 'ps2-6-a-1.png'), img_smoothed )
     
@@ -368,6 +371,7 @@ def main():
     # Find and draw lines
     H, rho, theta = hough_lines_acc( img_edges )
     peaks = hough_peaks(H, 10, 150)
+    img_smoothed = cv2.cvtColor( img_smoothed, cv2.COLOR_GRAY2BGR )
     hough_lines_draw( img_smoothed, peaks, rho, theta )
     cv2.imwrite( os.path.join(output_dir, 'ps2-6-c-1.png'), img_smoothed )
     
@@ -411,6 +415,7 @@ def main():
     # Find circles
     centers, radii = find_circles(img_edges, (20,50) )
     # Draw circles and lines
+    img = cv2.cvtColor( img, cv2.COLOR_GRAY2BGR )
     hough_lines_draw( img, peaks, rho, theta )
     # For each radius, draw the circles
     for i in range(len(radii)):
@@ -420,7 +425,7 @@ def main():
             c_array[j,0] = centers[i][j][0]
             c_array[j,1] = centers[i][j][1]
         #end for  
-        hough_circles_draw( img, c_array, radii[i], 255 )
+        hough_circles_draw( img, c_array, radii[i] )
     #end for
     
     cv2.imwrite( os.path.join(output_dir, 'ps2-8-a-1.png'), img )
