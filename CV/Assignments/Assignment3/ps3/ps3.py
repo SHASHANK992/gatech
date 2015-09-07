@@ -19,15 +19,12 @@ def disparity_ssd(L, R):
     """
     
     D = np.zeros(L.shape)
-    window_size = 1
+    window_size = 3
     for j in range(L.shape[0]-window_size):
         for i in range( L.shape[1]-window_size):
-            
+            b = i+j
         #end for
     #end for
-        
-        
-
     return D
 
 
@@ -39,16 +36,36 @@ def disparity_ncorr(L, R):
     R: Grayscale right image, same size as L
 
     Returns: Disparity map, same size as L, R
-    """
-    D = np.zero(L.shape)
-    D = cv2.matchTemplate(L, R, CV_TM_CCORR_NORMED)
     
+    
+    So we have epipolar lines, which means that matching pixels will be at the 
+    same y-position but different x-positions in the image pair
+    
+    To have a disparity map as defined above, we need to divide image L into strips 
+    Along each strip I want to compare the template (window) that I take from image R
+    """
+    D = np.zeros(L.shape)
+    # Window size 5 worked well
+    window_size = 5
+     
+    # For each row in the image
+    for i in range(L.shape[0] - window_size + 1):
+        for j in range( R.shape[1] - window_size + 1):
+            template = R[i:i+window_size, j:j+window_size]
+            
+            # Compute the normalized correlation for every window in this epipolar line
+            temp = cv2.matchTemplate( L[i:i+window_size,:], template, cv2.TM_CCORR_NORMED )
+        
+            # Find the maximum in the normalized correlation vector
+            # This index (less the current position) is what belongs in the disparity array
+            D[i,j] = np.argmax( temp ) - j
+            
     return D
 
 
 def main():
     """Run code/call functions to solve problems."""
-
+    '''
     # 1-a
     # Read images
     L = cv2.imread(os.path.join('input', 'pair0-L.png'), 0) * (1 / 255.0)  # grayscale, scale to [0.0, 1.0]
@@ -104,17 +121,19 @@ def main():
     
     cv2.imwrite( os.path.join( 'output', 'ps3-3-b-1.png'), D_L*255 )
     cv2.imwrite( os.path.join( 'output', 'ps3-3-b-2.png'), D_R*255 )    
-
+    '''
     # 4
     # TODO: Implement disparity_ncorr() and apply to pair1 images (original, noisy and contrast-boosted)
     # Normal
     L = cv2.imread(os.path.join('input', 'pair1-L.png'), 0) * (1 / 255.0)
     R = cv2.imread(os.path.join('input', 'pair1-R.png'), 0) * (1 / 255.0)
     
-    D_L = disparity_ncorr(L,R)
-    D_R = disparity_ncorr(R,L)
+    D_L = disparity_ncorr( np.float32(L), np.float32(R) )
+    D_R = disparity_ncorr( np.float32(R), np.float32(L) )
     
-    cv2.imwrite( os.path.join( 'output', 'ps3-4-a-1.png'), D_L*255 )
+    print D_L
+    
+    cv2.imwrite( os.path.join( 'output', 'ps3-4-a-1.png'), D_L )
     cv2.imwrite( os.path.join( 'output', 'ps3-4-a-2.png'), D_R*255 )
     
     # Noisy
@@ -126,8 +145,8 @@ def main():
     noise = np.random.normal(0, sigma, L.shape)
     L = L + noise
     
-    D_L = disparity_ncorr(L,R)
-    D_R = disparity_ncorr(R,L)
+    D_L = disparity_ncorr( np.float32(L), np.float32(R) )
+    D_R = disparity_ncorr( np.float32(R), np.float32(L) )
     
     cv2.imwrite( os.path.join( 'output', 'ps3-4-b-1.png'), D_L*255 )
     cv2.imwrite( os.path.join( 'output', 'ps3-4-b-2.png'), D_R*255 )
@@ -138,14 +157,14 @@ def main():
 
     # Boost contrast in right image
     R = 1.10*R
-    R = R * (1/1.10) # Scale back to [0,1]
+    #R = R * (1/1.10) # Scale back to [0,1]
     
-    D_L = disparity_ncorr(L,R)
-    D_R = disparity_ncorr(R,L)
+    D_L = disparity_ncorr( np.float32(L), np.float32(R) )
+    D_R = disparity_ncorr( np.float32(R), np.float32(L) )
     
     cv2.imwrite( os.path.join( 'output', 'ps3-4-b-3.png'), D_L*255 )
     cv2.imwrite( os.path.join( 'output', 'ps3-4-b-4.png'), D_R*255 )
-    
+   
     # 5
     # TODO: Apply stereo matching to pair2 images, try pre-processing the images for best results
     L = cv2.imread( os.path.join('input', 'pair2-L.png'), 0) * (1/255.)
@@ -153,12 +172,12 @@ def main():
     
     # Preprocess
     
-    D_L = disparity_ncorr(L,R)
-    D_R = disparity_ncorr(R,L)
+    D_L = disparity_ncorr( np.float32(L), np.float32(R) )
+    D_R = disparity_ncorr( np.float32(R), np.float32(L) )
     
     cv2.imwrite( os.path.join( 'output', 'ps3-5-a-1.png'), D_L*255 )
     cv2.imwrite( os.path.join( 'output', 'ps3-5-a-2.png'), D_R*255 )
-
+    
 
 if __name__ == "__main__":
     main()
