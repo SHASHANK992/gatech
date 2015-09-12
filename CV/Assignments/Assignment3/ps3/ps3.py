@@ -51,16 +51,21 @@ def ssd( strip, template):
     # For every position along the strip
     for index in range( strip.shape[1]-template.shape[1] ):
         # Calculate the SSD value over the entire template
-        ssd_val = 0
-        for i in range(template.shape[0]):
-            for j in range(template.shape[1]):
-                ssd_val += ( template[i,j] - strip[i,index+j]  )**2
-            #end for
-        #end for
+        ssd_val = np.sum( np.square( template - strip[:, index:index+template.shape[0]] ), axis=(0,1) )
        
         ssd_vector[0, index] = ssd_val
     # end for
 
+    return ssd_vector
+    
+def ssd_strides( strip, template ):
+    
+    ssd_vector = np.zeros( (1, strip.shape[1]) )
+    
+    #Extend the borders of the strip
+    strip = cv2.copyMakeBorder(strip, 0, 0, 0, template.shape[0], cv2.BORDER_REFLECT )
+    
+    
     return ssd_vector
 
 
@@ -107,17 +112,17 @@ def main():
     R = cv2.imread(os.path.join('input', 'pair0-R.png'), 0) * (1 / 255.0)
 
     # Compute disparity (using method disparity_ssd defined in disparity_ssd.py)
-    D_L = disparity_ssd(np.float32(L), np.float32(R), 11)  # TODO: implemenet disparity_ssd()
-    #D_R = disparity_ssd(np.float32(R), np.float32(L), 11)
+    D_L = disparity_ssd(np.float32(L), np.float32(R), 13)  # TODO: implemenet disparity_ssd()
+    D_R = disparity_ssd(np.float32(R), np.float32(L), 11)
 
     # TODO: Save output images (D_L as output/ps3-1-a-1.png and D_R as output/ps3-1-a-2.png)
     # Note: They may need to be scaled/shifted before saving to show results properly
     D_L = cv2.normalize( D_L, D_L, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
-    #D_R = cv2.normalize( D_R, D_R, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
+    D_R = cv2.normalize( D_R, D_R, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
     
     cv2.imwrite( os.path.join( 'output', 'ps3-1-a-1.png'), D_L )
-    #cv2.imwrite( os.path.join( 'output', 'ps3-1-a-2.png'), D_R )
-    '''
+    cv2.imwrite( os.path.join( 'output', 'ps3-1-a-2.png'), D_R )
+    
     # 2
     # TODO: Apply disparity_ssd() to pair1-L.png and pair1-R.png (in both directions)
     L = cv2.imread( os.path.join('input', 'pair1-L.png'), 0) * (1/255.)
@@ -130,7 +135,7 @@ def main():
     D_R = cv2.normalize( D_R, D_R, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
     cv2.imwrite( os.path.join( 'output', 'ps3-2-a-1.png'), D_L )
     cv2.imwrite( os.path.join( 'output', 'ps3-2-a-2.png'), D_R )
-
+    
     # 3
     # TODO: Apply disparity_ssd() to noisy versions of pair1 images
     L = cv2.imread( os.path.join('input', 'pair1-L.png'), 0) * (1/255.)
@@ -155,7 +160,7 @@ def main():
     
     # Boost contrast in right image
     R = 1.10*R
-    R = R * (1/1.10) # Scale back to [0,1]
+    R[ R > 1.0 ] = 1.0
     
     D_L = disparity_ssd(L, R)
     D_R = disparity_ssd(R, L)
@@ -164,8 +169,7 @@ def main():
     D_R = cv2.normalize( D_R, D_R, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
     cv2.imwrite( os.path.join( 'output', 'ps3-3-b-1.png'), D_L )
     cv2.imwrite( os.path.join( 'output', 'ps3-3-b-2.png'), D_R )    
-    '''
-    '''
+    
     # 4
     # TODO: Implement disparity_ncorr() and apply to pair1 images (original, noisy and contrast-boosted)
     # Normal
@@ -203,7 +207,7 @@ def main():
 
     # Boost contrast in right image
     R = 1.10*R
-    #R = R * (1/1.10) # Scale back to [0,1]
+    R[ R > 1.0 ] = 1.0
     
     D_L = disparity_ncorr( np.float32(L), np.float32(R) )
     D_R = disparity_ncorr( np.float32(R), np.float32(L) )
@@ -227,7 +231,7 @@ def main():
     D_R = cv2.normalize( D_R, D_R, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
     cv2.imwrite( os.path.join( 'output', 'ps3-5-a-1.png'), D_L )
     cv2.imwrite( os.path.join( 'output', 'ps3-5-a-2.png'), D_R )
-    '''
+    
 
 if __name__ == "__main__":
     main()

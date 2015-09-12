@@ -134,8 +134,15 @@ def computeGradient(image, kernel):
                                 size.
     """                            
     # WRITE YOUR CODE HERE.
+    
+    imageGrad = np.zeros( (image.shape[0]-2, image.shape[1]-2) )
+    
+    for i in range( 1, image.shape[0]-2 ):
+        for j in range ( 1, image.shape[1]-2 ):
+            image_cutout = image[ i-1:i+2, j-1:j+2 ]
+            imageGrad[i-1,j-1] = np.sum( np.multiply(image_cutout, kernel), axis=(0,1) )
 
 
-
+    return imageGrad
     # END OF FUNCTION.
     
