@@ -19,30 +19,49 @@ def disparity_ssd(L, R, window_size=3):
     """
     
     D = np.zeros(L.shape)
-    min_ssd = 0
 
-    for j in range(L.shape[0]-window_size):
-        for i in range( L.shape[1]-window_size):
+    for i in range(L.shape[0]-window_size):
+        for j in range( L.shape[1]-window_size):
             # Cut out template
             template = R[i:i+window_size, j:j+window_size]
+            # Define the strip we are covering
+            strip = L[i:i+window_size, :]
             
             # Compute SSD between this strip and the template
-            curr_ssd = ssd( L[i:i+window_size,:], template )
+            curr_ssd = ssd( strip, template )
             
             # Find the minimum in the ssd vector
             # This index (less the current position) is what belongs in the disparity array
-            D[i,j] = np.argmin( temp ) - j            
+            D[i,j] = np.argmin( curr_ssd ) - j            
         #end for
+        
     #end for
     return D
 
 def ssd( strip, template):
     """ Computes the sum of squared difference between two arrays
     """
-    ssd_val = 0
+    # output will be a vector the same width as the input strip, but 
+    # only one row tall
+    ssd_vector = np.zeros( (1, strip.shape[1]) )
     
+    #Extend the borders of the strip
+    strip = cv2.copyMakeBorder(strip, 0, 0, 0, template.shape[0], cv2.BORDER_REFLECT )
     
-    return ssd_val
+    # For every position along the strip
+    for index in range( strip.shape[1]-template.shape[1] ):
+        # Calculate the SSD value over the entire template
+        ssd_val = 0
+        for i in range(template.shape[0]):
+            for j in range(template.shape[1]):
+                ssd_val += ( template[i,j] - strip[i,index+j]  )**2
+            #end for
+        #end for
+       
+        ssd_vector[0, index] = ssd_val
+    # end for
+
+    return ssd_vector
 
 
 def disparity_ncorr(L, R, window_size=3):
@@ -81,7 +100,7 @@ def disparity_ncorr(L, R, window_size=3):
 
 def main():
     """Run code/call functions to solve problems."""
-    '''
+    
     # 1-a
     # Read images
     L = cv2.imread(os.path.join('input', 'pair0-L.png'), 0) * (1 / 255.0)  # grayscale, scale to [0.0, 1.0]
@@ -89,17 +108,16 @@ def main():
 
     # Compute disparity (using method disparity_ssd defined in disparity_ssd.py)
     D_L = disparity_ssd(np.float32(L), np.float32(R), 11)  # TODO: implemenet disparity_ssd()
-    D_R = disparity_ssd(np.float32(R), np.float32(L), 11)
+    #D_R = disparity_ssd(np.float32(R), np.float32(L), 11)
 
     # TODO: Save output images (D_L as output/ps3-1-a-1.png and D_R as output/ps3-1-a-2.png)
     # Note: They may need to be scaled/shifted before saving to show results properly
     D_L = cv2.normalize( D_L, D_L, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
-    print np.where( D_R == 0.0)[0].shape
-    D_R = cv2.normalize( D_R, D_R, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
+    #D_R = cv2.normalize( D_R, D_R, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
     
     cv2.imwrite( os.path.join( 'output', 'ps3-1-a-1.png'), D_L )
-    cv2.imwrite( os.path.join( 'output', 'ps3-1-a-2.png'), D_R )
-    
+    #cv2.imwrite( os.path.join( 'output', 'ps3-1-a-2.png'), D_R )
+    '''
     # 2
     # TODO: Apply disparity_ssd() to pair1-L.png and pair1-R.png (in both directions)
     L = cv2.imread( os.path.join('input', 'pair1-L.png'), 0) * (1/255.)
@@ -147,7 +165,7 @@ def main():
     cv2.imwrite( os.path.join( 'output', 'ps3-3-b-1.png'), D_L )
     cv2.imwrite( os.path.join( 'output', 'ps3-3-b-2.png'), D_R )    
     '''
-    
+    '''
     # 4
     # TODO: Implement disparity_ncorr() and apply to pair1 images (original, noisy and contrast-boosted)
     # Normal
@@ -209,7 +227,7 @@ def main():
     D_R = cv2.normalize( D_R, D_R, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
     cv2.imwrite( os.path.join( 'output', 'ps3-5-a-1.png'), D_L )
     cv2.imwrite( os.path.join( 'output', 'ps3-5-a-2.png'), D_R )
-    
+    '''
 
 if __name__ == "__main__":
     main()
