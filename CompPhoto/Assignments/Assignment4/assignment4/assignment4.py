@@ -58,7 +58,8 @@ def imageGradientX(image):
     
     for i in range(diff.shape[0]):
         for j in range(diff.shape[1]):
-            diff[i,j] = abs( image[i,j+1] - image[i,j] )
+            
+            diff[i,j] = int(abs( np.float(image[i,j+1]) - image[i,j] ))
         #end for
     #end for
 
@@ -96,7 +97,7 @@ def imageGradientY(image):
     
     for i in range(diff.shape[0]):
         for j in range(diff.shape[1]):
-            diff[i,j] = abs( image[i+1,j] - image[i,j] )
+            diff[i,j] = int(abs( np.float(image[i+1,j]) - image[i,j] ))
         #end for
     #end for
 
@@ -140,7 +141,7 @@ def computeGradient(image, kernel):
     for i in range( 1, image.shape[0]-2 ):
         for j in range ( 1, image.shape[1]-2 ):
             image_cutout = image[ i-1:i+2, j-1:j+2 ]
-            imageGrad[i-1,j-1] = np.sum( np.multiply(image_cutout, kernel), axis=(0,1) )
+            imageGrad[i-1,j-1] = abs(np.sum( np.multiply(image_cutout, kernel), axis=(0,1) ))
 
 
     return imageGrad
