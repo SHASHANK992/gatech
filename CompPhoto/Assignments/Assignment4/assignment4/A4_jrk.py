@@ -30,3 +30,6 @@ cv2.imwrite( 'butterfly_y.png', butterfly_y)
 
 butterfly_xy = (butterfly_x/2) + (butterfly_y/2)
 cv2.imwrite( 'butterfly_xy.png', butterfly_xy)
+
+butterfly_xy[ butterfly_xy > 128 ] = 255
+cv2.imwrite( 'butterfly_thresh.png', butterfly_xy)

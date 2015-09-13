@@ -105,7 +105,7 @@ def disparity_ncorr(L, R, window_size=3):
 
 def main():
     """Run code/call functions to solve problems."""
-    
+    '''
     # 1-a
     # Read images
     L = cv2.imread(os.path.join('input', 'pair0-L.png'), 0) * (1 / 255.0)  # grayscale, scale to [0.0, 1.0]
@@ -193,8 +193,8 @@ def main():
     noise = np.random.normal(0, sigma, L.shape)
     L = L + noise
     
-    D_L = disparity_ncorr( np.float32(L), np.float32(R) )
-    D_R = disparity_ncorr( np.float32(R), np.float32(L) )
+    D_L = disparity_ncorr( np.float32(L), np.float32(R), 25)
+    D_R = disparity_ncorr( np.float32(R), np.float32(L), 25 )
     
     D_L = cv2.normalize( D_L, D_L, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
     D_R = cv2.normalize( D_R, D_R, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
@@ -216,16 +216,19 @@ def main():
     D_R = cv2.normalize( D_R, D_R, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
     cv2.imwrite( os.path.join( 'output', 'ps3-4-b-3.png'), D_L )
     cv2.imwrite( os.path.join( 'output', 'ps3-4-b-4.png'), D_R )
-   
+    '''
     # 5
     # TODO: Apply stereo matching to pair2 images, try pre-processing the images for best results
     L = cv2.imread( os.path.join('input', 'pair2-L.png'), 0) * (1/255.)
     R = cv2.imread( os.path.join('input', 'pair2-R.png'), 0) * (1/255.)
     
     # Preprocess
+    # Smooth the image
+    L_smoothed = cv2.GaussianBlur(L, (5,5), 5)
+    R_smoothed = cv2.GaussianBlur(R, (5,5), 5)
     
-    D_L = disparity_ncorr( np.float32(L), np.float32(R) )
-    D_R = disparity_ncorr( np.float32(R), np.float32(L) )
+    D_L = disparity_ncorr( np.float32(L_smoothed), np.float32(R_smoothed), 5 )
+    D_R = disparity_ncorr( np.float32(R_smoothed), np.float32(L_smoothed), 5 )
     
     D_L = cv2.normalize( D_L, D_L, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
     D_R = cv2.normalize( D_R, D_R, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
