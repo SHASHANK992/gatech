@@ -64,10 +64,21 @@ def reduce(image):
 
   """
   # WRITE YOUR CODE HERE.
-
-
-
-
+  r = image.shape[0]
+  c = image.shape[1]
+  #reduced_img = np.zeros( (ceil(r/2), ceil(c/2)) )
+  
+  # Convolve
+  kernel = generatingKernel(0.4)
+  # Reshape arrays to be vectors
+  img_conv = np.convolve(kernel, image, 'same')
+  # Reshape output vector to be array
+  
+  # All rows, all columns, step size 2
+  # I am not sure this meets the ceiling requirements
+  reduced_img = img_conv[::2, ::2]
+  
+  return reduced_img
   # END OF FUNCTION.
 
 def expand(image):

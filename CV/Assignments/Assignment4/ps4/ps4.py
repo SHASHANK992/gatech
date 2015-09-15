@@ -45,6 +45,30 @@ def solve_least_squares(pts3d, pts2d):
     """
 
     # TODO: Your code here
+    # Build the array into something that can be solved
+    N = pts3d.shape[0]
+    A = np.zeros( (2*N, 11) )
+    x = np.zeros( (2*N, 1) )
+    
+    for i in range(0, 2*N, 2):
+        X = pts3d[ i/2, 0]
+        Y = pts3d[ i/2, 1]
+        Z = pts3d[ i/2, 2]
+        u = pts2d[ i/2, 0]
+        v = pts2d[ i/2, 1]
+        A[i]   = np.array([ [ X, Y, Z, 1, 0, 0, 0, 0, -u*X, -u*Y, -u*Z ] ])        
+        A[i+1] = np.array([ [ 0, 0, 0, 0, X, Y, Z, 1, -v*X, -v*Y, -v*Z ] ])
+        
+        x[i]   = u
+        x[i+1] = v
+    #end for
+    
+    # Use this
+    # http://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.lstsq.html#numpy.linalg.lstsq
+    M, error, rank, s = np.linalg.lstsq(A, x)
+    M = np.append( M, np.array([[1]]), axis=0)
+    M = np.reshape( M, (3, 4))
+    
     return M, error
 
 
@@ -62,6 +86,12 @@ def project_points(pts3d, M):
     """
 
     # TODO: Your code here
+    # Want x = MX, but M is 3x4 and X is Nx3
+    # I think I need to convert to homogenous coordinates
+    # Just transpose and add 1's along last row?
+    
+    
+    
     return pts2d_projected    
 
 
@@ -79,6 +109,12 @@ def get_residuals(pts2d, pts2d_projected):
     """
 
     # TODO: Your code here
+    
+    diff = pts2d - pts2d_projected
+    diff_sq = np.multiply(diff, diff)
+    
+    residuals = np.sqrt(diff_sq)
+    
     return residuals
 
 
@@ -140,8 +176,8 @@ def main():
 
     # 1b
     # Read points
-    pts3d = read_points(os.path.join(input_dir, SCENE))
-    pts2d_pic_b = read_points(os.path.join(input_dir, PIC_B_2D))
+    #pts3d = read_points(os.path.join(input_dir, SCENE))
+    #pts2d_pic_b = read_points(os.path.join(input_dir, PIC_B_2D))
     # NOTE: These points are not normalized
 
     # TODO: Use the functions from 1a to implement calibrate_camera() and find the best transform (bestM)
