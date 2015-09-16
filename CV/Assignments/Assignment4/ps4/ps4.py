@@ -2,7 +2,7 @@
 
 import numpy as np
 import cv2
-
+from random import randrange
 import os
 
 # I/O directories
@@ -89,8 +89,19 @@ def project_points(pts3d, M):
     # Want x = MX, but M is 3x4 and X is Nx3
     # I think I need to convert to homogenous coordinates
     # Just transpose and add 1's along last row?
+    N = pts3d.shape[0]
+    pts2d_projected = np.zeros( (N, 2) )
     
-    
+    for i in range(N):
+        X = pts3d[i,0]
+        Y = pts3d[i,1]
+        Z = pts3d[i,2]
+        
+        denom = M[2,0]*X + M[2,1]*Y + M[2,2]*Z + M[2,3]
+        
+        pts2d_projected[i, 0] = (M[0,0]*X + M[0,1]*Y + M[0,2]*Z + M[0,3])/denom
+        pts2d_projected[i, 1] = (M[1,0]*X + M[1,1]*Y + M[1,2]*Z + M[1,3])/denom
+    #end for    
     
     return pts2d_projected    
 
@@ -109,11 +120,16 @@ def get_residuals(pts2d, pts2d_projected):
     """
 
     # TODO: Your code here
-    
+    #L2 = ( (x-x')**2 + (y-y')**2 )*(1/2)
+    N = pts2d.shape[0]
+    # Find the difference between each point
     diff = pts2d - pts2d_projected
+    # square each point
     diff_sq = np.multiply(diff, diff)
-    
-    residuals = np.sqrt(diff_sq)
+    # Sum along horizontal axis
+    sum_sq = np.sum(diff_sq, axis=1)
+    # Take square root
+    residuals = np.reshape( np.sqrt(sum_sq), (N, 1) )
     
     return residuals
 
@@ -134,6 +150,60 @@ def calibrate_camera(pts3d, pts2d):
 
     # TODO: Your code here
     # NOTE: Use the camera calibration procedure in the problem set
+    min_resid = 100
+    bestM = 0
+    N = pts3d.shape[0]
+    
+    k_list = [ 8, 12, 16 ]
+    for k in k_list:
+        # Repeat 10 times
+        for i in range(10):
+            mypts3D = np.copy(pts3d)
+            mypts2D = np.copy(pts2d)
+            
+            # Choose k points from 2D list and the corresponding points in the 3D list
+            curr2d = np.zeros( (k, 2) )
+            curr3d = np.zeros( (k, 3) )
+            for j in range(k):
+                index = randrange(N-j)
+                curr2d[ j,: ] = mypts2D[ index, : ]
+                curr3d[ j,: ] = mypts3D[ index, : ]
+                
+                # Remove points from my arrays
+                mypts2D = np.delete(mypts2D, index, axis=0)
+                mypts3D = np.delete(mypts3D, index, axis=0)
+            # end for            
+            
+            # Compute projection matrix based on the selected points
+            M, error = solve_least_squares( curr3d, curr2d )
+            
+            # Select 4 points not in selected points
+            notSelected_2d = np.zeros( (4, 2) )
+            notSelected_3d = np.zeros( (4, 3) )
+            for j in range(4):
+                index = randrange( N-k )
+                notSelected_2d[j,:] = mypts2D[index,:]
+                notSelected_3d[j,:] = mypts3D[index,:]
+            #end for
+            
+            # Project not selected 3D points to 2D using M
+            notSelected_projected = project_points( notSelected_3d, M )
+            
+            # Compute average residual using the 4 points above
+            resid = get_residuals( notSelected_2d, notSelected_projected )
+            avg_resid = np.average( resid )
+            
+            print "For k = " + str(k) + " and iteration " + str(i) + " average residual is " + str(avg_resid)
+            
+            if avg_resid < min_resid:
+                min_resid = avg_resid
+                bestM = M           
+            #end if
+        #end for
+    #end for
+    
+    error = min_resid
+    
     return bestM, error
 
 
@@ -173,17 +243,28 @@ def main():
     residuals = get_residuals(pts2d_norm_pic_a, pts2d_projected)  # TODO: implement this
 
     # TODO: Print the <u, v> projection of the last point, and the corresponding residual
+    print 'Last point: ' + str(pts2d_projected[-1,0])
+    print 'Residual of last point: ' + str(residuals[-1,0])
 
     # 1b
     # Read points
-    #pts3d = read_points(os.path.join(input_dir, SCENE))
-    #pts2d_pic_b = read_points(os.path.join(input_dir, PIC_B_2D))
+    pts3d = read_points(os.path.join(input_dir, SCENE))
+    pts2d_pic_b = read_points(os.path.join(input_dir, PIC_B_2D))
     # NOTE: These points are not normalized
 
     # TODO: Use the functions from 1a to implement calibrate_camera() and find the best transform (bestM)
-
+    bestM, error = calibrate_camera( pts3d, pts2d_pic_b )
+    print "Best M is "
+    print bestM
+    print "Best residual error is " + str(error)
+    
     # 1c
     # TODO: Compute the camera location using bestM
+    Q = bestM[:, 0:3]
+    m4 = bestM[:,3]
+    C = -1 *np.dot( np.linalg.inv(Q), m4 )
+    print 'Camera center'
+    print C
 
     # 2a
     # TODO: Implement compute_fundamental_matrix() to find the raw fundamental matrix
