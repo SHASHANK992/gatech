@@ -56,6 +56,8 @@ def solve_least_squares(pts3d, pts2d):
         Z = pts3d[ i/2, 2]
         u = pts2d[ i/2, 0]
         v = pts2d[ i/2, 1]
+        # Used the equations from the lecture slides. Note that with M[3,4] constrained
+        # to be 1, we only have 11 variables, not 12
         A[i]   = np.array([ [ X, Y, Z, 1, 0, 0, 0, 0, -u*X, -u*Y, -u*Z ] ])        
         A[i+1] = np.array([ [ 0, 0, 0, 0, X, Y, Z, 1, -v*X, -v*Y, -v*Z ] ])
         
@@ -66,7 +68,7 @@ def solve_least_squares(pts3d, pts2d):
     # Use this
     # http://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.lstsq.html#numpy.linalg.lstsq
     M, error, rank, s = np.linalg.lstsq(A, x)
-    M = np.append( M, np.array([[1]]), axis=0)
+    M = np.append( M, np.array([[1]]), axis=0) # Add the constrained variable back in
     M = np.reshape( M, (3, 4))
     
     return M, error
@@ -86,9 +88,8 @@ def project_points(pts3d, M):
     """
 
     # TODO: Your code here
-    # Want x = MX, but M is 3x4 and X is Nx3
-    # I think I need to convert to homogenous coordinates
-    # Just transpose and add 1's along last row?
+    
+    # Use equations given in lecture
     N = pts3d.shape[0]
     pts2d_projected = np.zeros( (N, 2) )
     
@@ -221,6 +222,31 @@ def compute_fundamental_matrix(pts2d_a, pts2d_b):
     """
 
     # TODO: Your code here
+    # Build the array into something that can be solved
+    N = pts2d_a.shape[0]
+    A = np.zeros( (N, 8) )
+    X = np.zeros( (N, 1) )
+    
+    for i in range(N):
+        u1 = pts2d_a[i, 0]
+        v1 = pts2d_a[i, 1]
+        
+        u2 = pts2d_b[i, 0]
+        v2 = pts2d_b[i, 1]
+        
+        # Used the equations from the lecture slides. Note that with F[3,3] constrained
+        # to be 1, we only have 8, not 9
+        A[i]   = np.array([ [ u1*u2, u1*v2, u1, v1*u2, v1*v2, v1, u2, v2 ] ])        
+        
+        X[i]   = -1
+    #end for
+    
+    # Use this
+    # http://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.lstsq.html#numpy.linalg.lstsq
+    F, error, rank, s = np.linalg.lstsq(A, X)
+    F = np.append( F, np.array([[1]]), axis=0) # Add the constrained variable back in
+    F = np.reshape( F, (3, 3))
+    
     return F
 
 
@@ -243,7 +269,9 @@ def main():
     residuals = get_residuals(pts2d_norm_pic_a, pts2d_projected)  # TODO: implement this
 
     # TODO: Print the <u, v> projection of the last point, and the corresponding residual
-    print 'Last point: ' + str(pts2d_projected[-1,0])
+    print 'M matrix:'
+    print M
+    print 'Last point: ' + str(pts2d_projected[-1,:])
     print 'Residual of last point: ' + str(residuals[-1,0])
 
     # 1b
@@ -268,12 +296,36 @@ def main():
 
     # 2a
     # TODO: Implement compute_fundamental_matrix() to find the raw fundamental matrix
+    pts2d_a = read_points( os.path.join(input_dir, PIC_A_2D))
+    pts2d_b = read_points( os.path.join(input_dir, PIC_B_2D))
+    
+    F = compute_fundamental_matrix( pts2d_a, pts2d_b)
+    print 'Fundamental matrix F'
+    print F
 
     # 2b
     # TODO: Reduce the rank of the fundamental matrix
+    # Decompose F
+    U, D, V = np.linalg.svd(F, compute_uv=1)
+    D = np.diag(D)
+    D[2,2] = 0
+    F = np.dot( U, np.dot(D, V) )
+    print 'Reduced Rank F'
+    print F
 
     # 2c
     # TODO: Draw epipolar lines
+    pic_a = cv2.imread( os.path.join(input_dir, PIC_A))
+    pic_b = cv2.imread( os.path.join(input_dir, PIC_B))
+    
+    # Compute points with which to draw epipolar lines
+    
+    
+    
+    # Save images
+    cv2.imwrite( os.path.join(output_dir, 'ps4-2-c-1.png'), pic_a )
+    cv2.imwrite( os.path.join(output_dir, 'ps4-2-c-2.png'), pic_b )
+#end main
 
 
 if __name__ == '__main__':
