@@ -228,15 +228,15 @@ def compute_fundamental_matrix(pts2d_a, pts2d_b):
     X = np.zeros( (N, 1) )
     
     for i in range(N):
-        u1 = pts2d_a[i, 0]
-        v1 = pts2d_a[i, 1]
+        u = pts2d_a[i, 0]
+        v = pts2d_a[i, 1]
         
-        u2 = pts2d_b[i, 0]
-        v2 = pts2d_b[i, 1]
+        up = pts2d_b[i, 0]
+        vp = pts2d_b[i, 1]
         
         # Used the equations from the lecture slides. Note that with F[3,3] constrained
         # to be 1, we only have 8, not 9
-        A[i]   = np.array([ [ u1*u2, u1*v2, u1, v1*u2, v1*v2, v1, u2, v2 ] ])        
+        A[i]   = np.array([ [ u*up, v*up, up, u*vp, v*vp, vp, u, v ] ])        
         
         X[i]   = -1
     #end for
@@ -317,14 +317,139 @@ def main():
     # TODO: Draw epipolar lines
     pic_a = cv2.imread( os.path.join(input_dir, PIC_A))
     pic_b = cv2.imread( os.path.join(input_dir, PIC_B))
+    pts2d_a = read_points( os.path.join(input_dir, PIC_A_2D))
+    pts2d_b = read_points( os.path.join(input_dir, PIC_B_2D))
     
     # Compute points with which to draw epipolar lines
+    # Find lines at the image boundaries  
+    L_l = np.cross( [ 0, 0, 1 ], [0, pic_a.shape[0], 1 ] )
+    L_r = np.cross( [ pic_a.shape[1], 0, 1 ], [ pic_a.shape[1], pic_a.shape[0], 1 ] )
     
-    
-    
+    # For every point in the respective images
+    N = pts2d_a.shape[0]
+    for i in range( N ):
+        # Put original 2D (x,y) points into homogenous coordinates
+        pt_a = [ pts2d_a[i,0], pts2d_a[i,1], 1 ]
+        pt_b = [ pts2d_b[i,0], pts2d_b[i,1], 1 ]
+
+        # Compute the cross product to find the intersection of lines
+        # with image boundaries
+        p_la = np.cross( np.dot(pt_b,F), L_l)
+        p_ra = np.cross( np.dot(pt_b,F), L_r)
+        
+        p_lb = np.cross( np.dot(F,pt_a), L_l)
+        p_rb = np.cross( np.dot(F,pt_a), L_r)
+                
+        # Convert points into non-homogenous coordinates
+        pt_a1 = ( int(p_la[0]/p_la[2]), int(p_la[1]/p_la[2]) )
+        pt_a2 = ( int(p_ra[0]/p_ra[2]), int(p_ra[1]/p_ra[2]) )
+        
+        pt_b1 = ( int(p_lb[0]/p_lb[2]), int(p_lb[1]/p_lb[2]) )
+        pt_b2 = ( int(p_rb[0]/p_rb[2]), int(p_rb[1]/p_rb[2]) )
+                
+        pic_a = cv2.line( pic_a, pt_a1, pt_a2, (0,255,0) )
+        pic_b = cv2.line( pic_b, pt_b1, pt_b2, (0,255,0) )
+    #end for
+        
     # Save images
     cv2.imwrite( os.path.join(output_dir, 'ps4-2-c-1.png'), pic_a )
     cv2.imwrite( os.path.join(output_dir, 'ps4-2-c-2.png'), pic_b )
+    
+    #*********************************************************************************
+    #
+    # EXTRA CREDIT
+    #
+    #*********************************************************************************
+    # Part d
+    pts2d_a = read_points( os.path.join(input_dir, PIC_A_2D))
+    pts2d_b = read_points( os.path.join(input_dir, PIC_B_2D))
+    
+    # Create transformation matrices
+    A_avg = np.average( pts2d_a, axis=0 )
+    B_avg = np.average( pts2d_b, axis=0 ) 
+    
+    scale_a = 1/(np.max(np.absolute(pts2d_a),axis=(0,1)))
+    scale_b = 1/(np.max(np.absolute(pts2d_b),axis=(0,1)))
+    
+    Ta = np.dot( np.diag([ scale_a, scale_a, 1]) , np.array([ [1,0,-A_avg[0]],[0,1,-A_avg[1]],[0,0,1] ]) )
+    Tb = np.dot( np.diag([ scale_b, scale_b, 1]) , np.array([ [1,0,-B_avg[0]],[0,1,-B_avg[1]],[0,0,1] ]) )
+    
+    print 'Transformation matrix A'
+    print Ta
+    print 'Transformation matrix B'
+    print Tb
+    
+    # Normalize points using transformation matrices
+    pts_a_norm = np.zeros( (pts2d_a.shape[0], 3) )
+    pts_b_norm = np.zeros( (pts2d_b.shape[0], 3) )
+    for i in range( pts_a_norm.shape[0] ):
+        pt_a = np.append( pts2d_a[i,:], [1] )
+        pt_b = np.append( pts2d_b[i,:], [1] )
+        
+        pts_a_norm[i,:] = np.dot(Ta, pt_a)
+        pts_b_norm[i,:] = np.dot(Tb, pt_b)
+    #end for
+    
+    # Compute Funcamental matrix F
+    F = compute_fundamental_matrix( pts_a_norm, pts_b_norm)
+    print 'Fundamental matrix F'
+    print F
+
+    # Reduce the rank of the fundamental matrix
+    # Decompose F
+    U, D, V = np.linalg.svd(F, compute_uv=1)
+    D = np.diag(D)
+    D[2,2] = 0
+    F_hat = np.dot( U, np.dot(D, V) )
+    print 'Reduced Rank F'
+    print F_hat
+    
+    # Compute best F
+    F_better = np.dot(np.dot(np.transpose(Tb),F_hat),Ta)
+    print 'Best F'
+    print F_better
+    
+    # Draw epipolar lines
+    pic_a = cv2.imread( os.path.join(input_dir, PIC_A))
+    pic_b = cv2.imread( os.path.join(input_dir, PIC_B))
+    pts2d_a = read_points( os.path.join(input_dir, PIC_A_2D))
+    pts2d_b = read_points( os.path.join(input_dir, PIC_B_2D))
+    
+    # Compute points with which to draw epipolar lines
+    # Find lines at the image boundaries  
+    L_l = np.cross( [ 0, 0, 1 ], [0, pic_a.shape[0], 1 ] )
+    L_r = np.cross( [ pic_a.shape[1], 0, 1 ], [ pic_a.shape[1], pic_a.shape[0], 1 ] )
+    
+    # For every point in the respective images
+    N = pts2d_a.shape[0]
+    for i in range( N ):
+        # Put original 2D (x,y) points into homogenous coordinates
+        pt_a = [ pts2d_a[i,0], pts2d_a[i,1], 1 ]
+        pt_b = [ pts2d_b[i,0], pts2d_b[i,1], 1 ]
+
+        # Compute the cross product to find the intersection of lines
+        # with image boundaries
+        p_la = np.cross( np.dot(pt_b,F_better), L_l)
+        p_ra = np.cross( np.dot(pt_b,F_better), L_r)
+        
+        p_lb = np.cross( np.dot(F_better,pt_a), L_l)
+        p_rb = np.cross( np.dot(F_better,pt_a), L_r)
+                
+        # Convert points into non-homogenous coordinates
+        pt_a1 = ( int(p_la[0]/p_la[2]), int(p_la[1]/p_la[2]) )
+        pt_a2 = ( int(p_ra[0]/p_ra[2]), int(p_ra[1]/p_ra[2]) )
+        
+        pt_b1 = ( int(p_lb[0]/p_lb[2]), int(p_lb[1]/p_lb[2]) )
+        pt_b2 = ( int(p_rb[0]/p_rb[2]), int(p_rb[1]/p_rb[2]) )
+                
+        pic_a = cv2.line( pic_a, pt_a1, pt_a2, (0,255,0) )
+        pic_b = cv2.line( pic_b, pt_b1, pt_b2, (0,255,0) )
+    #end for
+        
+    # Save images
+    cv2.imwrite( os.path.join(output_dir, 'ps4-2-e-1.png'), pic_a )
+    cv2.imwrite( os.path.join(output_dir, 'ps4-2-e-2.png'), pic_b )
+    
 #end main
 
 
