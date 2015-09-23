@@ -66,17 +66,18 @@ def reduce(image):
   # WRITE YOUR CODE HERE.
   r = image.shape[0]
   c = image.shape[1]
-  #reduced_img = np.zeros( (ceil(r/2), ceil(c/2)) )
+  reduced_img = np.zeros( (np.ceil(r/2), np.ceil(c/2)) )
   
-  # Convolve
   kernel = generatingKernel(0.4)
-  # Reshape arrays to be vectors
-  img_conv = np.convolve(kernel, image, 'same')
-  # Reshape output vector to be array
-  
-  # All rows, all columns, step size 2
-  # I am not sure this meets the ceiling requirements
-  reduced_img = img_conv[::2, ::2]
+  # linearize kernel
+  kernel_v = np.reshape( kernel, (kernel.shape[0]*kernel.shape[1]))
+  # Linearize image
+  img_v = np.reshape(image[:,:], (r*c) )
+  # Convolve
+  img_conv = np.convolve(img_v, kernel_v, 'same') 
+  # Extract every other row and column
+  img_conv_m = np.reshape( img_conv, (r,c))
+  reduced_img[:,:] = img_conv_m[::2,::2]
   
   return reduced_img
   # END OF FUNCTION.
@@ -107,9 +108,30 @@ def expand(image):
     output (numpy.ndarray): an image of shape (2*r, 2*c)
   """
   # WRITE YOUR CODE HERE.
+  img_ex = np.zeros( ( 2*image.shape[0], 2*image.shape[1] ) )
+  
+  kernel = generatingKernel(0.4)
+  
+  # Copy original image to every other index of supersampled image
+  img_ex[::2, ::2] = image[:,:]
+  
+  # Copy column on left to column on right for every other column
+  img_ex[1::2, 1::2] = image[:,:]
+  
+  # Linearize
+  kernel_v = np.reshape( kernel, (kernel.shape[0]*kernel.shape[1]) )
+  img_ex_v = np.reshape( img_ex, (img_ex.shape[0]*img_ex.shape[1]) )
+  
+  # Convolve
+  img_ex_conv = np.convolve(img_ex_v, kernel_v, 'same')
+  
+  # Reshape
+  img_ex = np.reshape(img_ex_conv, (img_ex.shape[0], img_ex.shape[1]) )
+  
+  # Multiply
+  img_ex = 2*img_ex
 
-
-
+  return img_ex
   # END OF FUNCTION.
 
 def gaussPyramid(image, levels):
@@ -138,7 +160,16 @@ def gaussPyramid(image, levels):
   """
   output = [image]
   # WRITE YOUR CODE HERE.
-
+  
+  img_reduced = image
+  
+  # For each of the levels
+  for i in range( levels ):
+    # Reduce the image
+    img_reduced = reduce(img_reduced)
+    
+    # Add reduced image to list
+    output.append(img_reduced)
 
   return output
   # END OF FUNCTION.
@@ -174,8 +205,16 @@ def laplPyramid(gaussPyr):
   in an image of size 6x8. In this case, crop the expanded layer to 5x7.
   """
   output = []
+  
   # WRITE YOUR CODE HERE.
-
+  
+  # For each layer in the pyramid
+  for level in gaussPyr:
+    # Expand the next layer
+    expanded = expand(level)
+    # Find the difference 
+    diff =     
+    # Add to output
 
 
   return output
@@ -246,7 +285,7 @@ def collapse(pyramid):
   6x8. If the next layer is of size 5x7, crop the expanded image to size 5x7.
   """
   # WRITE YOUR CODE HERE.
-
+  
 
 
   # END OF FUNCTION.
