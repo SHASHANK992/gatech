@@ -66,18 +66,13 @@ def reduce(image):
   # WRITE YOUR CODE HERE.
   r = image.shape[0]
   c = image.shape[1]
-  reduced_img = np.zeros( (np.ceil(r/2), np.ceil(c/2)) )
+  reduced_img = np.zeros( (np.ceil(r/2.), np.ceil(c/2.)) )
   
   kernel = generatingKernel(0.4)
-  # linearize kernel
-  kernel_v = np.reshape( kernel, (kernel.shape[0]*kernel.shape[1]))
-  # Linearize image
-  img_v = np.reshape(image[:,:], (r*c) )
   # Convolve
-  img_conv = np.convolve(img_v, kernel_v, 'same') 
+  img_conv = sp.signal.convolve2d(image, kernel, 'same') 
   # Extract every other row and column
-  img_conv_m = np.reshape( img_conv, (r,c))
-  reduced_img[:,:] = img_conv_m[::2,::2]
+  reduced_img[:,:] = img_conv[::2,::2]
   
   return reduced_img
   # END OF FUNCTION.
@@ -115,21 +110,11 @@ def expand(image):
   # Copy original image to every other index of supersampled image
   img_ex[::2, ::2] = image[:,:]
   
-  # Copy column on left to column on right for every other column
-  img_ex[1::2, 1::2] = image[:,:]
-  
-  # Linearize
-  kernel_v = np.reshape( kernel, (kernel.shape[0]*kernel.shape[1]) )
-  img_ex_v = np.reshape( img_ex, (img_ex.shape[0]*img_ex.shape[1]) )
-  
   # Convolve
-  img_ex_conv = np.convolve(img_ex_v, kernel_v, 'same')
-  
-  # Reshape
-  img_ex = np.reshape(img_ex_conv, (img_ex.shape[0], img_ex.shape[1]) )
+  img_ex_conv = sp.signal.convolve2d(img_ex, kernel, 'same')
   
   # Multiply
-  img_ex = 2*img_ex
+  img_ex = 4.0*img_ex_conv
 
   return img_ex
   # END OF FUNCTION.
@@ -208,20 +193,25 @@ def laplPyramid(gaussPyr):
   
   # WRITE YOUR CODE HERE.
   gaussPyr_len = len( gaussPyr )
-  curr_layer = gaussPyr.pop(0)
+  # The top layer will be the biggest
+  curr_layer = gaussPyr[0]
   
   # For each layer in the pyramid
-  for i  in range(gaussPyr_len):
+  for i in range(1,gaussPyr_len):
     # Retrieve the next layer
-    next_layer = gaussPyr.pop(0)
+    next_layer = gaussPyr[i]
     # Expand next layer
     expanded = expand(next_layer)
     # Find the difference 
     # Crop expanded image to be the same size as the original layer
-    diff =  curr_layer - expanded[0:curr_layer[0], 0:curr_layer[1]]  
+    diff =  curr_layer - expanded[0:curr_layer.shape[0], 0:curr_layer.shape[1]]  
     # Add to output
     output.append(diff)
+    curr_layer = next_layer
   #end for
+  
+  # Add last layer to output
+  output.append(curr_layer)
 
   return output
   # END OF FUNCTION.
@@ -266,11 +256,11 @@ def blend(laplPyrWhite, laplPyrBlack, gaussPyrMask):
   
   for i in range(pyr_len):
     # Retrieve the current layer for the white and black images
-    white_level = laplPyrWhite.pop(0)
-    black_level = laplPyrBlack.pop(0)
-    mask_level  = gaussPyrMask.pop(0)
+    white_level = laplPyrWhite[i]
+    black_level = laplPyrBlack[i]
+    mask_level  = gaussPyrMask[i]
     
-    output = numpy.zeros( white_level.shape )
+    output = np.zeros( white_level.shape )
     
     # For each pixel
     for y in range(white_level.shape[0]):
@@ -310,22 +300,28 @@ def collapse(pyramid):
   # WRITE YOUR CODE HERE.
   
   # Figure out what is the base layer
-  # I think it is the end of the pyramid
+  # This is the beginning of the pyramid
   len_pyr = len(pyramid)
-  collapsed_img = np.zeros(pyramid[len_pyr].shape)
+
+  collapsed_img = np.zeros( pyramid[0].shape )
   
-  img_sum = pyramid.pop(0)
+  # Reverse the list to make things easier
+  pyramid.reverse()
+  # This starts at the beginning of the pyramid, i.e., the smallest layer
+  img_sum = pyramid[0]
   
-  for i in range(len_pyr):
+  for i in range(1, len_pyr):
     # Retrieve layer above
-    next_level = pyramid.pop(0)
+    next_level = pyramid[i]
     
-    # Expand current layer, making sure to have the layer sizes agree
+    # Expand current sum, making sure to have the layer sizes agree
     expanded = expand(img_sum)[0:next_level.shape[0], 0:next_level.shape[1]]
     
     # Add expanded layer to next larger level
-    img_sum = 0.5*(next_level) + 0.5*expanded
+    img_sum = next_level + expanded
   #end for
     
   collapsed_img = img_sum
+  
+  return collapsed_img
   # END OF FUNCTION.

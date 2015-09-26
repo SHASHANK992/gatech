@@ -15,7 +15,12 @@ img_white_expanded = assignment6.expand( img_white_reduced)
 
 cv2.imwrite( '.\images\image_white_expanded.png', img_white_expanded)
 
-myPyramid = assignment6.gaussPyramid(img_white, 2)
-for pyr in myPyramid:
-	print pyr
+myGauss = assignment6.gaussPyramid(img_white, 2)
+#print "gauss ", len(myGauss)
+#for pyr in myPyramid:
+#	print pyr.shape
+
+myLapl = assignment6.laplPyramid(myGauss)
+#print "laplace ", len(myLapl)
+
 
