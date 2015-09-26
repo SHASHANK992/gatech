@@ -96,7 +96,31 @@ def harris_response(Ix, Iy, kernel, alpha):
 
     # TODO: Your code here
     # Note: Define any other parameters you need locally or as keyword arguments
+    # Copy Ix and Iy
+    extendBound = max( kernel.shape[0], kernel.shape[1] )
+    Ix_copy = np.copy(Ix)
+    Iy_copy = np.copy(Iy)
+    #Extend copies
+    Ix_copy = cv2.copyMakeBorder( Ix_copy, 0, extendBound, 0, extendBound, cv2.BORDER_REFLECT )
+    Iy_copy = cv2.copyMakeBorder( Iy_copy, 0, extendBound, 0, extendBound, cv2.BORDER_REFLECT )
     
+    R = np.zeros( Ix.shape )    
+    # For every pixel in image
+    for u in range( Ix.shape[0] ):
+        for v in range( Ix.shape[1]):            
+            # Compute M
+            M = np.zeros((2,2), dtype=np.float_)
+            for x in range(kernel.shape[0]):
+                for y in range(kernel.shape[1]):
+                    M = M + kernel[x,y]*np.array([ [(Ix_copy[u+x, v+y])**2,              Ix_copy[u+x, v+y]*Iy_copy[u+x, v+y]], 
+                                                   [Ix_copy[u+x, v+y]*Iy_copy[u+x, v+y], (Iy_copy[u+x, v+y])**2]               ])
+                #end for
+            # end for
+                        
+            # Compute R from M
+            R[u,v] = np.linalg.det(M) - alpha*(np.trace(M)**2)
+        #end for
+    #end for
     
     return R
 
@@ -117,28 +141,50 @@ def find_corners(R, threshold, radius):
 
     # TODO: Your code here
     corners = []
-    # For all values less than threshold, set to zeros
+    
+    # Make radius odd
+    r_copy = int(np.copy(radius))
+    if r_copy % 2 == 0:
+        r_copy += 1
+    # Purposely truncate
+    radius_half = r_copy/2
     
     # Create list of indices for all values that are above threshold
+    # np.where outputs two lists, one with the rows and one with the columns
     indices = np.where( R > threshold )
     
-    # For each index, if there are no values greater than it within the window, add it to corners list
-    for i in range(len(indices[0]):
-        for j in range(len(indices[1])):
-            r = indices[0][i]
-            c = indices[1][j]
-            val = R[r, c]
+    # For each index, build a box around it of according to radius
+    boxes = np.zeros( (len(indices[0])*len(indices[1]), 4) )
+    box_pos = 0
+    for x in range( len(indices[0]) ):
+        for y in range( len(indices[1]) ):
+            r = indices[0][x]
+            c = indices[1][y]
             
-            max_val = val
-            max_val_r = r
-            max_val_c = c
+            # If the box of size radius around the index is entirely 
+            # in the image, make the box of that size centered around
+            # the index
+            if( r-radius_half > 0 and r+radius_half < R.shape[0] and c-radius_half > 0 and c+radius_half < R.shape[1] ):
+                boxes[box_pos, 0] = r-radius_half
+                boxes[box_pos, 1] = c-radius_half
+                boxes[box_pos, 2] = r+radius_half
+                boxes[box_pos, 3] = c+radius_half
+            # If the box does not fit, go the boundaries instead
             
-            # For all values in window around (r,c), if value of R > val
-    
-            # The order might need reversed
-            corners.append( (max_val_r, max_val_c) )
+            box_pos += 1
         #end for
     #end for
+    
+    # We now of an array defining bounding boxes
+    # Use Adrian Rosebrock's nms algorithm to find boxes that belong
+    real_boxes = non_max_suppression( boxes, 1 )
+    
+    # For all the real boxes, determine the actual index
+    for i in range(real_boxes.shape[0] ):
+        r = real_boxes[i, 0] + radius_half
+        c = real_boxes[i, 1] + radius_half
+        
+        corners.append( (r, c) )
             
     return corners
 
@@ -159,10 +205,11 @@ def draw_corners(image, corners):
     # TODO: Your code here
     image_out = np.copy(image)
     image_out = cv2.normalize( image_out, image_out, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
-    image_out = cv2.cvtColor( image_out, cv2.CV_GRAY2RGB )
+    image_out = cv2.cvtColor( image_out, cv2.COLOR_GRAY2RGB )
     
     for corner in corners:
-        image_out = cv2.circle(image_out, corner, 1, (0, 255, 0) )
+        coord = ( corner[1], corner[0] )
+        image_out = cv2.circle(image_out, coord, 1, (0, 255, 0) )
     #end for
     
     return image_out
@@ -299,6 +346,69 @@ def compute_similarity_RANSAC(kp1, kp2, matches):
 
     # TODO: Your code here
     return transform
+    
+def norm_and_save( img, filename ):
+    normed = 0
+    normed = cv2.normalize( img, normed, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1)
+    cv2.imwrite( os.path.join(output_dir, filename), normed)
+#end norm_and_save
+
+# Taken from http://www.pyimagesearch.com/2015/02/16/faster-non-maximum-suppression-python/
+def non_max_suppression(boxes, overlapThresh):
+    # if there are no boxes, return an empty list
+	if len(boxes) == 0:
+		return []
+ 
+	# if the bounding boxes integers, convert them to floats --
+	# this is important since we'll be doing a bunch of divisions
+	if boxes.dtype.kind == "i":
+		boxes = boxes.astype("float")
+ 
+	# initialize the list of picked indexes	
+	pick = []
+ 
+	# grab the coordinates of the bounding boxes
+	x1 = boxes[:,0]
+	y1 = boxes[:,1]
+	x2 = boxes[:,2]
+	y2 = boxes[:,3]
+ 
+	# compute the area of the bounding boxes and sort the bounding
+	# boxes by the bottom-right y-coordinate of the bounding box
+	area = (x2 - x1 + 1) * (y2 - y1 + 1)
+	idxs = np.argsort(y2)
+    
+    # keep looping while some indexes still remain in the indexes
+	# list
+	while len(idxs) > 0:
+		# grab the last index in the indexes list and add the
+		# index value to the list of picked indexes
+		last = len(idxs) - 1
+		i = idxs[last]
+		pick.append(i)
+ 
+		# find the largest (x, y) coordinates for the start of
+		# the bounding box and the smallest (x, y) coordinates
+		# for the end of the bounding box
+		xx1 = np.maximum(x1[i], x1[idxs[:last]])
+		yy1 = np.maximum(y1[i], y1[idxs[:last]])
+		xx2 = np.minimum(x2[i], x2[idxs[:last]])
+		yy2 = np.minimum(y2[i], y2[idxs[:last]])
+ 
+		# compute the width and height of the bounding box
+		w = np.maximum(0, xx2 - xx1 + 1)
+		h = np.maximum(0, yy2 - yy1 + 1)
+ 
+		# compute the ratio of overlap
+		overlap = (w * h) / area[idxs[:last]]
+ 
+		# delete all indexes from the index list that have
+		idxs = np.delete(idxs, np.concatenate(([last],
+			np.where(overlap > overlapThresh)[0])))
+ 
+	# return only the bounding boxes that were picked using the
+	# integer data type
+	return boxes[pick].astype("int")
 
 
 # Driver code
@@ -306,29 +416,54 @@ def main():
     # Note: Comment out parts of this code as necessary
 
     # 1a
+    '''
     transA = cv2.imread(os.path.join(input_dir, "transA.jpg"), cv2.IMREAD_GRAYSCALE).astype(np.float_) / 255.0
     transA_Ix = gradientX(transA)  # TODO: implement this
     transA_Iy = gradientY(transA)  # TODO: implement this
     transA_pair = make_image_pair(transA_Ix, transA_Iy)  # TODO: implement this
-    transA_pair_norm = 0
-    transA_pair_norm = cv2.normalize( transA_pair, transA_pair_norm, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
-    cv2.imwrite(os.path.join(output_dir, "ps5-1-a-1.png"), transA_pair_norm)  # Note: you may have to scale/type-cast image before writing
+    norm_and_save( transA_pair, "ps5-1-a-1.png" ) # Note: you may have to scale/type-cast image before writing
+    '''
+    check = cv2.imread( os.path.join(input_dir, "check_rot.bmp"), cv2.IMREAD_GRAYSCALE).astype(np.float_)/255.0
+    check_Ix = gradientX(check)
+    check_Iy = gradientY(check)
+    check_pair = make_image_pair( check_Ix, check_Iy)
+    norm_and_save( check_pair, "check-1a.png")
     
+    '''
     # TODO: Similarly for simA.jpg
+    simA = cv2.imread(os.path.join(input_dir, "simA.jpg"), cv2.IMREAD_GRAYSCALE).astype(np.float_)/255.0
+    simA_Ix = gradientX(simA)
+    simA_Iy = gradientY(simA)
+    simA_pair = make_image_pair(simA_Ix, simA_Iy)
+    norm_and_save( simA_pair, "ps5-1-a-2.png" )
+    '''
     
     # 1b
-    transA_R = harris_response(transA_Ix, trans_Iy, np.ones((3, 3), dtype=np.float_) / 9.0, 0.04)  # TODO: implement this, tweak parameters for best response
+    kernel = np.ones((3, 3), dtype=np.float_)/9.0
+    '''
+    transA_R = harris_response(transA_Ix, transA_Iy, kernel, 0.04)  # TODO: implement this, tweak parameters for best response
     # TODO: Scale/type-cast response map and write to file
+    norm_and_save( transA_R, "ps5-1-b-1.png" )  
+    '''
+    check_R = harris_response(check_Ix, check_Iy, kernel, 0.04)
+    norm_and_save(check_R, "check-1b.png")  
 
     # TODO: Similarly for transB, simA and simB (you can write a utility function for grouping operations on each image)
-    '''
+    
     # 1c
-    transA_corners = find_corners(transA_R, 0.0, 2.5)  # TODO: implement this, tweak parameters till you get good corners
+    print "Finding corners"
+    '''
+    transA_corners = find_corners(transA_R, 5.0, 2)  # TODO: implement this, tweak parameters till you get good corners
     transA_out = draw_corners(transA, transA_corners)  # TODO: implement this
     # TODO: Write image to file
+    cv2.imwrite( os.path.join(output_dir, "ps5-1-c-1.png"), transA_out )
+    '''
+    check_corners = find_corners(check_R, 0.0, 2)
+    check_out = draw_corners( check, check_corners)
+    cv2.imwrite( os.path.join(output_dir, "check-1c.png"), check_out )
 
     # TODO: Similarly for transB, simA and simB (write a utility function if you want)
-
+    '''
     # 2a
     transA_angle = gradient_angle(transA_Ix, transA_Iy)  # TODO: implement this
     transA_kp = get_keypoints(transA_corners, transA_R, transA_angle, _size=5.0, _octave=0)  # TODO: implement this, update parameters
