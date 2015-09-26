@@ -207,15 +207,21 @@ def laplPyramid(gaussPyr):
   output = []
   
   # WRITE YOUR CODE HERE.
+  gaussPyr_len = len( gaussPyr )
+  curr_layer = gaussPyr.pop(0)
   
   # For each layer in the pyramid
-  for level in gaussPyr:
-    # Expand the next layer
-    expanded = expand(level)
+  for i  in range(gaussPyr_len):
+    # Retrieve the next layer
+    next_layer = gaussPyr.pop(0)
+    # Expand next layer
+    expanded = expand(next_layer)
     # Find the difference 
-    diff =     
+    # Crop expanded image to be the same size as the original layer
+    diff =  curr_layer - expanded[0:curr_layer[0], 0:curr_layer[1]]  
     # Add to output
-
+    output.append(diff)
+  #end for
 
   return output
   # END OF FUNCTION.
@@ -256,7 +262,24 @@ def blend(laplPyrWhite, laplPyrBlack, gaussPyrMask):
 
   blended_pyr = []
   # WRITE YOUR CODE HERE.
-
+  pyr_len = len(laplPyrWhite)
+  
+  for i in range(pyr_len):
+    # Retrieve the current layer for the white and black images
+    white_level = laplPyrWhite.pop(0)
+    black_level = laplPyrBlack.pop(0)
+    mask_level  = gaussPyrMask.pop(0)
+    
+    output = numpy.zeros( white_level.shape )
+    
+    # For each pixel
+    for y in range(white_level.shape[0]):
+      for x in range(white_level.shape[1]):
+         output[y,x] = mask_level[y,x]*white_level[y,x] + (1-mask_level[y,x])*black_level[y,x]
+      #end for
+    #end for
+    blended_pyr.append(output)    
+  #end for
 
   return blended_pyr
   # END OF FUNCTION.
@@ -286,6 +309,23 @@ def collapse(pyramid):
   """
   # WRITE YOUR CODE HERE.
   
-
-
+  # Figure out what is the base layer
+  # I think it is the end of the pyramid
+  len_pyr = len(pyramid)
+  collapsed_img = np.zeros(pyramid[len_pyr].shape)
+  
+  img_sum = pyramid.pop(0)
+  
+  for i in range(len_pyr):
+    # Retrieve layer above
+    next_level = pyramid.pop(0)
+    
+    # Expand current layer, making sure to have the layer sizes agree
+    expanded = expand(img_sum)[0:next_level.shape[0], 0:next_level.shape[1]]
+    
+    # Add expanded layer to next larger level
+    img_sum = 0.5*(next_level) + 0.5*expanded
+  #end for
+    
+  collapsed_img = img_sum
   # END OF FUNCTION.
