@@ -24,6 +24,8 @@ def gradientX(image):
     """
 
     # TODO: Your code here
+    Ix = cv2.Sobel( image, cv2.CV_64F, 1, 0)
+    
     return Ix
 
 
@@ -40,6 +42,8 @@ def gradientY(image):
     """
 
     # TODO: Your code here
+    Iy = cv2.Sobel( image, cv2.CV_64F, 0, 1)
+
     return Iy
 
 
@@ -57,6 +61,21 @@ def make_image_pair(image1, image2):
     """
 
     # TODO: Your code here
+    # Determine if the input images are grayscale or color
+    r = np.maximum( image1.shape[0], image2.shape[0] )
+    c = image1.shape[1] + image2.shape[1]
+    image_pair = []
+    
+    if len(image1.shape) == 3:
+        # Make image_pair of appropriate size
+        image_pair = np.zeros( (r,c,3) )
+        image_pair[0:image1.shape[0],0:image1.shape[1],:] = image1[:,:,:]
+        image_pair[0:image2.shape[0],image1.shape[1]+1:c,:] = image2[:,:,:]
+    else:
+        image_pair = np.zeros( (r,c) )
+        image_pair[ 0:image1.shape[0], 0:image1.shape[1] ] = image1[:,:]
+        image_pair[ 0:image2.shape[0], image1.shape[1]:c ] = image2[:,:] 
+    #end if  
     return image_pair
 
 
@@ -77,6 +96,8 @@ def harris_response(Ix, Iy, kernel, alpha):
 
     # TODO: Your code here
     # Note: Define any other parameters you need locally or as keyword arguments
+    
+    
     return R
 
 
@@ -95,6 +116,30 @@ def find_corners(R, threshold, radius):
     """
 
     # TODO: Your code here
+    corners = []
+    # For all values less than threshold, set to zeros
+    
+    # Create list of indices for all values that are above threshold
+    indices = np.where( R > threshold )
+    
+    # For each index, if there are no values greater than it within the window, add it to corners list
+    for i in range(len(indices[0]):
+        for j in range(len(indices[1])):
+            r = indices[0][i]
+            c = indices[1][j]
+            val = R[r, c]
+            
+            max_val = val
+            max_val_r = r
+            max_val_c = c
+            
+            # For all values in window around (r,c), if value of R > val
+    
+            # The order might need reversed
+            corners.append( (max_val_r, max_val_c) )
+        #end for
+    #end for
+            
     return corners
 
 
@@ -112,6 +157,14 @@ def draw_corners(image, corners):
     """
 
     # TODO: Your code here
+    image_out = np.copy(image)
+    image_out = cv2.normalize( image_out, image_out, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
+    image_out = cv2.cvtColor( image_out, cv2.CV_GRAY2RGB )
+    
+    for corner in corners:
+        image_out = cv2.circle(image_out, corner, 1, (0, 255, 0) )
+    #end for
+    
     return image_out
 
 
@@ -257,16 +310,18 @@ def main():
     transA_Ix = gradientX(transA)  # TODO: implement this
     transA_Iy = gradientY(transA)  # TODO: implement this
     transA_pair = make_image_pair(transA_Ix, transA_Iy)  # TODO: implement this
-    cv2.imwrite(os.path.join(output_dir, "ps5-1-a-1.png"), transA_pair)  # Note: you may have to scale/type-cast image before writing
+    transA_pair_norm = 0
+    transA_pair_norm = cv2.normalize( transA_pair, transA_pair_norm, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
+    cv2.imwrite(os.path.join(output_dir, "ps5-1-a-1.png"), transA_pair_norm)  # Note: you may have to scale/type-cast image before writing
     
     # TODO: Similarly for simA.jpg
-
+    
     # 1b
     transA_R = harris_response(transA_Ix, trans_Iy, np.ones((3, 3), dtype=np.float_) / 9.0, 0.04)  # TODO: implement this, tweak parameters for best response
     # TODO: Scale/type-cast response map and write to file
 
     # TODO: Similarly for transB, simA and simB (you can write a utility function for grouping operations on each image)
-
+    '''
     # 1c
     transA_corners = find_corners(transA_R, 0.0, 2.5)  # TODO: implement this, tweak parameters till you get good corners
     transA_out = draw_corners(transA, transA_corners)  # TODO: implement this
@@ -298,7 +353,7 @@ def main():
     # TODO: Compute similarity transform for (simA, simB) pair, draw biggest consensus set
 
     # Extra credit: 3c, 3d, 3e
-
+    '''
 
 if __name__ == "__main__":
     main()
