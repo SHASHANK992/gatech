@@ -4,6 +4,7 @@ import cv2
 import assignment6
 
 # Test expand function
+'''
 img_white = cv2.imread( 'images\source\sample\white.jpg', 0 )
 
 
@@ -13,7 +14,7 @@ cv2.imwrite( '.\images\image_white_reduced.png', img_white_reduced)
 
 img_white_expanded = assignment6.expand( img_white_reduced)
 
-cv2.imwrite( '.\images\image_white_expanded.png', img_white_expanded)
+#cv2.imwrite( '.\images\image_white_expanded.png', img_white_expanded)
 
 myGauss = assignment6.gaussPyramid(img_white, 2)
 #print "gauss ", len(myGauss)
@@ -22,5 +23,9 @@ myGauss = assignment6.gaussPyramid(img_white, 2)
 
 myLapl = assignment6.laplPyramid(myGauss)
 #print "laplace ", len(myLapl)
+'''
+
+# Create a mask image to use with the image blender
+
 
 
