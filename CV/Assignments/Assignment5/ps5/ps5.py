@@ -1,6 +1,7 @@
 """Problem Set 5: Harris, SIFT, RANSAC."""
 
 import numpy as np
+from math import atan2
 import cv2
 
 import os
@@ -142,49 +143,39 @@ def find_corners(R, threshold, radius):
     # TODO: Your code here
     corners = []
     
-    # Make radius odd
-    r_copy = int(np.copy(radius))
-    if r_copy % 2 == 0:
-        r_copy += 1
-    # Purposely truncate
-    radius_half = r_copy/2
-    
     # Create list of indices for all values that are above threshold
     # np.where outputs two lists, one with the rows and one with the columns
     indices = np.where( R > threshold )
     
-    # For each index, build a box around it of according to radius
-    boxes = np.zeros( (len(indices[0])*len(indices[1]), 4) )
-    box_pos = 0
+    # For each possible corner
     for x in range( len(indices[0]) ):
         for y in range( len(indices[1]) ):
             r = indices[0][x]
             c = indices[1][y]
             
-            # If the box of size radius around the index is entirely 
-            # in the image, make the box of that size centered around
-            # the index
-            if( r-radius_half > 0 and r+radius_half < R.shape[0] and c-radius_half > 0 and c+radius_half < R.shape[1] ):
-                boxes[box_pos, 0] = r-radius_half
-                boxes[box_pos, 1] = c-radius_half
-                boxes[box_pos, 2] = r+radius_half
-                boxes[box_pos, 3] = c+radius_half
-            # If the box does not fit, go the boundaries instead
+            val = R[r, c]
             
-            box_pos += 1
+            max_val = val
+            max_val_r = r
+            max_val_c = c
+            
+            # For all values in window around (r,c), if value of R > val
+            for i in range(int(radius)):
+                for j in range(int(radius)):
+                    if( r+i < R.shape[0] and c+j < R.shape[1] ):
+                        if( R[r+i, c+j] > max_val ):
+                            max_val = R[r+i, c+j]
+                            max_val_r = r+i
+                            max_val_c = c+j
+                         #end if
+                     #end if
+                 #end for
+             #end for
+    
+            # The order might need reversed
+            corners.append( (max_val_c, max_val_r) )
         #end for
     #end for
-    
-    # We now of an array defining bounding boxes
-    # Use Adrian Rosebrock's nms algorithm to find boxes that belong
-    real_boxes = non_max_suppression( boxes, 1 )
-    
-    # For all the real boxes, determine the actual index
-    for i in range(real_boxes.shape[0] ):
-        r = real_boxes[i, 0] + radius_half
-        c = real_boxes[i, 1] + radius_half
-        
-        corners.append( (r, c) )
             
     return corners
 
@@ -208,8 +199,8 @@ def draw_corners(image, corners):
     image_out = cv2.cvtColor( image_out, cv2.COLOR_GRAY2RGB )
     
     for corner in corners:
-        coord = ( corner[1], corner[0] )
-        image_out = cv2.circle(image_out, coord, 1, (0, 255, 0) )
+        #coord = ( corner[1], corner[0] )
+        image_out = cv2.circle(image_out, corner, 1, (0, 255, 0) )
     #end for
     
     return image_out
@@ -230,6 +221,13 @@ def gradient_angle(Ix, Iy):
 
     # TODO: Your code here
     # Note: +ve X axis points to the right (0 degrees), +ve Y axis points down (90 degrees)
+    # Make y component the negative of what it currently is to account for change in coord system
+    angle = np.zeros( Ix.shape )
+    
+    for i in range( Ix.shape[0] ):
+        for j in range( Ix.shape[1]):
+            angle[i, j] = int( np.degrees( atan2( -1*Iy[i,j], Ix[i,j] ) ) )    
+    
     return angle
 
 
@@ -251,6 +249,16 @@ def get_keypoints(points, R, angle, _size, _octave=0):
 
     # TODO: Your code here
     # Note: You should be able to plot the keypoints using cv2.drawKeypoints() in OpenCV 2.4.9+
+    keypoints = []
+    
+    for i in range( len( points) ):
+        x = points[i][0]
+        y = points[i][1]
+        theta = angle[y,x]
+        response = R[y, x]        
+        kp = cv2.KeyPoint( x, y, _size, theta, response, _octave )        
+        keypoints.append( kp )
+          
     return keypoints
 
 
@@ -268,6 +276,12 @@ def get_descriptors(image, keypoints):
 
     # TODO: Your code here
     # Note: You can use OpenCV's SIFT.compute() method to extract descriptors, or write your own!
+    #descriptors = np.zeros( (len(keypoints), 128) )
+    sift = cv2.SIFT()
+    #image = cv2.cvtColor( image, cv2.COLOR_GRAY2RGB )
+    
+    kp, descriptors = sift.compute(image, keypoints)
+    
     return descriptors
 
 
@@ -286,6 +300,10 @@ def match_descriptors(desc1, desc2):
 
     # TODO: Your code here
     # Note: You can use OpenCV's descriptor matchers, or roll your own!
+    bfm = cv2.BFMatcher()
+    
+    descriptors = bfm.match( desc1, desc2 )
+    
     return descriptors
 
 
@@ -307,6 +325,23 @@ def draw_matches(image1, image2, kp1, kp2, matches):
 
     # TODO: Your code here
     # Note: DO NOT use OpenCV's match drawing function(s)! Write your own :)
+    
+    # convert black and white to color
+    image_out = make_image_pair(image1, image2)
+    
+    # Sort
+    matches = sorted( matches, key = lambda x:x.distance)
+    
+    for i in range(10):
+        match = matches[i]
+        print "Match # ",i
+        print match.queryIdx
+        print match.trainIdx
+        print match.imgIdx
+        print kp1[match.queryIdx].pt
+    
+    #image_out = cv2.drawMatches(image1, kp1, image2, kp2, matches[:10], flags=2)
+    
     return image_out
 
 
@@ -353,134 +388,106 @@ def norm_and_save( img, filename ):
     cv2.imwrite( os.path.join(output_dir, filename), normed)
 #end norm_and_save
 
-# Taken from http://www.pyimagesearch.com/2015/02/16/faster-non-maximum-suppression-python/
-def non_max_suppression(boxes, overlapThresh):
-    # if there are no boxes, return an empty list
-	if len(boxes) == 0:
-		return []
- 
-	# if the bounding boxes integers, convert them to floats --
-	# this is important since we'll be doing a bunch of divisions
-	if boxes.dtype.kind == "i":
-		boxes = boxes.astype("float")
- 
-	# initialize the list of picked indexes	
-	pick = []
- 
-	# grab the coordinates of the bounding boxes
-	x1 = boxes[:,0]
-	y1 = boxes[:,1]
-	x2 = boxes[:,2]
-	y2 = boxes[:,3]
- 
-	# compute the area of the bounding boxes and sort the bounding
-	# boxes by the bottom-right y-coordinate of the bounding box
-	area = (x2 - x1 + 1) * (y2 - y1 + 1)
-	idxs = np.argsort(y2)
+def drawKP( img_in, kp ):
     
-    # keep looping while some indexes still remain in the indexes
-	# list
-	while len(idxs) > 0:
-		# grab the last index in the indexes list and add the
-		# index value to the list of picked indexes
-		last = len(idxs) - 1
-		i = idxs[last]
-		pick.append(i)
- 
-		# find the largest (x, y) coordinates for the start of
-		# the bounding box and the smallest (x, y) coordinates
-		# for the end of the bounding box
-		xx1 = np.maximum(x1[i], x1[idxs[:last]])
-		yy1 = np.maximum(y1[i], y1[idxs[:last]])
-		xx2 = np.minimum(x2[i], x2[idxs[:last]])
-		yy2 = np.minimum(y2[i], y2[idxs[:last]])
- 
-		# compute the width and height of the bounding box
-		w = np.maximum(0, xx2 - xx1 + 1)
-		h = np.maximum(0, yy2 - yy1 + 1)
- 
-		# compute the ratio of overlap
-		overlap = (w * h) / area[idxs[:last]]
- 
-		# delete all indexes from the index list that have
-		idxs = np.delete(idxs, np.concatenate(([last],
-			np.where(overlap > overlapThresh)[0])))
- 
-	# return only the bounding boxes that were picked using the
-	# integer data type
-	return boxes[pick].astype("int")
-
+    image_out = np.copy(img_in)
+    image_out = cv2.normalize( image_out, image_out, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1 )
+    image_out = cv2.cvtColor( image_out, cv2.COLOR_GRAY2RGB )
+    
+    # Draw keypoints
+    image_out = cv2.drawKeypoints( image_out, kp, image_out, (0,255, 0) )
+    
+    return image_out
+    
+#end drawKP
 
 # Driver code
 def main():
     # Note: Comment out parts of this code as necessary
 
+    #****************************
     # 1a
-    '''
+    #transA
     transA = cv2.imread(os.path.join(input_dir, "transA.jpg"), cv2.IMREAD_GRAYSCALE).astype(np.float_) / 255.0
     transA_Ix = gradientX(transA)  # TODO: implement this
     transA_Iy = gradientY(transA)  # TODO: implement this
     transA_pair = make_image_pair(transA_Ix, transA_Iy)  # TODO: implement this
     norm_and_save( transA_pair, "ps5-1-a-1.png" ) # Note: you may have to scale/type-cast image before writing
-    '''
-    check = cv2.imread( os.path.join(input_dir, "check_rot.bmp"), cv2.IMREAD_GRAYSCALE).astype(np.float_)/255.0
-    check_Ix = gradientX(check)
-    check_Iy = gradientY(check)
-    check_pair = make_image_pair( check_Ix, check_Iy)
-    norm_and_save( check_pair, "check-1a.png")
-    
-    '''
-    # TODO: Similarly for simA.jpg
+    #transB
+    transB = cv2.imread(os.path.join(input_dir, "transB.jpg"), cv2.IMREAD_GRAYSCALE).astype(np.float_) / 255.0
+    transB_Ix = gradientX(transB)
+    transB_Iy = gradientY(transB)
+
+    # simA
     simA = cv2.imread(os.path.join(input_dir, "simA.jpg"), cv2.IMREAD_GRAYSCALE).astype(np.float_)/255.0
     simA_Ix = gradientX(simA)
     simA_Iy = gradientY(simA)
     simA_pair = make_image_pair(simA_Ix, simA_Iy)
     norm_and_save( simA_pair, "ps5-1-a-2.png" )
-    '''
+    # simB
     
+    #***************************************
     # 1b
     kernel = np.ones((3, 3), dtype=np.float_)/9.0
-    '''
-    transA_R = harris_response(transA_Ix, transA_Iy, kernel, 0.04)  # TODO: implement this, tweak parameters for best response
-    # TODO: Scale/type-cast response map and write to file
-    norm_and_save( transA_R, "ps5-1-b-1.png" )  
-    '''
-    check_R = harris_response(check_Ix, check_Iy, kernel, 0.04)
-    norm_and_save(check_R, "check-1b.png")  
-
-    # TODO: Similarly for transB, simA and simB (you can write a utility function for grouping operations on each image)
     
+    transA_R = harris_response(transA_Ix, transA_Iy, kernel, 0.04)  # TODO: implement this, tweak parameters for best response
+    norm_and_save( transA_R, "ps5-1-b-1.png" )  
+    transB_R = harris_response(transB_Ix, transB_Iy, kernel, 0.04)
+    norm_and_save( transB_R, "ps5-1-b-2.png" )
+    
+    # sim A and B
+
+    #****************************************
     # 1c
     print "Finding corners"
-    '''
-    transA_corners = find_corners(transA_R, 5.0, 2)  # TODO: implement this, tweak parameters till you get good corners
-    transA_out = draw_corners(transA, transA_corners)  # TODO: implement this
-    # TODO: Write image to file
+    transA_corners = find_corners(transA_R, 5.0, 15)  # tweak parameters till you get good corners
+    transA_out = draw_corners(transA, transA_corners) 
     cv2.imwrite( os.path.join(output_dir, "ps5-1-c-1.png"), transA_out )
-    '''
-    check_corners = find_corners(check_R, 0.0, 2)
-    check_out = draw_corners( check, check_corners)
-    cv2.imwrite( os.path.join(output_dir, "check-1c.png"), check_out )
+    
+    transB_corners = find_corners(transB_R, 5.0, 15)
+    transB_out = draw_corners(transB, transB_corners)
+    cv2.imwrite( os.path.join(output_dir, "ps5-1-c-2.png"), transB_out )
+    
+    # Sim A and B
 
-    # TODO: Similarly for transB, simA and simB (write a utility function if you want)
-    '''
+    
+    #************************************************************************************
     # 2a
     transA_angle = gradient_angle(transA_Ix, transA_Iy)  # TODO: implement this
     transA_kp = get_keypoints(transA_corners, transA_R, transA_angle, _size=5.0, _octave=0)  # TODO: implement this, update parameters
     # TODO: Draw keypoints on transA
-    # TODO: Similarly, find keypoints for transB and draw them
+    transA_kp_img = drawKP( transA, transA_kp )
+    cv2.imwrite( os.path.join(output_dir, "ps5-2-a-1.png"), transA_kp_img)
+    
+    transB_angle = gradient_angle(transB_Ix, transB_Iy)
+    transB_kp = get_keypoints(transB_corners, transB_R, transB_angle, _size=5.0, _octave=0)
+    transB_kp_img = drawKP( transB, transB_kp )
+    cv2.imwrite( os.path.join(output_dir, "ps5-2-a-2.png"), transB_kp_img )
+
     # TODO: Combine transA and transB images (with keypoints drawn) using make_image_pair() and write to file
 
     # TODO: Ditto for (simA, simB) pair
-
+    
+    #*********************************
     # 2b
-    transA_desc = get_descriptors(transA, transA_kp)  # TODO: implement this
+    transA_color = cv2.imread(os.path.join(input_dir, "transA.jpg"), cv2.IMREAD_COLOR)
+    transA_desc = get_descriptors(transA_color, transA_kp)  # TODO: implement this
     # TODO: Similarly get transB_desc
-    # TODO: Find matches: trans_matches = match_descriptors(transA_desc, transB_desc)
-    # TODO: Draw matches and write to file: draw_matches(transA, transB, transA_kp, transB_kp, trans_matches)
-
+    transB_color = cv2.imread( os.path.join(input_dir, "transB.jpg"), cv2.IMREAD_COLOR)
+    transB_desc = get_descriptors(transB_color, transB_kp)
+    
+    # TODO: Find matches: 
+    trans_matches = match_descriptors(transA_desc, transB_desc)
+    match1 = trans_matches[0]
+    
+    # TODO: Draw matches and write to file: 
+    trans_match_img = draw_matches(transA, transB, transA_kp, transB_kp, trans_matches)
+    cv2.imwrite( os.path.join(output_dir, "ps5-2-b-1.png"), trans_match_img )
     # TODO: Ditto for (simA, simB) pair (may have to vary some parameters along the way?)
-
+    
+    
+    '''
+    #***************************************************************************
     # 3a
     # TODO: Compute translation vector using RANSAC for (transA, transB) pair, draw biggest consensus set
 
