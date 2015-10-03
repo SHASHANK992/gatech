@@ -1,7 +1,8 @@
 """Problem Set 5: Harris, SIFT, RANSAC."""
 
 import numpy as np
-from math import atan2
+from math import atan2, log
+from random import randrange
 import cv2
 
 import os
@@ -199,7 +200,7 @@ def draw_corners(image, corners):
     image_out = cv2.cvtColor( image_out, cv2.COLOR_GRAY2RGB )
     
     for corner in corners:
-        image_out = cv2.circle(image_out, corner, 1, (0, 255, 0) )
+        cv2.circle(image_out, corner, 1, (0, 255, 0) )
     #end for
     
     return image_out
@@ -276,11 +277,11 @@ def get_descriptors(image, keypoints):
     # TODO: Your code here
     # Note: You can use OpenCV's SIFT.compute() method to extract descriptors, or write your own!
     #descriptors = np.zeros( (len(keypoints), 128) )
-    sift = cv2.ORB_create()
+    #sift = cv2.ORB_create()
+    sift = cv2.SIFT()
     #image = cv2.cvtColor( image, cv2.COLOR_GRAY2RGB )
     
     kp, descriptors = sift.compute(image, keypoints)
-    
     return descriptors
 
 
@@ -302,7 +303,7 @@ def match_descriptors(desc1, desc2):
     bfm = cv2.BFMatcher()
     
     descriptors = bfm.match( desc1, desc2 )
-    
+
     return descriptors
 
 
@@ -335,25 +336,21 @@ def draw_matches(image1, image2, kp1, kp2, matches):
     # Sort matches in order of best match
     matches = sorted( matches, key = lambda x:x.distance)
     img_offset = image1.shape[1]
-    
-    
-    for i in range( 300 ):
+       
+    for i in range( num_matches/2 ):
         match = matches[i]
         pt1 = kp1[match.queryIdx].pt
         pt1 = ( int(pt1[0]), int(pt1[1]) )
         pt2 = kp2[match.trainIdx].pt
         #Add offset to second point
         pt2 = ( int(pt2[0]+img_offset), int(pt2[1]) )
-        image_out = cv2.line(image_out, pt1, pt2, (0,255,0) )
-        
-
+        cv2.line(image_out, pt1, pt2, (0,255,0) )
     #end for
-    
     
     return image_out
 
 
-def compute_translation_RANSAC(kp1, kp2, matches):
+def compute_translation_RANSAC(kp1, kp2, matches, threshold=5):
     """Compute best translation vector using RANSAC given keypoint matches.
 
     Parameters
@@ -369,6 +366,98 @@ def compute_translation_RANSAC(kp1, kp2, matches):
     """
 
     # TODO: Your code here
+    # Implement adaptive procedure
+    min_num_kp = min( len(kp1), len(kp2) )
+    N = float("inf")
+    sample_count = 0
+    ratio = 1.0
+    
+    translation = np.zeros( (2,1) )
+    good_matches = []
+    
+    while N > sample_count:
+
+        # Choose pair of matching points randomly
+        index = randrange( len(matches) )
+        match1 = matches[index]
+        pt1 = kp1[match1.queryIdx].pt
+        pt2 = kp2[match1.trainIdx].pt
+        # Calculate transform
+        offset = np.array([ [pt1[0]-pt2[0]], 
+                            [pt1[1]-pt2[1]] ])
+        
+        # Find the set of matches that fall within this transform
+        temp_matches = []
+        for i in range( len(matches) ):
+            match = matches[i]
+            pt1 = kp1[match.queryIdx].pt
+            pt2 = kp2[match.trainIdx].pt
+            
+            x_diff = pt1[0] - pt2[0]
+            y_diff = pt1[1] - pt2[1]
+            
+            x_bound = (x_diff-threshold <= offset[0,0]) and ( offset[0,0] <= x_diff+threshold)
+            y_bound = (y_diff-threshold <= offset[1,0]) and ( offset[1,0] <= y_diff+threshold)
+            
+            
+            if (x_bound and y_bound):
+                temp_matches.append(match)
+            #end if
+        #end for
+        
+        # Keep track of the best translation and matches so far
+        if len(temp_matches) > len(good_matches) :
+            good_matches = temp_matches
+            translation = offset
+        #end if
+        
+        temp_ratio = 1.0 - ( float(len(good_matches))/len(matches) )
+        if temp_ratio < ratio:
+            ratio = temp_ratio
+            N = log( 1.0 - 0.99 )/log( 1.0 - (1.0-ratio)**1 )
+        #end if
+        
+        sample_count += 1
+    #end while   
+    
+    '''
+    for i in range( min_num_kp ):
+
+        # Choose pair of matching points randomly
+        match1 = matches[i]
+        pt1 = kp1[match1.queryIdx].pt
+        pt2 = kp2[match1.trainIdx].pt
+        # Calculate transform
+        offset = np.array([ [pt1[0]-pt2[0]], 
+                            [pt1[1]-pt2[1]] ])
+        
+        # Find the set of matches that fall within this transform
+        temp_matches = []
+        for i in range( len(matches) ):
+            match = matches[i]
+            pt1 = kp1[match.queryIdx].pt
+            pt2 = kp2[match.trainIdx].pt
+            
+            x_diff = pt1[0] - pt2[0]
+            y_diff = pt1[1] - pt2[1]
+            
+            x_bound = (x_diff-threshold <= offset[0,0]) and ( offset[0,0] <= x_diff+threshold)
+            y_bound = (y_diff-threshold <= offset[1,0]) and ( offset[1,0] <= y_diff+threshold)            
+            
+            if (x_bound and y_bound):
+                temp_matches.append(match)
+            #end if
+        #end for
+        
+        # Keep track of the best translation and matches so far
+        if len(temp_matches) > len(good_matches) :
+            good_matches = temp_matches
+            translation = offset
+        #end if
+        
+    #end while  
+    '''
+    
     return translation, good_matches
 
 
@@ -388,7 +477,7 @@ def compute_similarity_RANSAC(kp1, kp2, matches):
     """
 
     # TODO: Your code here
-    return transform
+    return transform, good_matches
     
 def norm_and_save( img, filename ):
     normed = 0
@@ -452,7 +541,7 @@ def main():
     transA_out = draw_corners(transA, transA_corners) 
     cv2.imwrite( os.path.join(output_dir, "ps5-1-c-1.png"), transA_out )
     
-    transB_corners = find_corners(transB_R, 5.0, 15)
+    transB_corners = find_corners(transB_R, 4.0, 15)
     transB_out = draw_corners(transB, transB_corners)
     cv2.imwrite( os.path.join(output_dir, "ps5-1-c-2.png"), transB_out )
     
@@ -494,11 +583,16 @@ def main():
     # TODO: Ditto for (simA, simB) pair (may have to vary some parameters along the way?)
     
     
-    '''
+    
     #***************************************************************************
     # 3a
     # TODO: Compute translation vector using RANSAC for (transA, transB) pair, draw biggest consensus set
+    v_trans, translation_matches = compute_translation_RANSAC(transA_kp, transB_kp, trans_matches)
+    translation_img = draw_matches( transA, transB, transA_kp, transB_kp, translation_matches )
+    cv2.imwrite( os.path.join(output_dir, "ps5-3-a-1.png"), translation_img )
 
+    '''
+    #***********************
     # 3b
     # TODO: Compute similarity transform for (simA, simB) pair, draw biggest consensus set
 
