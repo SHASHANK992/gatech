@@ -72,7 +72,7 @@ def make_image_pair(image1, image2):
         # Make image_pair of appropriate size
         image_pair = np.zeros( (r,c,3) )
         image_pair[0:image1.shape[0],0:image1.shape[1],:] = image1[:,:,:]
-        image_pair[0:image2.shape[0],image1.shape[1]+1:c,:] = image2[:,:,:]
+        image_pair[0:image2.shape[0],image1.shape[1]:c,:] = image2[:,:,:]
     else:
         image_pair = np.zeros( (r,c) )
         image_pair[ 0:image1.shape[0], 0:image1.shape[1] ] = image1[:,:]
@@ -276,10 +276,7 @@ def get_descriptors(image, keypoints):
 
     # TODO: Your code here
     # Note: You can use OpenCV's SIFT.compute() method to extract descriptors, or write your own!
-    #descriptors = np.zeros( (len(keypoints), 128) )
-    #sift = cv2.ORB_create()
     sift = cv2.SIFT()
-    #image = cv2.cvtColor( image, cv2.COLOR_GRAY2RGB )
     
     kp, descriptors = sift.compute(image, keypoints)
     return descriptors
@@ -367,12 +364,11 @@ def compute_translation_RANSAC(kp1, kp2, matches, threshold=5):
 
     # TODO: Your code here
     # Implement adaptive procedure
-    min_num_kp = min( len(kp1), len(kp2) )
     N = float("inf")
     sample_count = 0
     ratio = 1.0
     
-    translation = np.zeros( (2,1) )
+    translation = np.zeros( (2,3) )
     good_matches = []
     
     while N > sample_count:
@@ -420,48 +416,10 @@ def compute_translation_RANSAC(kp1, kp2, matches, threshold=5):
         sample_count += 1
     #end while   
     
-    '''
-    for i in range( min_num_kp ):
-
-        # Choose pair of matching points randomly
-        match1 = matches[i]
-        pt1 = kp1[match1.queryIdx].pt
-        pt2 = kp2[match1.trainIdx].pt
-        # Calculate transform
-        offset = np.array([ [pt1[0]-pt2[0]], 
-                            [pt1[1]-pt2[1]] ])
-        
-        # Find the set of matches that fall within this transform
-        temp_matches = []
-        for i in range( len(matches) ):
-            match = matches[i]
-            pt1 = kp1[match.queryIdx].pt
-            pt2 = kp2[match.trainIdx].pt
-            
-            x_diff = pt1[0] - pt2[0]
-            y_diff = pt1[1] - pt2[1]
-            
-            x_bound = (x_diff-threshold <= offset[0,0]) and ( offset[0,0] <= x_diff+threshold)
-            y_bound = (y_diff-threshold <= offset[1,0]) and ( offset[1,0] <= y_diff+threshold)            
-            
-            if (x_bound and y_bound):
-                temp_matches.append(match)
-            #end if
-        #end for
-        
-        # Keep track of the best translation and matches so far
-        if len(temp_matches) > len(good_matches) :
-            good_matches = temp_matches
-            translation = offset
-        #end if
-        
-    #end while  
-    '''
-    
     return translation, good_matches
 
 
-def compute_similarity_RANSAC(kp1, kp2, matches):
+def compute_similarity_RANSAC(kp1, kp2, matches, threshold=5.0):
     """Compute best similarity transform using RANSAC given keypoint matches.
 
     Parameters
@@ -477,6 +435,96 @@ def compute_similarity_RANSAC(kp1, kp2, matches):
     """
 
     # TODO: Your code here
+    # Implement adaptive procedure
+    N = float("inf")
+    sample_count = 0
+    ratio = 1.0
+    
+    transform = np.zeros( (2,3) )
+    good_matches = []
+    
+    while N > sample_count:
+
+        # Choose 2 pairs of matching points randomly
+        index1 = randrange( len(matches) )
+        index2 = randrange( len(matches) )
+        match1 = matches[index1]
+        match2 = matches[index2]
+        ptA1 = kp1[match1.queryIdx].pt
+        ptA2 = kp1[match2.queryIdx].pt
+        ptB1 = kp2[match1.trainIdx].pt
+        ptB2 = kp2[match2.trainIdx].pt
+        
+        # Calculate transform
+        # Assuming system as below
+        '''
+                                            [ [ u ]
+        [ [u']       [ [ a -b  c ]     *      [ v ]
+          [v'] ]  =    [ b  a  d ] ]          [ 1 ] ]
+                  
+        '''
+        # To solve, you need two points ( 4 equations)
+        A = np.array([ [ ptA1[0], ptA1[1], 1, 0 ],
+                       [ ptA1[1], ptA1[0], 0, 1 ],
+                       [ ptA2[0], ptA2[1], 1, 0 ],
+                       [ ptA2[1], ptA2[0], 0, 1 ] ])
+                       
+        b = np.array([ [ ptB1[0] ],       # a
+                       [ ptB1[1] ],       # b
+                       [ ptB2[0] ],       # c
+                       [ ptB2[1] ] ])     # d
+                       
+        # Compute pseudo inverse for case of singular matrix
+        pinvA = np.dot( np.linalg.inv(np.dot( np.transpose(A), A)), np.transpose(A) )            
+        x = np.dot( pinvA, b)
+        
+        translation = np.array([ [ x[0,0], -1*x[1,0], x[2,0] ],
+                                 [ x[1,0],    x[0,0], x[3,0] ]  ])                                 
+        
+        # Find the set of matches that fall within this transform
+        temp_matches = []
+        for i in range( len(matches) ):
+            match = matches[i]
+            pt1 = kp1[match.queryIdx].pt
+            pt2 = kp2[match.trainIdx].pt
+            
+            # Apply transform
+            pt = np.array([ [ pt1[0] ],
+                            [ pt1[1] ],
+                            [   1    ]  ])                            
+            trans_pt = np.dot(translation, pt) 
+            
+            x = trans_pt[0]
+            y = trans_pt[1]
+            
+            x_diff = abs(pt2[0] - x)
+            y_diff = abs(pt2[1] - y)
+            
+            # Check if the transformed point falls within the threshold
+            # I am not highly confident in this math
+            x_bound = ( x_diff <= threshold )
+            y_bound = ( y_diff <= threshold ) 
+            
+            if (x_bound and y_bound):
+                temp_matches.append(match)
+            #end if
+        #end for
+        
+        # Keep track of the best translation and matches so far
+        if len(temp_matches) > len(good_matches) :
+            good_matches = temp_matches
+            transform = translation
+        #end if
+        
+        temp_ratio = 1.0 - ( float(len(good_matches))/len(matches) )
+        if temp_ratio < ratio:
+            ratio = temp_ratio
+            N = log( 1.0 - 0.99 )/log( 1.0 - (1.0-ratio)**1 )
+        #end if
+        
+        sample_count += 1
+    #end while  
+    
     return transform, good_matches
     
 def norm_and_save( img, filename ):
@@ -522,6 +570,10 @@ def main():
     simA_pair = make_image_pair(simA_Ix, simA_Iy)
     norm_and_save( simA_pair, "ps5-1-a-2.png" )
     # simB
+    simB = cv2.imread(os.path.join(input_dir, "simB.jpg"), cv2.IMREAD_GRAYSCALE).astype(np.float_)/255.0
+    simB_Ix = gradientX(simB)
+    simB_Iy = gradientY(simB)
+
     
     #***************************************
     # 1b
@@ -533,6 +585,10 @@ def main():
     norm_and_save( transB_R, "ps5-1-b-2.png" )
     
     # sim A and B
+    simA_R = harris_response( simA_Ix, simA_Iy, kernel, 0.04)
+    norm_and_save( simA_R, "ps5-1-b-3.png" )
+    simB_R = harris_response( simB_Ix, simB_Iy, kernel, 0.04)
+    norm_and_save( simB_R, "ps5-1-b-4.png" )
 
     #****************************************
     # 1c
@@ -546,7 +602,12 @@ def main():
     cv2.imwrite( os.path.join(output_dir, "ps5-1-c-2.png"), transB_out )
     
     # Sim A and B
-
+    simA_corners = find_corners(simA_R, 4.5, 15)
+    simA_out = draw_corners(simA, simA_corners)
+    cv2.imwrite( os.path.join(output_dir, "ps5-1-c-3.png"), simA_out )
+    simB_corners = find_corners(simB_R, 4.5, 15)
+    simB_out = draw_corners(simB, simB_corners)
+    cv2.imwrite( os.path.join(output_dir, "ps5-1-c-4.png"), simB_out )
     
     #************************************************************************************
     # 2a
@@ -554,50 +615,79 @@ def main():
     transA_kp = get_keypoints(transA_corners, transA_R, transA_angle, _size=5.0, _octave=0)  # TODO: implement this, update parameters
     # TODO: Draw keypoints on transA
     transA_kp_img = drawKP( transA, transA_kp )
-    cv2.imwrite( os.path.join(output_dir, "ps5-2-a-1.png"), transA_kp_img)
     
     transB_angle = gradient_angle(transB_Ix, transB_Iy)
     transB_kp = get_keypoints(transB_corners, transB_R, transB_angle, _size=5.0, _octave=0)
     transB_kp_img = drawKP( transB, transB_kp )
-    cv2.imwrite( os.path.join(output_dir, "ps5-2-a-2.png"), transB_kp_img )
 
     # TODO: Combine transA and transB images (with keypoints drawn) using make_image_pair() and write to file
+    trans_kp_img = make_image_pair( transA_kp_img, transB_kp_img )
+    cv2.imwrite( os.path.join(output_dir, "ps5-2-a-1.png"), trans_kp_img)
 
     # TODO: Ditto for (simA, simB) pair
+    simA_angle = gradient_angle( simA_Ix, simA_Iy )
+    simA_kp = get_keypoints( simA_corners, simA_R, simA_angle, _size=5.0, _octave=0)
+    simA_kp_img = drawKP( simA, simA_kp )
+    
+    simB_angle = gradient_angle( simB_Ix, simB_Iy )
+    simB_kp = get_keypoints( simB_corners, simB_R, simB_angle, _size=5.0, _octave=0)
+    simB_kp_img = drawKP( simB, simB_kp )
+    
+    sim_kp_img = make_image_pair( simA_kp_img, simB_kp_img )
+    cv2.imwrite( os.path.join(output_dir, "ps5-2-a-2.png"), sim_kp_img )
     
     #*********************************
     # 2b
+    # Get descriptors for transA
     transA_color = cv2.imread(os.path.join(input_dir, "transA.jpg"), cv2.IMREAD_COLOR)
     transA_desc = get_descriptors(transA_color, transA_kp)  # TODO: implement this
-    # TODO: Similarly get transB_desc
+    # Similarly get transB_desc
     transB_color = cv2.imread( os.path.join(input_dir, "transB.jpg"), cv2.IMREAD_COLOR)
     transB_desc = get_descriptors(transB_color, transB_kp)
     
-    # TODO: Find matches: 
+    # Find matches
     trans_matches = match_descriptors(transA_desc, transB_desc)
-    match1 = trans_matches[0]
     
-    # TODO: Draw matches and write to file: 
+    # Draw matches and write to file
     trans_match_img = draw_matches(transA, transB, transA_kp, transB_kp, trans_matches)
     cv2.imwrite( os.path.join(output_dir, "ps5-2-b-1.png"), trans_match_img )
-    # TODO: Ditto for (simA, simB) pair (may have to vary some parameters along the way?)
     
+    # Ditto for (simA, simB) pair (may have to vary some parameters along the way?)
+    simA_color = cv2.imread( os.path.join(input_dir, "simA.jpg"), cv2.IMREAD_COLOR)
+    simA_desc = get_descriptors( simA_color, simA_kp)
+    
+    simB_color = cv2.imread( os.path.join(input_dir, "simB.jpg"), cv2.IMREAD_COLOR)
+    simB_desc = get_descriptors( simB_color, simB_kp )
+    
+    sim_matches = match_descriptors( simA_desc, simB_desc )
+    
+    sim_match_img = draw_matches( simA, simB, simA_kp, simB_kp, sim_matches )    
+    cv2.imwrite( os.path.join(output_dir, "ps5-2-b-2.png"), sim_match_img )
     
     
     #***************************************************************************
     # 3a
     # TODO: Compute translation vector using RANSAC for (transA, transB) pair, draw biggest consensus set
     v_trans, translation_matches = compute_translation_RANSAC(transA_kp, transB_kp, trans_matches)
+    print "Transformation vector = ", v_trans
+    percentage = float(len(translation_matches))/len(trans_matches)
+    print "Percentage in consensus set: ", percentage    
     translation_img = draw_matches( transA, transB, transA_kp, transB_kp, translation_matches )
     cv2.imwrite( os.path.join(output_dir, "ps5-3-a-1.png"), translation_img )
-
-    '''
+    
+    
     #***********************
     # 3b
     # TODO: Compute similarity transform for (simA, simB) pair, draw biggest consensus set
+    similarity, translation_matches = compute_similarity_RANSAC( simA_kp, simB_kp, sim_matches )
+    print "Similarity matrix = ", similarity
+    percentage = float( len(translation_matches))/len(sim_matches)
+    print "Percentage in consensus set: ", percentage
+    similarity_img = draw_matches( simA, simB, simA_kp, simB_kp, sim_matches )
+    cv2.imwrite( os.path.join(output_dir, "ps5-3-b-1.png"), similarity_img )
 
     # Extra credit: 3c, 3d, 3e
-    '''
+    
 
 if __name__ == "__main__":
     main()
