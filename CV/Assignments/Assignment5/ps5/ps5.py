@@ -199,7 +199,6 @@ def draw_corners(image, corners):
     image_out = cv2.cvtColor( image_out, cv2.COLOR_GRAY2RGB )
     
     for corner in corners:
-        #coord = ( corner[1], corner[0] )
         image_out = cv2.circle(image_out, corner, 1, (0, 255, 0) )
     #end for
     
@@ -277,7 +276,7 @@ def get_descriptors(image, keypoints):
     # TODO: Your code here
     # Note: You can use OpenCV's SIFT.compute() method to extract descriptors, or write your own!
     #descriptors = np.zeros( (len(keypoints), 128) )
-    sift = cv2.SIFT()
+    sift = cv2.ORB_create()
     #image = cv2.cvtColor( image, cv2.COLOR_GRAY2RGB )
     
     kp, descriptors = sift.compute(image, keypoints)
@@ -328,19 +327,28 @@ def draw_matches(image1, image2, kp1, kp2, matches):
     
     # convert black and white to color
     image_out = make_image_pair(image1, image2)
+    image_out = cv2.normalize( image_out, image_out, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1)
+    image_out = cv2.cvtColor( image_out, cv2.COLOR_GRAY2RGB )
     
-    # Sort
+    num_matches = len(matches)
+        
+    # Sort matches in order of best match
     matches = sorted( matches, key = lambda x:x.distance)
+    img_offset = image1.shape[1]
     
-    for i in range(10):
+    
+    for i in range( 300 ):
         match = matches[i]
-        print "Match # ",i
-        print match.queryIdx
-        print match.trainIdx
-        print match.imgIdx
-        print kp1[match.queryIdx].pt
+        pt1 = kp1[match.queryIdx].pt
+        pt1 = ( int(pt1[0]), int(pt1[1]) )
+        pt2 = kp2[match.trainIdx].pt
+        #Add offset to second point
+        pt2 = ( int(pt2[0]+img_offset), int(pt2[1]) )
+        image_out = cv2.line(image_out, pt1, pt2, (0,255,0) )
+        
+
+    #end for
     
-    #image_out = cv2.drawMatches(image1, kp1, image2, kp2, matches[:10], flags=2)
     
     return image_out
 
