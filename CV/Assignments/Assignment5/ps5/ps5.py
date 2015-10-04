@@ -226,7 +226,7 @@ def gradient_angle(Ix, Iy):
     
     for i in range( Ix.shape[0] ):
         for j in range( Ix.shape[1]):
-            angle[i, j] = int( np.degrees( atan2( -1*Iy[i,j], Ix[i,j] ) ) )    
+            angle[i, j] =  np.degrees( atan2( -1*Iy[i,j], Ix[i,j] ) )  
     
     return angle
 
@@ -410,7 +410,7 @@ def compute_translation_RANSAC(kp1, kp2, matches, threshold=5):
         temp_ratio = 1.0 - ( float(len(good_matches))/len(matches) )
         if temp_ratio < ratio:
             ratio = temp_ratio
-            N = log( 1.0 - 0.99 )/log( 1.0 - (1.0-ratio)**1 )
+            N = log( 1.0 - 0.99 )/log( 1.0 - (1.0-ratio)**2 )
         #end if
         
         sample_count += 1

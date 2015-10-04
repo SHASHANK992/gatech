@@ -26,6 +26,15 @@ myLapl = assignment6.laplPyramid(myGauss)
 '''
 
 # Create a mask image to use with the image blender
+img_white = cv2.imread( '.\images\source\submit\white.png', 0)
+
+# Create array of zeros
+mask = np.zeros( img_white.shape )
+# Fill one half with 255
+offset=8
+mask[:, 0:((img_white.shape[1]/2)+offset) ] = 255*np.ones( (img_white.shape[0], (img_white.shape[1]/2)+offset) )
+cv2.imwrite( '.\images\source\submit\mask.jpg', mask)
+
 
 
 
