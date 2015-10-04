@@ -1,6 +1,7 @@
 """Problem Set 6: Optic Flow."""
 
 import numpy as np
+import scipy as sp
 import cv2
 
 import os
@@ -28,6 +29,21 @@ def optic_flow_LK(A, B):
     # TODO: Your code here
     return U, V
 
+def generatingKernel(parameter):
+  """ Return a 5x5 generating kernel based on an input parameter.
+
+  Note: This function is provided for you, do not change it.
+
+  Args:
+    parameter (float): Range of value: [0, 1].
+
+  Returns:
+    numpy.ndarray: A 5x5 kernel.
+
+  """
+  kernel = np.array([0.25 - parameter / 2.0, 0.25, parameter,
+                     0.25, 0.25 - parameter /2.0])
+  return np.outer(kernel, kernel)
 
 def reduce(image):
     """Reduce image to the next smaller level.
@@ -42,7 +58,17 @@ def reduce(image):
     """
 
     # TODO: Your code here
-    return reduced_image
+    r = image.shape[0]
+    c = image.shape[1]
+    reduced_img = np.zeros( (np.ceil(r/2.), np.ceil(c/2.)) )
+  
+    kernel = generatingKernel(0.4)
+    # Convolve
+    img_conv = sp.signal.convolve2d(image, kernel, 'same') 
+    # Extract every other row and column
+    reduced_img[:,:] = img_conv[::2,::2]
+  
+    return reduced_img
 
 
 def gaussian_pyramid(image, levels):
@@ -59,7 +85,19 @@ def gaussian_pyramid(image, levels):
     """
 
     # TODO: Your code here
-    return g_pyr
+    output = [image]
+  
+    img_reduced = image
+  
+    # For each of the levels
+    for i in range( levels ):
+      # Reduce the image
+      img_reduced = reduce(img_reduced)
+    
+      # Add reduced image to list
+      output.append(img_reduced)
+
+    return output
 
 
 def expand(image):
@@ -75,7 +113,21 @@ def expand(image):
     """
 
     # TODO: Your code here
-    return expanded_image
+    img_ex = np.zeros( ( 2*image.shape[0], 2*image.shape[1] ) )
+  
+    kernel = generatingKernel(0.4)
+  
+    # Copy original image to every other index of supersampled image
+    img_ex[::2, ::2] = image[:,:]
+  
+    # Convolve
+    img_ex_conv = sp.signal.convolve2d(img_ex, kernel, 'same')
+  
+    # Multiply
+    img_ex = 4.0*img_ex_conv
+
+    return img_ex
+    
 
 
 def laplacian_pyramid(g_pyr):
@@ -91,7 +143,31 @@ def laplacian_pyramid(g_pyr):
     """
 
     # TODO: Your code here
-    return l_pyr
+    output = []
+  
+    # WRITE YOUR CODE HERE.
+    gaussPyr_len = len( gaussPyr )
+    # The top layer will be the biggest
+    curr_layer = gaussPyr[0]
+    
+    # For each layer in the pyramid
+    for i in range(1,gaussPyr_len):
+        # Retrieve the next layer
+        next_layer = gaussPyr[i]
+        # Expand next layer
+        expanded = expand(next_layer)
+        # Find the difference 
+        # Crop expanded image to be the same size as the original layer
+        diff =  curr_layer - expanded[0:curr_layer.shape[0], 0:curr_layer.shape[1]]  
+        # Add to output
+        output.append(diff)
+        curr_layer = next_layer
+    #end for
+    
+    # Add last layer to output
+    output.append(curr_layer)
+    
+    return output
 
 
 def warp(image, U, V):

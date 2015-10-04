@@ -85,10 +85,23 @@ def findMatchesBetweenImages(image_1, image_2):
   image_2_desc = None
 
   # WRITE YOUR CODE HERE.
-
-
-
-
+  # Using openCV 2.4.9, so SIFT is included
+  sift = cv2.SIFT()
+  
+  # Use SIFT to generate keypoints and descriptors
+  image_1_kp, image_1_desc = sift.generateAndCompute(image1)
+  image_2_kp, image_2_desc = sift.generateAndCompute(image2)
+  
+  # Use BFM
+  bfm = cv2.BFMatcher() # Need to inlcude appropriate flags here
+  
+  matches_all = bfm.match( image_1_desc, image_2_desc )
+  
+  # Sort matches
+  matches_all = sorted( matches_all, key = lambda x:x.distance)
+  
+  # Take the top 10 matches
+  matches = matches_all
 
   # We coded the return statement for you. You are free to modify it -- just
   # make sure the tests pass.
