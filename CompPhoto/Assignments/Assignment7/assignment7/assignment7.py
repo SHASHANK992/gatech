@@ -85,7 +85,7 @@ def findMatchesBetweenImages(image_1, image_2):
   image_2_desc = None
 
   # WRITE YOUR CODE HERE.
-  # Using openCV 2.4.9, so SIFT is included
+  # Using SIFT was causing problems, so use ORB instead
   sift = cv2.ORB()
   
   # Use SIFT to generate keypoints and descriptors
