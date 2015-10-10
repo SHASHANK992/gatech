@@ -2,6 +2,7 @@
 
 import numpy as np
 import scipy as sp
+import scipy.signal
 import cv2
 
 import os
@@ -12,7 +13,7 @@ output_dir = "output"
 
 
 # Assignment code
-def optic_flow_LK(A, B):
+def optic_flow_LK_jrk(A, B, window_size=3, threshold=500.0):
     """Compute optic flow using the Lucas-Kanade method.
 
     Parameters
@@ -26,8 +27,125 @@ def optic_flow_LK(A, B):
         V: raw displacement (in pixels) along Y-axis, same size and type as U
     """
 
-    # TODO: Your code here
+    # TODO: Your code here        
+    # Take the difference of A and B
+    # This is the time derivative    
+    It = A - B  
+    
+    # Compute the gradients
+    # Since we assume the motion is so small, can just assume A and B are
+    # basically the same
+    Ix = cv2.Sobel( A, cv2.CV_64F, 1, 0 )
+    Iy = cv2.Sobel( A, cv2.CV_64F, 0, 1 )          
+    
+    # Run Gaussian or uniform smoothing
+    Ixx_blur = cv2.blur( Ix*Ix, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
+    Iyy_blur = cv2.blur( Iy*Iy, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
+    Ixy_blur = cv2.blur( Iy*Iy, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
+    Ixt_blur = cv2.blur( Ix*It, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
+    Iyt_blur = cv2.blur( Iy*It, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
+    
+    U = np.zeros( A.shape, dtype=np.float_ )
+    V = np.zeros( A.shape, dtype=np.float_ )
+    # Now we have all the derivatives we need
+    # Build the linear system to solve using least squares 
+    # Loop over all the pixels
+    for i in range( A.shape[0] ):
+        for j in range( A.shape[1] ):
+            matA = np.array( [ [Ixx_blur[i,j], Ixy_blur[i,j] ],
+                               [Ixy_blur[i,j], Iyy_blur[i,j] ] ])
+            vecB = np.array([ [ -1.0*Ixt_blur[i,j] ],
+                              [ -1.0*Iyt_blur[i,j] ] ])   
+                                                  
+            x, error, rank, s = np.linalg.lstsq( matA, vecB )
+            
+            # threshold
+            if abs(x[0,0]) > threshold:
+                x[0,0] = 0.0
+            if abs(x[1,0]) > threshold:
+                x[1,0] = 0.0 
+                                           
+            U[i,j] = x[0,0]
+            V[i,j] = x[1,0]
+            # Otherwise, just leave the position as zero
+            #end if
+            
+        #end for
+    #end for    
+    
     return U, V
+
+def optic_flow_LK(A, B, window_size=3):
+    """Compute optic flow using the Lucas-Kanade method.
+
+    Parameters
+    ----------
+        A: grayscale floating-point image, values in [0.0, 1.0]
+        B: grayscale floating-point image, values in [0.0, 1.0]
+
+    Returns
+    -------
+        U: raw displacement (in pixels) along X-axis, same size as image, floating-point type
+        V: raw displacement (in pixels) along Y-axis, same size and type as U
+    """
+
+    # TODO: Your code here        
+    # Take the difference of A and B
+    # This is the time derivative    
+    It = A - B  
+    
+    A_copy = cv2.copyMakeBorder( A, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)
+    
+    # Compute the gradients
+    # Since we assume the motion is so small, can just assume A and B are
+    # basically the same
+    Ix = cv2.Sobel( A, cv2.CV_64F, 1, 0 )
+    Iy = cv2.Sobel( A, cv2.CV_64F, 0, 1 )          
+    
+    # Run Gaussian or uniform smoothing
+    Ixx_blur = cv2.blur( Ix*Ix, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
+    Iyy_blur = cv2.blur( Iy*Iy, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
+    Ixy_blur = cv2.blur( Iy*Iy, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
+    Ixt_blur = cv2.blur( Ix*It, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
+    Iyt_blur = cv2.blur( Iy*It, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
+    
+    Ixx_blur = cv2.copyMakeBorder( Ixx_blur, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)
+    Iyy_blur = cv2.copyMakeBorder( Iyy_blur, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)
+    Ixy_blur = cv2.copyMakeBorder( Ixy_blur, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)
+    Ixt_blur = cv2.copyMakeBorder( Ixt_blur, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)
+    Iyt_blur = cv2.copyMakeBorder( Iyt_blur, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)
+    
+    U = np.zeros( A.shape, dtype=np.float_ )
+    V = np.zeros( A.shape, dtype=np.float_ )
+    # Now we have all the derivatives we need
+    # Build the linear system to solve using least squares 
+    # Loop over all the pixels
+    for i in range( A.shape[0] ):
+        for j in range( A.shape[1] ):
+            # For each pixel, create an overconstrained set of equations from the points surrounding
+            # the given pixel
+            matA = np.zeros( (window_size**2, 2) )
+            vecB = np.zeros( (window_size**2, 1) )
+            for ii in range( 0, 2*window_size, 2 ):
+                for jj in range( 0, 2*window_size, 2 ):
+                    matA[ii:ii+2, : ] = np.array( [ [Ixx_blur[i+ii,j+jj], Ixy_blur[i+ii,j+jj] ],
+                                                    [Ixy_blur[i+ii,j+jj], Iyy_blur[i+ii,j+jj] ] ])
+                    
+                    vecB[ii:ii+2, :] = np.array([ [ -1.0*Ixt_blur[i+ii,j+jj] ],
+                                                  [ -1.0*Iyt_blur[i+ii,j+jj] ] ])
+                    
+                #end for
+            #end for                   
+                              
+            x, error, rank, s = np.linalg.lstsq( matA, vecB )
+                       
+            U[i,j] = x[0,0]
+            V[i,j] = x[1,0]
+        #end for
+    #end for    
+    
+    return U, V
+
 
 def generatingKernel(parameter):
   """ Return a 5x5 generating kernel based on an input parameter.
@@ -203,6 +321,42 @@ def hierarchical_LK(A, B):
 
     # TODO: Your code here
     return U, V
+    
+def make_image_pair(image1, image2):
+    """Adjoin two images side-by-side to make a single new image.
+
+    Parameters
+    ----------
+        image1: first image, could be grayscale or color (BGR)
+        image2: second image, same type as first
+
+    Returns
+    -------
+        image_pair: combination of both images, side-by-side, same type
+    """
+
+    # TODO: Your code here
+    # Determine if the input images are grayscale or color
+    r = np.maximum( image1.shape[0], image2.shape[0] )
+    c = image1.shape[1] + image2.shape[1]
+    image_pair = []
+    
+    if len(image1.shape) == 3:
+        # Make image_pair of appropriate size
+        image_pair = np.zeros( (r,c,3) )
+        image_pair[0:image1.shape[0],0:image1.shape[1],:] = image1[:,:,:]
+        image_pair[0:image2.shape[0],image1.shape[1]:c,:] = image2[:,:,:]
+    else:
+        image_pair = np.zeros( (r,c) )
+        image_pair[ 0:image1.shape[0], 0:image1.shape[1] ] = image1[:,:]
+        image_pair[ 0:image2.shape[0], image1.shape[1]:c ] = image2[:,:] 
+    #end if  
+    return image_pair
+    
+def norm( img ):
+    normed = 0
+    normed = cv2.normalize( img, normed, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1)
+    return normed
 
 
 # Driver code
@@ -213,14 +367,42 @@ def main():
     Shift0 = cv2.imread(os.path.join(input_dir, 'TestSeq', 'Shift0.png'), 0) / 255.0
     ShiftR2 = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR2.png'), 0) / 255.0
     # TODO: Optionally, smooth the images if LK doesn't work well on raw images
+    Shift0 = cv2.GaussianBlur( Shift0, (35,35), 15, borderType=cv2.BORDER_REFLECT)
+    ShiftR2 = cv2.GaussianBlur( ShiftR2, (35,35), 15, borderType=cv2.BORDER_REFLECT)
+    
     U, V = optic_flow_LK(Shift0, ShiftR2)  # TODO: implement this
+    print np.max( U )
+    print np.min( U )
+
+    U_norm = norm(U)
+    V_norm = norm(V)
+    
+    U_colormap = cv2.applyColorMap( U_norm, cv2.COLORMAP_JET)
+    V_colormap = cv2.applyColorMap( V_norm, cv2.COLORMAP_JET)
+    
     # TODO: Save U, V as side-by-side false-color image or single quiver plot
+    UV_pair = make_image_pair(U_colormap, V_colormap)    
+    cv2.imwrite( os.path.join(output_dir, 'ps6-1-a-1.png'), UV_pair)
+    
+    # Try quiver
+    stride = 25
+    scale = 2
+    color = (0,255,0)
+    img_out = np.zeros( (V.shape[0], U.shape[1], 3), dtype=np.uint8)
+    for y in xrange(0, V.shape[0], stride):
+        for x in xrange(0, U.shape[1], stride):
+            cv2.line( img_out, (x,y), (x+int(U[y,x]*scale), y+int(V[y,x]*scale)), color, 1)
+        #end for
+    #end for
+    
+    cv2.imwrite( os.path.join(output_dir, 'quiver.png'), img_out )
+           
 
     # TODO: Similarly for Shift0 and ShiftR5U5
 
     # 1b
     # TODO: Similarly for ShiftR10, ShiftR20 and ShiftR40
-
+    '''
     # 2a
     yos_img_01 = cv2.imread(os.path.join(input_dir, 'DataSeq1', 'yos_img_01.jpg'), 0) / 255.0
     yos_img_01_g_pyr = gaussian_pyramid(yos_img_01, 4)  # TODO: implement this
@@ -265,7 +447,7 @@ def main():
 
     # 4c
     # TODO: Repeat for DataSeq1 (use 0.png as the original)    
-
+    '''
 
 if __name__ == "__main__":
     main()

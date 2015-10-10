@@ -87,7 +87,7 @@ def findMatchesBetweenImages(image_1, image_2):
   # WRITE YOUR CODE HERE.
   # Using SIFT was causing problems, so use ORB instead
   sift = cv2.ORB()
-  
+
   # Use SIFT to generate keypoints and descriptors
   image_1_kp, image_1_desc = sift.detectAndCompute( image_1, None )
   image_2_kp, image_2_desc = sift.detectAndCompute( image_2, None )
