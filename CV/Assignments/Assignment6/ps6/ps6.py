@@ -13,7 +13,7 @@ output_dir = "output"
 
 
 # Assignment code
-def optic_flow_LK_jrk(A, B, window_size=3, threshold=500.0):
+def optic_flow_LK(A, B, window_size=9):
     """Compute optic flow using the Lucas-Kanade method.
 
     Parameters
@@ -41,7 +41,7 @@ def optic_flow_LK_jrk(A, B, window_size=3, threshold=500.0):
     # Run Gaussian or uniform smoothing
     Ixx_blur = cv2.blur( Ix*Ix, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
     Iyy_blur = cv2.blur( Iy*Iy, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
-    Ixy_blur = cv2.blur( Iy*Iy, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
+    Ixy_blur = cv2.blur( Ix*Iy, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
     Ixt_blur = cv2.blur( Ix*It, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
     Iyt_blur = cv2.blur( Iy*It, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
     
@@ -54,28 +54,20 @@ def optic_flow_LK_jrk(A, B, window_size=3, threshold=500.0):
         for j in range( A.shape[1] ):
             matA = np.array( [ [Ixx_blur[i,j], Ixy_blur[i,j] ],
                                [Ixy_blur[i,j], Iyy_blur[i,j] ] ])
-            vecB = np.array([ [ -1.0*Ixt_blur[i,j] ],
-                              [ -1.0*Iyt_blur[i,j] ] ])   
+            vecB = np.array([ [ 1.0*Ixt_blur[i,j] ],
+                              [ 1.0*Iyt_blur[i,j] ] ])   
                                                   
             x, error, rank, s = np.linalg.lstsq( matA, vecB )
-            
-            # threshold
-            if abs(x[0,0]) > threshold:
-                x[0,0] = 0.0
-            if abs(x[1,0]) > threshold:
-                x[1,0] = 0.0 
                                            
             U[i,j] = x[0,0]
             V[i,j] = x[1,0]
-            # Otherwise, just leave the position as zero
-            #end if
-            
+                        
         #end for
     #end for    
     
     return U, V
 
-def optic_flow_LK(A, B, window_size=3):
+def optic_flow_LK_jrk(A, B, window_size=3):
     """Compute optic flow using the Lucas-Kanade method.
 
     Parameters
@@ -94,26 +86,15 @@ def optic_flow_LK(A, B, window_size=3):
     # This is the time derivative    
     It = A - B  
     
-    A_copy = cv2.copyMakeBorder( A, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)
+    It = cv2.copyMakeBorder( It, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)
     
     # Compute the gradients
     # Since we assume the motion is so small, can just assume A and B are
     # basically the same
     Ix = cv2.Sobel( A, cv2.CV_64F, 1, 0 )
-    Iy = cv2.Sobel( A, cv2.CV_64F, 0, 1 )          
-    
-    # Run Gaussian or uniform smoothing
-    Ixx_blur = cv2.blur( Ix*Ix, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
-    Iyy_blur = cv2.blur( Iy*Iy, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
-    Ixy_blur = cv2.blur( Iy*Iy, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
-    Ixt_blur = cv2.blur( Ix*It, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
-    Iyt_blur = cv2.blur( Iy*It, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
-    
-    Ixx_blur = cv2.copyMakeBorder( Ixx_blur, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)
-    Iyy_blur = cv2.copyMakeBorder( Iyy_blur, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)
-    Ixy_blur = cv2.copyMakeBorder( Ixy_blur, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)
-    Ixt_blur = cv2.copyMakeBorder( Ixt_blur, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)
-    Iyt_blur = cv2.copyMakeBorder( Iyt_blur, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)
+    Iy = cv2.Sobel( A, cv2.CV_64F, 0, 1 )  
+    Ix = cv2.copyMakeBorder( Ix, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)
+    Iy = cv2.copyMakeBorder( Iy, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)        
     
     U = np.zeros( A.shape, dtype=np.float_ )
     V = np.zeros( A.shape, dtype=np.float_ )
@@ -126,15 +107,14 @@ def optic_flow_LK(A, B, window_size=3):
             # the given pixel
             matA = np.zeros( (window_size**2, 2) )
             vecB = np.zeros( (window_size**2, 1) )
-            for ii in range( 0, 2*window_size, 2 ):
-                for jj in range( 0, 2*window_size, 2 ):
-                    matA[ii:ii+2, : ] = np.array( [ [Ixx_blur[i+ii,j+jj], Ixy_blur[i+ii,j+jj] ],
-                                                    [Ixy_blur[i+ii,j+jj], Iyy_blur[i+ii,j+jj] ] ])
+            index = 0
+            for ii in range( window_size ):
+                for jj in range( window_size):
+                    matA[index, :] = np.array([ [Ix[i+ii,j+jj], Iy[i+ii,j+jj]] ] )
                     
-                    vecB[ii:ii+2, :] = np.array([ [ -1.0*Ixt_blur[i+ii,j+jj] ],
-                                                  [ -1.0*Iyt_blur[i+ii,j+jj] ] ])
+                    vecB[index, :] = np.array([ [ -1.0*It[i+ii,j+jj] ] ] ) 
                     
-                #end for
+                    index += 1                   
             #end for                   
                               
             x, error, rank, s = np.linalg.lstsq( matA, vecB )
@@ -208,7 +188,7 @@ def gaussian_pyramid(image, levels):
     img_reduced = image
   
     # For each of the levels
-    for i in range( levels ):
+    for i in range( levels-1 ):
       # Reduce the image
       img_reduced = reduce(img_reduced)
     
@@ -248,7 +228,7 @@ def expand(image):
     
 
 
-def laplacian_pyramid(g_pyr):
+def laplacian_pyramid(gaussPyr):
     """Create a Laplacian pyramid from a given Gaussian pyramid.
 
     Parameters
@@ -322,6 +302,8 @@ def hierarchical_LK(A, B):
     # TODO: Your code here
     return U, V
     
+#def problem1( img1, img2, filename )
+    
 def make_image_pair(image1, image2):
     """Adjoin two images side-by-side to make a single new image.
 
@@ -358,25 +340,55 @@ def norm( img ):
     normed = cv2.normalize( img, normed, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1)
     return normed
 
+def quiver_img( U, V, stride, scale ):
+    img_out = np.zeros( (V.shape[0], U.shape[1], 3), dtype=np.uint8)
+    color = (0,255,0)
+    for y in xrange(0, V.shape[0], stride):
+        for x in xrange(0, U.shape[1], stride):
+            cv2.arrowedLine( img_out, (x,y), (x+int(U[y,x]*scale), y+int(V[y,x]*scale)), color, 1, tipLength=0.5)
+        #end for
+    #end for    
+    return img_out
+
+def createPyrImg( gaussPyr ):
+    # The gaussian pyramid is arranged with the biggest array at the bottom (index 0) of the pyramid
+    # The number of rows in the output image is the number of rows in the bottom image
+    rows = gaussPyr[0].shape[0]
+    # The number of columns is the sum of all the widths of the images
+    columns = 0
+    for i in range( len(gaussPyr) ):
+        columns += gaussPyr[i].shape[1]
+    #end for
+    
+    # Create the empty output image
+    img_out = np.zeros( (rows, columns) )
+    
+    col = 0
+    for i in range( len(gaussPyr) ):
+        level = gaussPyr[i]
+        img_out[ 0:level.shape[0], col:col+level.shape[1] ] = level[:,:]
+        col += level.shape[1]     
+    #end for
+    
+    return img_out
 
 # Driver code
 def main():
     # Note: Comment out parts of this code as necessary
 
     # 1a
-    Shift0 = cv2.imread(os.path.join(input_dir, 'TestSeq', 'Shift0.png'), 0) / 255.0
-    ShiftR2 = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR2.png'), 0) / 255.0
+    Shift0    = cv2.imread(os.path.join(input_dir, 'TestSeq', 'Shift0.png'), 0) / 255.0
+    ShiftR2   = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR2.png'), 0) / 255.0
+    ShiftR5U5 = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR5U5.png'), 0) /255.0
     # TODO: Optionally, smooth the images if LK doesn't work well on raw images
-    Shift0 = cv2.GaussianBlur( Shift0, (35,35), 15, borderType=cv2.BORDER_REFLECT)
-    ShiftR2 = cv2.GaussianBlur( ShiftR2, (35,35), 15, borderType=cv2.BORDER_REFLECT)
+    Shift0 = cv2.GaussianBlur( Shift0, (25,25), 15, borderType=cv2.BORDER_REFLECT)
+    ShiftR2 = cv2.GaussianBlur( ShiftR2, (25,25), 15, borderType=cv2.BORDER_REFLECT)
+    ShiftR5U5 = cv2.GaussianBlur( ShiftR5U5, (25,25), 15, borderType=cv2.BORDER_REFLECT)
     
-    U, V = optic_flow_LK(Shift0, ShiftR2)  # TODO: implement this
-    print np.max( U )
-    print np.min( U )
+    U, V = optic_flow_LK(Shift0, ShiftR2, 21)  # TODO: implement this
 
     U_norm = norm(U)
-    V_norm = norm(V)
-    
+    V_norm = norm(V)    
     U_colormap = cv2.applyColorMap( U_norm, cv2.COLORMAP_JET)
     V_colormap = cv2.applyColorMap( V_norm, cv2.COLORMAP_JET)
     
@@ -384,34 +396,81 @@ def main():
     UV_pair = make_image_pair(U_colormap, V_colormap)    
     cv2.imwrite( os.path.join(output_dir, 'ps6-1-a-1.png'), UV_pair)
     
-    # Try quiver
-    stride = 25
-    scale = 2
-    color = (0,255,0)
-    img_out = np.zeros( (V.shape[0], U.shape[1], 3), dtype=np.uint8)
-    for y in xrange(0, V.shape[0], stride):
-        for x in xrange(0, U.shape[1], stride):
-            cv2.line( img_out, (x,y), (x+int(U[y,x]*scale), y+int(V[y,x]*scale)), color, 1)
-        #end for
-    #end for
-    
-    cv2.imwrite( os.path.join(output_dir, 'quiver.png'), img_out )
-           
+    img_quiver = quiver_img( U, V, 10, 20)    
+    cv2.imwrite( os.path.join(output_dir, 'quiver_1-a-1.png'), img_quiver )
 
     # TODO: Similarly for Shift0 and ShiftR5U5
+    U, V = optic_flow_LK(Shift0, ShiftR5U5,61)
+    U_norm = norm(U)
+    V_norm = norm(V)
+    U_colormap = cv2.applyColorMap( U_norm, cv2.COLORMAP_JET)
+    V_colormap = cv2.applyColorMap( V_norm, cv2.COLORMAP_JET)
+    UV_pair = make_image_pair( U_colormap, V_colormap)
+    cv2.imwrite( os.path.join(output_dir, 'ps6-1-a-2.png'), UV_pair)
+    img_quiver = quiver_img( U, V, 10, 10)
+    cv2.imwrite( os.path.join(output_dir, 'quiver_1-a-2.png'), img_quiver)
 
+    #**********************
     # 1b
     # TODO: Similarly for ShiftR10, ShiftR20 and ShiftR40
-    '''
+    ShiftR10 = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR10.png'), 0)/255.0
+    ShiftR20 = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR20.png'), 0)/255.0
+    ShiftR40 = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR40.png'), 0)/255.0
+    
+    ShiftR10 = cv2.GaussianBlur( ShiftR10, (25,25), 15, borderType=cv2.BORDER_REFLECT)
+    ShiftR20 = cv2.GaussianBlur( ShiftR20, (25,25), 15, borderType=cv2.BORDER_REFLECT)
+    ShiftR40 = cv2.GaussianBlur( ShiftR40, (25,25), 15, borderType=cv2.BORDER_REFLECT)
+    
+    # 10
+    U, V = optic_flow_LK(Shift0, ShiftR10,61)
+    U_norm = norm(U)
+    V_norm = norm(V)
+    U_colormap = cv2.applyColorMap( U_norm, cv2.COLORMAP_JET)
+    V_colormap = cv2.applyColorMap( V_norm, cv2.COLORMAP_JET)
+    UV_pair = make_image_pair( U_colormap, V_colormap)
+    cv2.imwrite( os.path.join(output_dir, 'ps6-1-b-1.png'), UV_pair)
+    img_quiver = quiver_img( U, V, 10, 10)
+    cv2.imwrite( os.path.join(output_dir, 'quiver_1-b-1.png'), img_quiver)
+    
+    # 20
+    U, V = optic_flow_LK(Shift0, ShiftR20,61)
+    U_norm = norm(U)
+    V_norm = norm(V)
+    U_colormap = cv2.applyColorMap( U_norm, cv2.COLORMAP_JET)
+    V_colormap = cv2.applyColorMap( V_norm, cv2.COLORMAP_JET)
+    UV_pair = make_image_pair( U_colormap, V_colormap)
+    cv2.imwrite( os.path.join(output_dir, 'ps6-1-b-2.png'), UV_pair)
+    img_quiver = quiver_img( U, V, 10, 10)
+    cv2.imwrite( os.path.join(output_dir, 'quiver_1-b-2.png'), img_quiver)
+    
+    # 40
+    U, V = optic_flow_LK(Shift0, ShiftR40,71)
+    U_norm = norm(U)
+    V_norm = norm(V)
+    U_colormap = cv2.applyColorMap( U_norm, cv2.COLORMAP_JET)
+    V_colormap = cv2.applyColorMap( V_norm, cv2.COLORMAP_JET)
+    UV_pair = make_image_pair( U_colormap, V_colormap)
+    cv2.imwrite( os.path.join(output_dir, 'ps6-1-b-3.png'), UV_pair)
+    img_quiver = quiver_img( U, V, 10, 10)
+    cv2.imwrite( os.path.join(output_dir, 'quiver_1-b-3.png'), img_quiver)
+    
+    
+    #***************************************************************************
     # 2a
     yos_img_01 = cv2.imread(os.path.join(input_dir, 'DataSeq1', 'yos_img_01.jpg'), 0) / 255.0
     yos_img_01_g_pyr = gaussian_pyramid(yos_img_01, 4)  # TODO: implement this
     # TODO: Save pyramid images as a single side-by-side image (write a utility function?)
-
+    gaussPyr_img =  norm( createPyrImg( yos_img_01_g_pyr ) )
+    cv2.imwrite( os.path.join(output_dir, 'ps6-2-a-1.png'), gaussPyr_img )
+    
+    #******************************
     # 2b
     yos_img_01_l_pyr = laplacian_pyramid(yos_img_01_g_pyr)  # TODO: implement this
     # TODO: Save pyramid images as a single side-by-side image
+    laplPyr_img = norm( createPyrImg( yos_img_01_l_pyr ) )
+    cv2.imwrite( os.path.join(output_dir, 'ps6-2-b-1.png'), laplPyr_img )
 
+    
     # 3a
     yos_img_02 = cv2.imread(os.path.join(input_dir, 'DataSeq1', 'yos_img_02.jpg'), 0) / 255.0
     yos_img_02_g_pyr = gaussian_pyramid(yos_img_02, 4)
@@ -427,7 +486,9 @@ def main():
     # Similarly, you can compute displacements for yos_img_02 and yos_img_03 (but no need to save images)
 
     # TODO: Repeat for DataSeq2 (save images)
-
+    
+    
+    '''
     # 4a
     ShiftR10 = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR10.png'), 0) / 255.0
     ShiftR20 = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR20.png'), 0) / 255.0
