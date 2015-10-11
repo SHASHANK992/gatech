@@ -36,7 +36,9 @@ def optic_flow_LK(A, B, window_size=9):
     # Since we assume the motion is so small, can just assume A and B are
     # basically the same
     Ix = cv2.Sobel( A, cv2.CV_64F, 1, 0 )
-    Iy = cv2.Sobel( A, cv2.CV_64F, 0, 1 )          
+    Iy = cv2.Sobel( A, cv2.CV_64F, 0, 1 )
+    #Ix = cv2.normalize( Ix, Ix, -1.0, 1.0, cv2.NORM_MINMAX, cv2.CV_64F)
+    #Iy = cv2.normalize( Iy, Iy, -1.0, 1.0, cv2.NORM_MINMAX, cv2.CV_64F)
     
     # Run Gaussian or uniform smoothing
     Ixx_blur = cv2.blur( Ix*Ix, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
@@ -268,7 +270,7 @@ def laplacian_pyramid(gaussPyr):
     return output
 
 
-def warp(image, U, V):
+def warp(image, U, V, scale=10):
     """Warp image using X and Y displacements (U and V).
 
     Parameters
@@ -278,10 +280,34 @@ def warp(image, U, V):
     Returns
     -------
         warped: warped image, such that warped[y, x] = image[y + V[y, x], x + U[y, x]]
+        
+    Note
+    ----
+    Like many in the forums are experiencing, I think the input U and V need to be scaled
+    by a certain factor. I will assume that the inputs are the raw values and that the
+    scale input variable can be used if needed
 
     """
 
     # TODO: Your code here
+    U_warp = scale*U
+    U_warp = U_warp.astype(int)
+    V_warp = scale*V
+    V_warp = V_warp.astype(int)
+    
+    img_border = cv2.copyMakeBorder( image, scale, scale, scale, scale, cv2.BORDER_REFLECT)
+    
+    print img_border.shape
+    print U.shape
+    print V.shape
+    
+    warped = np.zeros(image.shape)
+    for y in range(image.shape[0]):
+        for x in range(image.shape[1]):
+            warped[y, x] = img_border[y + V_warp[y,x]+scale, x + U_warp[y,x]+scale]
+        #endfor
+    #endfor
+        
     return warped
 
 
@@ -371,11 +397,21 @@ def createPyrImg( gaussPyr ):
     #end for
     
     return img_out
+    
+def colorAndQuiver( U, V, stride, scale, filename ):
+    U_norm = norm(U)
+    V_norm = norm(V)
+    U_colormap = cv2.applyColorMap( U_norm, cv2.COLORMAP_JET)
+    V_colormap = cv2.applyColorMap( V_norm, cv2.COLORMAP_JET)
+    UV_pair = make_image_pair( U_colormap, V_colormap)
+    cv2.imwrite( os.path.join(output_dir, filename), UV_pair)
+    img_quiver = quiver_img( U, V, stride, scale)
+    cv2.imwrite( os.path.join(output_dir, 'quiver_' + filename), img_quiver)
 
 # Driver code
 def main():
     # Note: Comment out parts of this code as necessary
-
+    
     # 1a
     Shift0    = cv2.imread(os.path.join(input_dir, 'TestSeq', 'Shift0.png'), 0) / 255.0
     ShiftR2   = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR2.png'), 0) / 255.0
@@ -386,29 +422,16 @@ def main():
     ShiftR5U5 = cv2.GaussianBlur( ShiftR5U5, (25,25), 15, borderType=cv2.BORDER_REFLECT)
     
     U, V = optic_flow_LK(Shift0, ShiftR2, 21)  # TODO: implement this
-
-    U_norm = norm(U)
-    V_norm = norm(V)    
-    U_colormap = cv2.applyColorMap( U_norm, cv2.COLORMAP_JET)
-    V_colormap = cv2.applyColorMap( V_norm, cv2.COLORMAP_JET)
-    
-    # TODO: Save U, V as side-by-side false-color image or single quiver plot
-    UV_pair = make_image_pair(U_colormap, V_colormap)    
-    cv2.imwrite( os.path.join(output_dir, 'ps6-1-a-1.png'), UV_pair)
-    
-    img_quiver = quiver_img( U, V, 10, 20)    
-    cv2.imwrite( os.path.join(output_dir, 'quiver_1-a-1.png'), img_quiver )
+    print np.max(U), np.min(U)
+    colorAndQuiver( U, V, 10, 20, 'ps6-1-a-1.png')
+    # Warp R2 back to R0
+    ShiftR2_warped = warp( ShiftR2, U, V )
+    ShiftR2_warped = norm( ShiftR2_warped)
+    cv2.imwrite( os.path.join(output_dir, 'warp.png'), ShiftR2_warped)
 
     # TODO: Similarly for Shift0 and ShiftR5U5
     U, V = optic_flow_LK(Shift0, ShiftR5U5,61)
-    U_norm = norm(U)
-    V_norm = norm(V)
-    U_colormap = cv2.applyColorMap( U_norm, cv2.COLORMAP_JET)
-    V_colormap = cv2.applyColorMap( V_norm, cv2.COLORMAP_JET)
-    UV_pair = make_image_pair( U_colormap, V_colormap)
-    cv2.imwrite( os.path.join(output_dir, 'ps6-1-a-2.png'), UV_pair)
-    img_quiver = quiver_img( U, V, 10, 10)
-    cv2.imwrite( os.path.join(output_dir, 'quiver_1-a-2.png'), img_quiver)
+    colorAndQuiver( U, V, 10, 10, 'ps6-1-a-2.png')
 
     #**********************
     # 1b
@@ -423,36 +446,15 @@ def main():
     
     # 10
     U, V = optic_flow_LK(Shift0, ShiftR10,61)
-    U_norm = norm(U)
-    V_norm = norm(V)
-    U_colormap = cv2.applyColorMap( U_norm, cv2.COLORMAP_JET)
-    V_colormap = cv2.applyColorMap( V_norm, cv2.COLORMAP_JET)
-    UV_pair = make_image_pair( U_colormap, V_colormap)
-    cv2.imwrite( os.path.join(output_dir, 'ps6-1-b-1.png'), UV_pair)
-    img_quiver = quiver_img( U, V, 10, 10)
-    cv2.imwrite( os.path.join(output_dir, 'quiver_1-b-1.png'), img_quiver)
+    colorAndQuiver( U, V, 10, 10, 'ps6-1-b-1.png')
     
     # 20
     U, V = optic_flow_LK(Shift0, ShiftR20,61)
-    U_norm = norm(U)
-    V_norm = norm(V)
-    U_colormap = cv2.applyColorMap( U_norm, cv2.COLORMAP_JET)
-    V_colormap = cv2.applyColorMap( V_norm, cv2.COLORMAP_JET)
-    UV_pair = make_image_pair( U_colormap, V_colormap)
-    cv2.imwrite( os.path.join(output_dir, 'ps6-1-b-2.png'), UV_pair)
-    img_quiver = quiver_img( U, V, 10, 10)
-    cv2.imwrite( os.path.join(output_dir, 'quiver_1-b-2.png'), img_quiver)
+    colorAndQuiver( U, V, 10, 10, 'ps6-1-b-2.png')
     
     # 40
     U, V = optic_flow_LK(Shift0, ShiftR40,71)
-    U_norm = norm(U)
-    V_norm = norm(V)
-    U_colormap = cv2.applyColorMap( U_norm, cv2.COLORMAP_JET)
-    V_colormap = cv2.applyColorMap( V_norm, cv2.COLORMAP_JET)
-    UV_pair = make_image_pair( U_colormap, V_colormap)
-    cv2.imwrite( os.path.join(output_dir, 'ps6-1-b-3.png'), UV_pair)
-    img_quiver = quiver_img( U, V, 10, 10)
-    cv2.imwrite( os.path.join(output_dir, 'quiver_1-b-3.png'), img_quiver)
+    colorAndQuiver( U, V, 10, 10, 'ps6-1-b-3.png')
     
     
     #***************************************************************************
@@ -469,23 +471,37 @@ def main():
     # TODO: Save pyramid images as a single side-by-side image
     laplPyr_img = norm( createPyrImg( yos_img_01_l_pyr ) )
     cv2.imwrite( os.path.join(output_dir, 'ps6-2-b-1.png'), laplPyr_img )
-
     
+    #*******************************************************************************
     # 3a
     yos_img_02 = cv2.imread(os.path.join(input_dir, 'DataSeq1', 'yos_img_02.jpg'), 0) / 255.0
     yos_img_02_g_pyr = gaussian_pyramid(yos_img_02, 4)
     # TODO: Select appropriate pyramid *level* that leads to best optic flow estimation
-    U, V = optic_flow_LK(yos_img_01_l_pyr[level], yos_img_02_g_pyr[level])
+    level = 1
+    U, V = optic_flow_LK(yos_img_01_g_pyr[level], yos_img_02_g_pyr[level], 31)
     # TODO: Scale up U, V to original image size (note: don't forget to scale values as well!)
+    U_ex = U
+    V_ex = V
+    for i in range(level):
+        U_ex = expand(U_ex)
+        V_ex = expand(V_ex)
+        # I might need to multiply values here?
+    #end for
     # TODO: Save U, V as side-by-side false-color image or single quiver plot
+    colorAndQuiver( U_ex, V_ex, 10, 40, 'ps6-3-a-1.png')  
+    print np.max(U_ex), np.min(U_ex)
+    print np.max(V_ex), np.min(V_ex) 
 
-    yos_img_02_warped = warp(yos_img_02, U, V)  # TODO: implement this
+    # Warp img 02 back to img 01
+    yos_img_02_warped = warp(yos_img_02, U_ex, V_ex)  # TODO: implement this
     # TODO: Save difference image between yos_img_02_warped and original yos_img_01
     # Note: Scale values such that zero difference maps to neutral gray, max -ve to black and max +ve to white
 
     # Similarly, you can compute displacements for yos_img_02 and yos_img_03 (but no need to save images)
 
     # TODO: Repeat for DataSeq2 (save images)
+
+    
     
     
     '''
