@@ -270,7 +270,7 @@ def laplacian_pyramid(gaussPyr):
     return output
 
 
-def warp(image, U, V, scale=10):
+def warp(image, U, V, scale=5):
     """Warp image using X and Y displacements (U and V).
 
     Parameters
@@ -290,10 +290,18 @@ def warp(image, U, V, scale=10):
     """
 
     # TODO: Your code here
+    # If we have an estimate of the pixel motion, scale the input
+    # accordingly
+    U_warp = 0
+    V_warp = 0
+    U_warp = cv2.normalize( U, U_warp, 0, scale, cv2.NORM_MINMAX, cv2.CV_8UC1)
+    V_warp = cv2.normalize( U, V_warp, 0, scale, cv2.NORM_MINMAX, cv2.CV_8UC1)
+    '''
     U_warp = scale*U
     U_warp = U_warp.astype(int)
     V_warp = scale*V
     V_warp = V_warp.astype(int)
+    '''
     
     img_border = cv2.copyMakeBorder( image, scale, scale, scale, scale, cv2.BORDER_REFLECT)
     
@@ -311,7 +319,7 @@ def warp(image, U, V, scale=10):
     return warped
 
 
-def hierarchical_LK(A, B):
+def hierarchical_LK(A, B, displacement=2):
     """Compute optic flow using the Hierarchical Lucas-Kanade method.
 
     Parameters
@@ -326,6 +334,37 @@ def hierarchical_LK(A, B):
     """
 
     # TODO: Your code here
+    N = int( np.log(displacement) )
+    k = N
+    A_k = reduce(A)
+    B_k = reduce(B)
+    
+    U = np.zeros( A_k.shape )
+    V = np.zeros( A_k.shape )
+    
+    iteration = 0
+    while k > 0:
+        # If this is not the first time, expand U and V
+        if iteration != 0:
+            U = 2*expand(U)
+            V = 2*expand(V)
+        #endif
+        
+        # Warp B_k using U
+        C_k = warp(B_k, U)
+        
+        # Compute incremental flow field
+        D_x, D_y = optic_flow_LK(A_k, C_k)
+        
+        # Add to original flow
+        U = U + D_x
+        V = V + D_y
+        
+        # Decrement k
+        k -= 1
+        iteration += 1
+    #end while
+        
     return U, V
     
 #def problem1( img1, img2, filename )
