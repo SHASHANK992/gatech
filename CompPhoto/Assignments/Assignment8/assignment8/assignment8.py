@@ -220,11 +220,19 @@ def blendImagePair(warped_image, image_2, point):
     """
     output_image = np.copy(warped_image)
     # REPLACE THIS WITH YOUR BLENDING CODE.
+    '''
+    #Instructor provided
     output_image[point[1]:point[1] + image_2.shape[0],
                  point[0]:point[0] + image_2.shape[1]] = image_2
-
-
-
+    '''
+    # Find the points along the intersection of the two images
+    intersect_l = warped_image[point[1]:point[1]+image_2.shape[0], point[0]]
+    intersect_r = image_2[:,0]
+    
+    intersect = 0.5*intersect_l + 0.5*intersect_r
+    
+    output_image[point[1]:point[1] + image_2.shape[0], point[0]] = intersect
+    output_image[point[1]:point[1]+image_2.shape[0], point[0]+1:point[0]+image_2.shape[1]+1] = image_2[:,1:]
 
     return output_image
     # END OF FUNCTION
@@ -295,22 +303,11 @@ def warpImagePair(image_1, image_2, homography):
     image_2_corners = getImageCorners(image_2)
     h = homography
     # Use homography to transform the corners of image 1
-    # I think I need to use homogeneous coordinates
-    '''img1_corners_h = np.zeros( (4, 3) )
-    for i in range(4):
-        x = image_1_corners[i,:,0]
-        y = image_1_corners[i,:,1]
-        img1_corners_h[i,:] = np.array([ [x, y, 1] ])
-    #end for
-    
-    img1_trans_h = np.dot( img1_corners_h, homography )
-    
-    for i in range(4):
-        x = img1_trans_h[i,0]
-        y = img1_trans_h[i,1]
-        w = img1_trans_h[i,2]
-        image_1_corners[i,:,:] = np.array([ [ x/w, y/w ] ])
-    #end for    
+    # Use homogeneous coordinates
+    ''' Reasoning
+    (h0,h1,h2)    (x)   (h0*x + h1*y + h2)   (tx)   
+    (h3,h4,h5)  * (y) = (h3*x + h4*y + h5) = (ty) 
+    (h6,h7,h8)    (1)   (h6*x + h7*y + h8)   (tz)
     '''
     for i in range(4):
         x = image_1_corners[i,0,0]
@@ -321,9 +318,7 @@ def warpImagePair(image_1, image_2, homography):
         py = int( (h[1,0]*x + h[1,1]*y + h[1,2])*z )
         
         image_1_corners[i,:,:] = np.array([[px, py]])
-        
-    
-    print image_1_corners
+    #end for
     
     image_corners = np.zeros( (8, 1, 2) )
     image_corners[0:4,:,:] = image_1_corners
@@ -339,7 +334,8 @@ def warpImagePair(image_1, image_2, homography):
                              [ 0, 1, -1*y_min ],
                              [ 0, 0,     1    ] ])
                              
-    M = np.dot( homography, translation )
+    #M = np.dot( homography, translation )
+    M = np.dot( translation, homography )
     
     warped_image = cv2.warpPerspective( image_1, M, (int(x_max-x_min), int(y_max-y_min)) )
 
