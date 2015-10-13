@@ -66,9 +66,10 @@ def getImageCorners(image):
     """
     corners = np.zeros((4, 1, 2), dtype=np.float32)
     # WRITE YOUR CODE HERE
-
-
-
+    corners[ 0, 0, :] = np.array([ [0, 0] ])
+    corners[ 1, 0, :] = np.array([ [ image.shape[1], 0 ] ])
+    corners[ 2, 0, :] = np.array([ [ 0, image.shape[0] ] ])
+    corners[ 3, 0, :] = np.array([ [ image.shape[1], image.shape[0] ] ])
 
     return corners
     # END OF FUNCTION
@@ -118,10 +119,22 @@ def findMatchesBetweenImages(image_1, image_2, num_matches):
     image_2_desc = None
 
     # COPY YOUR CODE FROM A7 HERE.
-
-
-
-
+    # Using SIFT was causing problems, so use ORB instead
+    sift = cv2.ORB()
+    
+    # Use SIFT to generate keypoints and descriptors
+    image_1_kp, image_1_desc = sift.detectAndCompute( image_1, None )
+    image_2_kp, image_2_desc = sift.detectAndCompute( image_2, None )
+    
+    # Use BFM
+    bfm = cv2.BFMatcher( cv2.NORM_HAMMING, crossCheck=True) 
+    
+    matches_all = bfm.match( image_1_desc, image_2_desc )
+    
+    # Sort matches
+    matches_all = sorted( matches_all, key = lambda x:x.distance)
+    
+    matches = matches_all[:num_matches]
 
     return image_1_kp, image_2_kp, matches
   # END OF FUNCTION.
@@ -165,12 +178,20 @@ def findHomography(image_1_kp, image_2_kp, matches):
     image_2_points = np.zeros((len(matches), 1, 2), dtype=np.float32)
 
     # WRITE YOUR CODE HERE.
-
-
-
-
+    # Find matching point values
+    matchIdx = 0
+    for match in matches:
+        image_1_points[matchIdx] = image_1_kp[match.queryIdx].pt
+        image_2_points[matchIdx] = image_2_kp[match.trainIdx].pt
+                
+        matchIdx += 1
+    #end for
+    
+    # Compute homography
+    H, mask = cv2.findHomography( image_1_points, image_2_points, method=cv2.RANSAC, ransacReprojThreshold=5.0)
+        
     # Replace this return statement with the homography.
-    return None
+    return H
     # END OF FUNCTION
 
 def blendImagePair(warped_image, image_2, point):
@@ -270,9 +291,57 @@ def warpImagePair(image_1, image_2, homography):
     y_max = 0
 
     # WRITE YOUR CODE HERE
-
-
-
+    image_1_corners = getImageCorners(image_1)
+    image_2_corners = getImageCorners(image_2)
+    h = homography
+    # Use homography to transform the corners of image 1
+    # I think I need to use homogeneous coordinates
+    '''img1_corners_h = np.zeros( (4, 3) )
+    for i in range(4):
+        x = image_1_corners[i,:,0]
+        y = image_1_corners[i,:,1]
+        img1_corners_h[i,:] = np.array([ [x, y, 1] ])
+    #end for
+    
+    img1_trans_h = np.dot( img1_corners_h, homography )
+    
+    for i in range(4):
+        x = img1_trans_h[i,0]
+        y = img1_trans_h[i,1]
+        w = img1_trans_h[i,2]
+        image_1_corners[i,:,:] = np.array([ [ x/w, y/w ] ])
+    #end for    
+    '''
+    for i in range(4):
+        x = image_1_corners[i,0,0]
+        y = image_2_corners[i,0,1]
+        z = 1.0/(h[2,0]*x + h[2,1]*y + h[2,2])
+        
+        px = int( (h[0,0]*x + h[0,1]*y + h[0,2])*z )
+        py = int( (h[1,0]*x + h[1,1]*y + h[1,2])*z )
+        
+        image_1_corners[i,:,:] = np.array([[px, py]])
+        
+    
+    print image_1_corners
+    
+    image_corners = np.zeros( (8, 1, 2) )
+    image_corners[0:4,:,:] = image_1_corners
+    image_corners[4:8,:,:] = image_2_corners
+    
+    x_min = np.min(image_corners[:,:,0])
+    x_max = np.max(image_corners[:,:,0])
+    y_min = np.min(image_corners[:,:,1])
+    y_max = np.max(image_corners[:,:,1])
+    
+    
+    translation = np.array([ [ 1, 0, -1*x_min ],
+                             [ 0, 1, -1*y_min ],
+                             [ 0, 0,     1    ] ])
+                             
+    M = np.dot( homography, translation )
+    
+    warped_image = cv2.warpPerspective( image_1, M, (int(x_max-x_min), int(y_max-y_min)) )
 
     # END OF CODING
     output_image = blendImagePair(warped_image, image_2,
