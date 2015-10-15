@@ -225,16 +225,29 @@ def blendImagePair(warped_image, image_2, point):
     output_image = np.copy(warped_image)
     
     # Take a small region around where the images meet as the region to blend
-    blend_region = 25
+    blend_region = 100
     left = output_image[point[1]:point[1]+image_2.shape[0], point[0]-blend_region:point[0]+blend_region]
     # The right image will have some black region associated with it
     right = np.zeros( left.shape )
+    right[:,0:blend_region] = warped_image[point[1]:point[1]+image_2.shape[0], point[0]-blend_region:point[0]]
     right[:,blend_region:] = image_2[:,0:blend_region]
     # The mask is split along the middle
     mask = np.zeros( (left.shape[0], left.shape[1]) )
-    mask[:,blend_region:] = np.ones( (left.shape[0], blend_region) )
+    mask[:,blend_region:] = 255*np.ones( (left.shape[0], blend_region) )
+    
     # Blend image
-    blend_img = run_blend(left, right, mask)
+    out_layers = []
+    left = left.astype(float)
+    right = right.astype(float)
+    mask = mask/255.0
+    for channel in range(3):
+      outimg = run_blend( left[:,:,channel], right[:,:,channel], mask )
+      out_layers.append(outimg)
+    #endfor
+    
+    blend_img = cv2.merge(out_layers)
+    blend_img = blend_img.astype(int)
+
     # Put blended image with the output image
     output_image[point[1]:point[1]+image_2.shape[0], point[0]-blend_region:point[0]+blend_region] = blend_img
     output_image[ point[1]:point[1]+image_2.shape[0], point[0]+blend_region:] = image_2[:,blend_region:]  
@@ -354,9 +367,9 @@ def run_blend(black_image, white_image, mask):
   """ This function administrates the blending of the two images according to 
   mask.
 
-  Assume all images are float dtype, and return a float dtype.
+  Assume all images are float, and return a float.
   """
-
+  
   # Automatically figure out the size
   min_size = min(black_image.shape)
   depth = int(math.floor(math.log(min_size, 2))) - 4 # at least 16x16 at the highest level.
