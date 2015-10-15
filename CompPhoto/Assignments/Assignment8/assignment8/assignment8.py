@@ -221,52 +221,23 @@ def blendImagePair(warped_image, image_2, point):
     Returns:
         image: The warped image with image_2 blended into it.
     """
+    # Copy entire image
     output_image = np.copy(warped_image)
-
-    '''
-    # Find the points along the intersection of the two images
-    blend_region = 50
-    intersect_l = warped_image[point[1]:point[1]+image_2.shape[0], point[0]-blend_region:point[0]+blend_region]
-    # We need to make image_2 overlap with the warped image. Take a portion of the warped image as image 2
-    intersect_r = np.zeros( (image_2.shape[0], 2*blend_region, 3) )
-    intersect_r[:,0:blend_region] = warped_image[point[1]:point[1]+image_2.shape[0], point[0]-blend_region:point[0]]
-    intersect_r[:,blend_region:]= image_2[:,0:blend_region]
-    mask = np.zeros( (image_2.shape[0], 2*blend_region) )
-    mask[:,0:blend_region] = np.ones( (mask.shape[0], blend_region) )
     
-    # Blend
-    blend_img = run_blend(intersect_l, intersect_r, mask)
-    cv2.imwrite("test.png", blend_img)
-    # Combine
-    output_image[point[1]:point[1]+image_2.shape[0], point[0]-blend_region:point[0]+blend_region] = blend_img
-    output_image[ point[1]:point[1]+image_2.shape[0], point[0]+blend_region:] = image_2[:,blend_region:]
-    '''
-    '''
-    extend = 25
-    temp_image = np.zeros( (image_2.shape[0], image_2.shape[1]+extend, 3) )
-    temp_image[:,0:extend] = output_image[point[1]:point[1]+image_2.shape[0],point[0]-extend:point[0]]
-    temp_image[:,extend:] = image_2
-    
-    mask = np.zeros( (temp_image.shape[0], temp_image.shape[1]) )
-    mask[:,0:extend] = np.ones( (temp_image.shape[0],extend) )
-    
-    blend_image = run_blend(temp_image, temp_image, mask)
-    cv2.imwrite('test.png', blend_image)
-    
-    output_image[point[1]:point[1]+image_2.shape[0], point[0]-extend:] = blend_image
-    '''
+    # Take a small region around where the images meet as the region to blend
     blend_region = 25
     left = output_image[point[1]:point[1]+image_2.shape[0], point[0]-blend_region:point[0]+blend_region]
+    # The right image will have some black region associated with it
     right = np.zeros( left.shape )
     right[:,blend_region:] = image_2[:,0:blend_region]
+    # The mask is split along the middle
     mask = np.zeros( (left.shape[0], left.shape[1]) )
-    mask[:,0:blend_region] = np.ones( (left.shape[0], blend_region) )
-    
+    mask[:,blend_region:] = np.ones( (left.shape[0], blend_region) )
+    # Blend image
     blend_img = run_blend(left, right, mask)
-    
+    # Put blended image with the output image
     output_image[point[1]:point[1]+image_2.shape[0], point[0]-blend_region:point[0]+blend_region] = blend_img
-    output_image[ point[1]:point[1]+image_2.shape[0], point[0]+blend_region:] = image_2[:,blend_region:]
-    
+    output_image[ point[1]:point[1]+image_2.shape[0], point[0]+blend_region:] = image_2[:,blend_region:]  
     
     return output_image
     # END OF FUNCTION
