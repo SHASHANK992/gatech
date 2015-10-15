@@ -5,6 +5,9 @@ import numpy as np
 import scipy as sp
 import scipy.signal
 import cv2
+from scipy.stats import norm
+from scipy.signal import convolve2d
+import math
 
 # Import ORB as SIFT to avoid confusion.
 try:
@@ -219,11 +222,13 @@ def blendImagePair(warped_image, image_2, point):
         image: The warped image with image_2 blended into it.
     """
     output_image = np.copy(warped_image)
+
     # REPLACE THIS WITH YOUR BLENDING CODE.
     '''
     #Instructor provided
     output_image[point[1]:point[1] + image_2.shape[0],
                  point[0]:point[0] + image_2.shape[1]] = image_2
+    '''
     '''
     # Find the points along the intersection of the two images
     intersect_l = warped_image[point[1]:point[1]+image_2.shape[0], point[0]]
@@ -232,8 +237,29 @@ def blendImagePair(warped_image, image_2, point):
     intersect = 0.5*intersect_l + 0.5*intersect_r
     
     output_image[point[1]:point[1] + image_2.shape[0], point[0]] = intersect
-    output_image[point[1]:point[1]+image_2.shape[0], point[0]+1:point[0]+image_2.shape[1]+1] = image_2[:,1:]
+    output_image[point[1]:point[1]+image_2.shape[0], point[0]+1:point[0]+image_2.shape[1]] = image_2[:,1:]
 
+    # I would like to blend the area around where the two images meet here using the code from a previous assignment,
+    # but the instructions says we aren't allowed to put code in anywhere other than the marked places. 
+    
+    print output_image.shape
+    '''
+    # Find the points along the intersection of the two images
+    blend_region = 100
+    intersect_l = warped_image[point[1]:point[1]+image_2.shape[0], point[0]-blend_region:point[0]+blend_region]
+    # We need to make image_2 overlap with the warped image. Take a portion of the warped image as image 2
+    intersect_r = np.zeros( (image_2.shape[0], 2*blend_region, 3) )
+    intersect_r[:,0:blend_region] = warped_image[point[1]:point[1]+image_2.shape[0], point[0]-blend_region:point[0]]
+    intersect_r[:,blend_region:]= image_2[:,0:blend_region]
+    mask = np.zeros( (image_2.shape[0], 2*blend_region) )
+    mask[:,0:blend_region] = np.ones( (mask.shape[0], blend_region) )
+    
+    # Blend
+    blend_img = run_blend(intersect_l, intersect_r, mask)
+    # Combine
+    output_image[point[1]:point[1]+image_2.shape[0], point[0]-blend_region:point[0]+blend_region] = blend_img
+    output_image[ point[1]:point[1]+image_2.shape[0], point[0]+blend_region:] = image_2[:,blend_region:]
+    
     return output_image
     # END OF FUNCTION
 
@@ -337,12 +363,276 @@ def warpImagePair(image_1, image_2, homography):
     #M = np.dot( homography, translation )
     M = np.dot( translation, homography )
     
+    # There can be memory problems here if the image is warped too much
     warped_image = cv2.warpPerspective( image_1, M, (int(x_max-x_min), int(y_max-y_min)) )
 
     # END OF CODING
     output_image = blendImagePair(warped_image, image_2,
                                   (-1 * x_min, -1 * y_min))
     return output_image
+
+def run_blend(black_image, white_image, mask):
+  """ This function administrates the blending of the two images according to 
+  mask.
+
+  Assume all images are float dtype, and return a float dtype.
+  """
+
+  # Automatically figure out the size
+  min_size = min(black_image.shape)
+  depth = int(math.floor(math.log(min_size, 2))) - 4 # at least 16x16 at the highest level.
+
+  gauss_pyr_mask = gaussPyramid(mask, depth)
+  gauss_pyr_black = gaussPyramid(black_image, depth)
+  gauss_pyr_white = gaussPyramid(white_image, depth)
+
+
+  lapl_pyr_black  = laplPyramid(gauss_pyr_black)
+  lapl_pyr_white = laplPyramid(gauss_pyr_white)
+
+  outpyr = blend(lapl_pyr_white, lapl_pyr_black, gauss_pyr_mask)
+  outimg = collapse(outpyr)
+
+  outimg[outimg < 0] = 0 # blending sometimes results in slightly out of bound numbers.
+  outimg[outimg > 255] = 255
+  outimg = outimg.astype(np.uint8)
+
+  return outimg
+  # End of function
+  
+  
+def generatingKernel(parameter):
+  """ Return a 5x5 generating kernel based on an input parameter.
+
+  Args:
+    parameter (float): Range of value: [0, 1].
+
+  Returns:
+    numpy.ndarray: A 5x5 kernel.
+
+  """
+  kernel = np.array([0.25 - parameter / 2.0, 0.25, parameter,
+                     0.25, 0.25 - parameter /2.0])
+  return np.outer(kernel, kernel)
+
+def reduce(image):
+  """ 
+  Args:
+    image (numpy.ndarray): a grayscale image of shape (r, c)
+
+  Returns:
+    output (numpy.ndarray): an image of shape (ceil(r/2), ceil(c/2))
+      For instance, if the input is 5x7, the output will be 3x4.
+
+  """
+  # WRITE YOUR CODE HERE.
+  r = image.shape[0]
+  c = image.shape[1]
+  reduced_img = np.zeros( (np.ceil(r/2.), np.ceil(c/2.)) )
+  
+  kernel = generatingKernel(0.4)
+  # Convolve
+  img_conv = sp.signal.convolve2d(image, kernel, 'same') 
+  # Extract every other row and column
+  reduced_img[:,:] = img_conv[::2,::2]
+  
+  return reduced_img
+  # END OF FUNCTION.
+
+def expand(image):
+  """ 
+  Args:
+    image (numpy.ndarray): a grayscale image of shape (r, c)
+
+  Returns:
+    output (numpy.ndarray): an image of shape (2*r, 2*c)
+  """
+  # WRITE YOUR CODE HERE.
+  img_ex = np.zeros( ( 2*image.shape[0], 2*image.shape[1] ) )
+  
+  kernel = generatingKernel(0.4)
+  
+  # Copy original image to every other index of supersampled image
+  img_ex[::2, ::2] = image[:,:]
+  
+  # Convolve
+  img_ex_conv = sp.signal.convolve2d(img_ex, kernel, 'same')
+  
+  # Multiply
+  img_ex = 4.0*img_ex_conv
+
+  return img_ex
+  # END OF FUNCTION.
+
+def gaussPyramid(image, levels):
+  """ 
+  Args:
+    image (numpy.ndarray): A grayscale image of dimension (r,c) and dtype float.
+    levels (uint8): A positive integer that specifies the number of reductions
+                    you should do. So, if levels = 0, you should return a list
+                    containing just the input image. If levels = 1, you should
+                    do one reduction. len(output) = levels + 1
+
+  Returns:
+    output (list): A list of arrays of dtype np.float. The first element of the
+                   list (output[0]) is layer 0 of the pyramid (the image
+                   itself). output[1] is layer 1 of the pyramid (image reduced
+                   once), etc. We have already included the original image in
+                   the output array for you. The arrays are of type
+                   numpy.ndarray.
+
+  Consult the lecture and README for more details about Gaussian Pyramids.
+  """
+  output = [image]
+  # WRITE YOUR CODE HERE.
+  
+  img_reduced = image
+  
+  # For each of the levels
+  for i in range( levels ):
+    # Reduce the image
+    img_reduced = reduce(img_reduced)
+    
+    # Add reduced image to list
+    output.append(img_reduced)
+
+  return output
+  # END OF FUNCTION.
+
+def laplPyramid(gaussPyr):
+  """ 
+  Args:
+    gaussPyr (list): A Gaussian Pyramid as returned by your gaussPyramid
+                     function. It is a list of numpy.ndarray items.
+
+  Returns:
+    output (list): A Laplacian pyramid of the same size as gaussPyr. This
+                   pyramid should be represented in the same way as guassPyr, 
+                   as a list of arrays. Every element of the list now
+                   corresponds to a layer of the Laplacian pyramid, containing
+                   the difference between two layers of the Gaussian pyramid.
+
+           output[k] = gauss_pyr[k] - expand(gauss_pyr[k + 1])
+
+           Note: The last element of output should be identical to the last 
+           layer of the input pyramid since it cannot be subtracted anymore.
+
+  Note: Sometimes the size of the expanded image will be larger than the given
+  layer. You should crop the expanded image to match in shape with the given
+  layer.
+
+  For example, if my layer is of size 5x7, reducing and expanding will result
+  in an image of size 6x8. In this case, crop the expanded layer to 5x7.
+  """
+  output = []
+  
+  # WRITE YOUR CODE HERE.
+  gaussPyr_len = len( gaussPyr )
+  # The top layer will be the biggest
+  curr_layer = gaussPyr[0]
+  
+  # For each layer in the pyramid
+  for i in range(1,gaussPyr_len):
+    # Retrieve the next layer
+    next_layer = gaussPyr[i]
+    # Expand next layer
+    expanded = expand(next_layer)
+    # Find the difference 
+    # Crop expanded image to be the same size as the original layer
+    diff =  curr_layer - expanded[0:curr_layer.shape[0], 0:curr_layer.shape[1]]  
+    # Add to output
+    output.append(diff)
+    curr_layer = next_layer
+  #end for
+  
+  # Add last layer to output
+  output.append(curr_layer)
+
+  return output
+  # END OF FUNCTION.
+
+def blend(laplPyrWhite, laplPyrBlack, gaussPyrMask):
+  """ Blend the two Laplacian pyramids by weighting them according to the
+  Gaussian mask.
+
+  Args:
+    laplPyrWhite (list): A Laplacian pyramid of one image, as constructed by
+                         your laplPyramid function.
+
+    laplPyrBlack (list): A Laplacian pyramid of another image, as constructed by
+                         your laplPyramid function.
+
+    gaussPyrMask (list): A Gaussian pyramid of the mask. Each value is in the
+                         range of [0, 1].
+
+  """ 
+
+  blended_pyr = []
+  # WRITE YOUR CODE HERE.
+  pyr_len = len(laplPyrWhite)
+  
+  for i in range(pyr_len):
+    # Retrieve the current layer for the white and black images
+    white_level = laplPyrWhite[i]
+    black_level = laplPyrBlack[i]
+    mask_level  = gaussPyrMask[i]
+    
+    output = np.zeros( white_level.shape )
+    
+    # For each pixel
+    for y in range(white_level.shape[0]):
+      for x in range(white_level.shape[1]):
+         output[y,x] = mask_level[y,x]*white_level[y,x] + (1-mask_level[y,x])*black_level[y,x]
+      #end for
+    #end for
+    blended_pyr.append(output)    
+  #end for
+
+  return blended_pyr
+  # END OF FUNCTION.
+
+def collapse(pyramid):
+  """ Collapse an input pyramid.
+
+  Args:
+    pyramid (list): A list of numpy.ndarray images. You can assume the input is
+                  taken from blend() or laplPyramid().
+
+  Returns:
+    output(numpy.ndarray): An image of the same shape as the base layer of the
+                           pyramid and dtype float.
+  """
+  # WRITE YOUR CODE HERE.
+  
+  # Figure out what is the base layer
+  # This is the beginning of the pyramid
+  len_pyr = len(pyramid)
+
+  collapsed_img = np.zeros( pyramid[0].shape )
+  
+  # Reverse the list to make things easier
+  pyramid.reverse()
+  # This starts at the beginning of the pyramid, i.e., the smallest layer
+  img_sum = pyramid[0]
+  
+  for i in range(1, len_pyr):
+    # Retrieve layer above
+    next_level = pyramid[i]
+    
+    # Expand current sum, making sure to have the layer sizes agree
+    expanded = expand(img_sum)[0:next_level.shape[0], 0:next_level.shape[1]]
+    
+    # Add expanded layer to next larger level
+    img_sum = next_level + expanded
+  #end for
+    
+  collapsed_img = img_sum
+  
+  return collapsed_img
+# END OF FUNCTION.    
+
+
+
 
 # Some simple testing.
 # image_1 = cv2.imread("images/source/panorama_1/1.jpg")

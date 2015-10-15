@@ -278,7 +278,7 @@ if __name__ == "__main__":
         cur_img = panorama_inputs[0]
         for new_img in panorama_inputs[1:]:
             image_1_kp, image_2_kp, matches = \
-                assignment8.findMatchesBetweenImages(cur_img, new_img, 20)
+                assignment8.findMatchesBetweenImages(cur_img, new_img, 100)
             print "Computing homography."
             homography = assignment8.findHomography(image_1_kp, image_2_kp,
                                                     matches)
