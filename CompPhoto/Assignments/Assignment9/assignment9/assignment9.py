@@ -29,7 +29,8 @@ import logging
 import numpy as np
 import os
 import random
-
+# See this address for HDR image set
+# http://www.digitaltrends.com/how-to/what-is-hdr-beginners-guide-to-high-dynamic-range-photography/
 
 def normalizeImage(img):
     """ This function normalizes an image from any range to 0->255.
