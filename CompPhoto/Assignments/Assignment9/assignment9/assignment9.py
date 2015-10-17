@@ -31,6 +31,7 @@ import os
 import random
 # See this address for HDR image set
 # http://www.digitaltrends.com/how-to/what-is-hdr-beginners-guide-to-high-dynamic-range-photography/
+# http://www.nikonusa.com/en/learn-and-explore/article/gsnc3qsr/high-dynamic-range-photography.html
 
 def normalizeImage(img):
     """ This function normalizes an image from any range to 0->255.
@@ -63,14 +64,13 @@ def normalizeImage(img):
     # We initialize this as float since you will do arithmetic computation.
     out = np.zeros(img.shape, dtype=np.float)
     # WRITE YOUR CODE HERE.
-
-
-
+    out = cv2.normalize(img, out, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1)
 
     # END OF FUNCTION.
     # We handle casting your matrix to a uint8. If your values do not range from
     # 0->255 this will produce overflow casting which would be erroneous.
     return np.uint8(out)
+    
 def linearWeight(pixel_value):
     """ Linear Weighting function based on pixel location.
 
@@ -98,9 +98,11 @@ def linearWeight(pixel_value):
     weight = 0.0
 
     # WRITE YOUR CODE HERE.
-
-
-
+    if pixel_value > pixel_range_mid:
+        weight = pixel_range_max - pixel_value
+    else:
+        weight = pixel_value.astype(np.float_)
+    #endif
 
     # END OF FUNCTION.
     return weight
@@ -141,10 +143,9 @@ def getYXLocations(image, intensity_value):
                                 locations of input intensity. Type np.int64.
     """
     # WRITE YOUR CODE HERE.
+    y_locs, x_locs = np.where( image = intensity_value )
 
-
-
-    
+    return y_locs, x_locs    
     # END OF FUNCTION
 
 def computeResponseCurve(pixels, log_exposures, smoothing_lambda,
@@ -251,10 +252,8 @@ def computeResponseCurve(pixels, log_exposures, smoothing_lambda,
     # Ax = b | x = A^-1 * b
 
     # PART 2: WRITE YOUR CODE HERE
-
-
-
-
+    mat_A_inv = np.linalg.pinv(mat_A)
+    x = np.dot(mat_A_inv, mat_b)
     # STOP WRITING CODE HERE.
 
     # x should be a 512 x 1 matrix (we slice it and only return 0->255).

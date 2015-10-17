@@ -270,7 +270,7 @@ def laplacian_pyramid(gaussPyr):
     return output
 
 
-def warp(image, U, V, scale=5):
+def warp(image, U, V, scale_x=5, scale_y=5):
     """Warp image using X and Y displacements (U and V).
 
     Parameters
@@ -294,8 +294,8 @@ def warp(image, U, V, scale=5):
     # accordingly
     U_warp = 0
     V_warp = 0
-    U_warp = cv2.normalize( U, U_warp, 0, scale, cv2.NORM_MINMAX, cv2.CV_8UC1)
-    V_warp = cv2.normalize( U, V_warp, 0, scale, cv2.NORM_MINMAX, cv2.CV_8UC1)
+    U_warp = cv2.normalize( U, U_warp, 0, scale_x, cv2.NORM_MINMAX, cv2.CV_8UC1)
+    V_warp = cv2.normalize( U, V_warp, 0, scale_y, cv2.NORM_MINMAX, cv2.CV_8UC1)
     '''
     U_warp = scale*U
     U_warp = U_warp.astype(int)
@@ -399,6 +399,20 @@ def make_image_pair(image1, image2):
         image_pair[ 0:image2.shape[0], image1.shape[1]:c ] = image2[:,:] 
     #end if  
     return image_pair
+    
+def stack_image( img1, img2, img3 )
+    """ Assume all images are of the same size"""
+    rows = img1.shape[0]
+    columns = img1.shape[1]
+    # output image is the same width, but three
+    # pictures tall
+    output_img = np.zeros((3*rows, columns))
+    output_img[0:rows,:] = img1
+    output_img[rows:2*rows,:] = img2
+    output_img[2*rows:3*rows,:] = img3
+    
+    return output_img
+#end stack_image
     
 def norm( img ):
     normed = 0
