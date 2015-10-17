@@ -13,7 +13,7 @@ output_dir = "output"
 
 
 # Assignment code
-def optic_flow_LK(A, B, window_size=9):
+def optic_flow_LK(A, B, window_size=9, threshold=10**-10):
     """Compute optic flow using the Lucas-Kanade method.
 
     Parameters
@@ -35,10 +35,8 @@ def optic_flow_LK(A, B, window_size=9):
     # Compute the gradients
     # Since we assume the motion is so small, can just assume A and B are
     # basically the same
-    Ix = cv2.Sobel( A, cv2.CV_64F, 1, 0 )
-    Iy = cv2.Sobel( A, cv2.CV_64F, 0, 1 )
-    #Ix = cv2.normalize( Ix, Ix, -1.0, 1.0, cv2.NORM_MINMAX, cv2.CV_64F)
-    #Iy = cv2.normalize( Iy, Iy, -1.0, 1.0, cv2.NORM_MINMAX, cv2.CV_64F)
+    Ix = (1.0/8.0)*cv2.Sobel( A, cv2.CV_64F, 1, 0 )
+    Iy = (1.0/8.0)*cv2.Sobel( A, cv2.CV_64F, 0, 1 )
     
     # Run Gaussian or uniform smoothing
     Ixx_blur = cv2.blur( Ix*Ix, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
@@ -56,78 +54,21 @@ def optic_flow_LK(A, B, window_size=9):
         for j in range( A.shape[1] ):
             matA = np.array( [ [Ixx_blur[i,j], Ixy_blur[i,j] ],
                                [Ixy_blur[i,j], Iyy_blur[i,j] ] ])
+            detA = np.linalg.det(matA)
             vecB = np.array([ [ 1.0*Ixt_blur[i,j] ],
                               [ 1.0*Iyt_blur[i,j] ] ])   
-                                                  
-            x, error, rank, s = np.linalg.lstsq( matA, vecB )
-                                           
-            U[i,j] = x[0,0]
-            V[i,j] = x[1,0]
-                        
+                                                 
+            if abs(detA) <= threshold:
+                U[i,j] = 0.0
+                V[i,j] = 0.0
+            else:
+                x, error, rank, s = np.linalg.lstsq( matA, vecB )                                            
+                U[i,j] = x[0,0]
+                V[i,j] = x[1,0]                 
         #end for
     #end for    
     
     return U, V
-
-def optic_flow_LK_jrk(A, B, window_size=3):
-    """Compute optic flow using the Lucas-Kanade method.
-
-    Parameters
-    ----------
-        A: grayscale floating-point image, values in [0.0, 1.0]
-        B: grayscale floating-point image, values in [0.0, 1.0]
-
-    Returns
-    -------
-        U: raw displacement (in pixels) along X-axis, same size as image, floating-point type
-        V: raw displacement (in pixels) along Y-axis, same size and type as U
-    """
-
-    # TODO: Your code here        
-    # Take the difference of A and B
-    # This is the time derivative    
-    It = A - B  
-    
-    It = cv2.copyMakeBorder( It, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)
-    
-    # Compute the gradients
-    # Since we assume the motion is so small, can just assume A and B are
-    # basically the same
-    Ix = cv2.Sobel( A, cv2.CV_64F, 1, 0 )
-    Iy = cv2.Sobel( A, cv2.CV_64F, 0, 1 )  
-    Ix = cv2.copyMakeBorder( Ix, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)
-    Iy = cv2.copyMakeBorder( Iy, window_size, window_size, window_size, window_size, cv2.BORDER_REFLECT)        
-    
-    U = np.zeros( A.shape, dtype=np.float_ )
-    V = np.zeros( A.shape, dtype=np.float_ )
-    # Now we have all the derivatives we need
-    # Build the linear system to solve using least squares 
-    # Loop over all the pixels
-    for i in range( A.shape[0] ):
-        for j in range( A.shape[1] ):
-            # For each pixel, create an overconstrained set of equations from the points surrounding
-            # the given pixel
-            matA = np.zeros( (window_size**2, 2) )
-            vecB = np.zeros( (window_size**2, 1) )
-            index = 0
-            for ii in range( window_size ):
-                for jj in range( window_size):
-                    matA[index, :] = np.array([ [Ix[i+ii,j+jj], Iy[i+ii,j+jj]] ] )
-                    
-                    vecB[index, :] = np.array([ [ -1.0*It[i+ii,j+jj] ] ] ) 
-                    
-                    index += 1                   
-            #end for                   
-                              
-            x, error, rank, s = np.linalg.lstsq( matA, vecB )
-                       
-            U[i,j] = x[0,0]
-            V[i,j] = x[1,0]
-        #end for
-    #end for    
-    
-    return U, V
-
 
 def generatingKernel(parameter):
   """ Return a 5x5 generating kernel based on an input parameter.
@@ -156,7 +97,6 @@ def reduce(image):
     -------
         reduced_image: same type as image, half size
     """
-
     # TODO: Your code here
     r = image.shape[0]
     c = image.shape[1]
@@ -229,7 +169,6 @@ def expand(image):
     return img_ex
     
 
-
 def laplacian_pyramid(gaussPyr):
     """Create a Laplacian pyramid from a given Gaussian pyramid.
 
@@ -269,8 +208,7 @@ def laplacian_pyramid(gaussPyr):
     
     return output
 
-
-def warp(image, U, V, scale_x=5, scale_y=5):
+def warp(image, U, V, scale_x=2, scale_y=2):
     """Warp image using X and Y displacements (U and V).
 
     Parameters
@@ -281,33 +219,22 @@ def warp(image, U, V, scale_x=5, scale_y=5):
     -------
         warped: warped image, such that warped[y, x] = image[y + V[y, x], x + U[y, x]]
         
-    Note
-    ----
-    Like many in the forums are experiencing, I think the input U and V need to be scaled
-    by a certain factor. I will assume that the inputs are the raw values and that the
-    scale input variable can be used if needed
+
 
     """
 
     # TODO: Your code here
     # If we have an estimate of the pixel motion, scale the input
     # accordingly
-    U_warp = 0
-    V_warp = 0
-    U_warp = cv2.normalize( U, U_warp, 0, scale_x, cv2.NORM_MINMAX, cv2.CV_8UC1)
-    V_warp = cv2.normalize( U, V_warp, 0, scale_y, cv2.NORM_MINMAX, cv2.CV_8UC1)
-    '''
-    U_warp = scale*U
-    U_warp = U_warp.astype(int)
-    V_warp = scale*V
-    V_warp = V_warp.astype(int)
-    '''
+    scale = max(scale_x, scale_y)
+    U_warp = np.around(U)
+    V_warp = np.around(V)
+    #U_warp = cv2.normalize( U, U_warp, 0, scale_x, cv2.NORM_MINMAX, cv2.CV_8UC1)
+    #V_warp = cv2.normalize( U, V_warp, 0, scale_y, cv2.NORM_MINMAX, cv2.CV_8UC1)
+    #np.savetxt('U.txt', U_warp, fmt='%d')
+    #np.savetxt('V.txt', V_warp, fmt='%d')
     
     img_border = cv2.copyMakeBorder( image, scale, scale, scale, scale, cv2.BORDER_REFLECT)
-    
-    print img_border.shape
-    print U.shape
-    print V.shape
     
     warped = np.zeros(image.shape)
     for y in range(image.shape[0]):
@@ -400,7 +327,7 @@ def make_image_pair(image1, image2):
     #end if  
     return image_pair
     
-def stack_image( img1, img2, img3 )
+def stack_image( img1, img2, img3 ):
     """ Assume all images are of the same size"""
     rows = img1.shape[0]
     columns = img1.shape[1]
@@ -470,21 +397,23 @@ def main():
     ShiftR2   = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR2.png'), 0) / 255.0
     ShiftR5U5 = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR5U5.png'), 0) /255.0
     # TODO: Optionally, smooth the images if LK doesn't work well on raw images
-    Shift0 = cv2.GaussianBlur( Shift0, (25,25), 15, borderType=cv2.BORDER_REFLECT)
-    ShiftR2 = cv2.GaussianBlur( ShiftR2, (25,25), 15, borderType=cv2.BORDER_REFLECT)
-    ShiftR5U5 = cv2.GaussianBlur( ShiftR5U5, (25,25), 15, borderType=cv2.BORDER_REFLECT)
+    Shift0_blur = cv2.GaussianBlur( Shift0, (25,25), 15, borderType=cv2.BORDER_REFLECT)
+    ShiftR2_blur = cv2.GaussianBlur( ShiftR2, (25,25), 15, borderType=cv2.BORDER_REFLECT)
+    ShiftR5U5_blur = cv2.GaussianBlur( ShiftR5U5, (25,25), 15, borderType=cv2.BORDER_REFLECT)
     
-    U, V = optic_flow_LK(Shift0, ShiftR2, 21)  # TODO: implement this
-    print np.max(U), np.min(U)
-    colorAndQuiver( U, V, 10, 20, 'ps6-1-a-1.png')
+    scale = 2
+    stride = 10
+    U, V = optic_flow_LK(Shift0_blur, ShiftR2_blur, 21)  # TODO: implement this
+    colorAndQuiver( U, V, stride, scale, 'ps6-1-a-1.png')
     # Warp R2 back to R0
-    ShiftR2_warped = warp( ShiftR2, U, V )
-    ShiftR2_warped = norm( ShiftR2_warped)
-    cv2.imwrite( os.path.join(output_dir, 'warp.png'), ShiftR2_warped)
+    #ShiftR2_warped = warp( ShiftR2, U, V, 2, 0 )
+    #ShiftR2_diff = ShiftR2_warped - Shift0
+    #ShiftR2_diff = norm( ShiftR2_diff)
+    #cv2.imwrite( os.path.join(output_dir, 'warp.png'), ShiftR2_diff)
 
     # TODO: Similarly for Shift0 and ShiftR5U5
-    U, V = optic_flow_LK(Shift0, ShiftR5U5,61)
-    colorAndQuiver( U, V, 10, 10, 'ps6-1-a-2.png')
+    U, V = optic_flow_LK(Shift0_blur, ShiftR5U5_blur,61)
+    colorAndQuiver( U, V, stride, scale, 'ps6-1-a-2.png')
 
     #**********************
     # 1b
@@ -493,21 +422,21 @@ def main():
     ShiftR20 = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR20.png'), 0)/255.0
     ShiftR40 = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR40.png'), 0)/255.0
     
-    ShiftR10 = cv2.GaussianBlur( ShiftR10, (25,25), 15, borderType=cv2.BORDER_REFLECT)
-    ShiftR20 = cv2.GaussianBlur( ShiftR20, (25,25), 15, borderType=cv2.BORDER_REFLECT)
-    ShiftR40 = cv2.GaussianBlur( ShiftR40, (25,25), 15, borderType=cv2.BORDER_REFLECT)
+    ShiftR10_blur = cv2.GaussianBlur( ShiftR10, (25,25), 15, borderType=cv2.BORDER_REFLECT)
+    ShiftR20_blur = cv2.GaussianBlur( ShiftR20, (25,25), 15, borderType=cv2.BORDER_REFLECT)
+    ShiftR40_blur = cv2.GaussianBlur( ShiftR40, (25,25), 15, borderType=cv2.BORDER_REFLECT)
     
     # 10
-    U, V = optic_flow_LK(Shift0, ShiftR10,61)
-    colorAndQuiver( U, V, 10, 10, 'ps6-1-b-1.png')
+    U, V = optic_flow_LK(Shift0_blur, ShiftR10_blur,61)
+    colorAndQuiver( U, V, stride, scale, 'ps6-1-b-1.png')
     
     # 20
-    U, V = optic_flow_LK(Shift0, ShiftR20,61)
-    colorAndQuiver( U, V, 10, 10, 'ps6-1-b-2.png')
+    U, V = optic_flow_LK(Shift0_blur, ShiftR20_blur,61)
+    colorAndQuiver( U, V, stride, scale, 'ps6-1-b-2.png')
     
     # 40
-    U, V = optic_flow_LK(Shift0, ShiftR40,71)
-    colorAndQuiver( U, V, 10, 10, 'ps6-1-b-3.png')
+    U, V = optic_flow_LK(Shift0_blur, ShiftR40_blur,71)
+    colorAndQuiver( U, V, stride, scale, 'ps6-1-b-3.png')
     
     
     #***************************************************************************
@@ -541,14 +470,17 @@ def main():
         # I might need to multiply values here?
     #end for
     # TODO: Save U, V as side-by-side false-color image or single quiver plot
-    colorAndQuiver( U_ex, V_ex, 10, 40, 'ps6-3-a-1.png')  
+    colorAndQuiver( U_ex, V_ex, stride, 10, 'ps6-3-a-1.png')  
     print np.max(U_ex), np.min(U_ex)
     print np.max(V_ex), np.min(V_ex) 
 
     # Warp img 02 back to img 01
-    yos_img_02_warped = warp(yos_img_02, U_ex, V_ex)  # TODO: implement this
+    yos_img_02_warped = warp(yos_img_02, U_ex, V_ex, scale_x=1, scale_y=1)  # TODO: implement this
     # TODO: Save difference image between yos_img_02_warped and original yos_img_01
     # Note: Scale values such that zero difference maps to neutral gray, max -ve to black and max +ve to white
+    yos_img_01_diff = yos_img_02_warped - yos_img_01
+    yos_img_01_diff = norm(yos_img_01_diff)
+    cv2.imwrite( os.path.join(output_dir, 'ps6-3-a-2.png'), yos_img_01_diff )
 
     # Similarly, you can compute displacements for yos_img_02 and yos_img_03 (but no need to save images)
 
