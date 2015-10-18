@@ -35,8 +35,13 @@ def optic_flow_LK(A, B, window_size=9, threshold=10**-10):
     # Compute the gradients
     # Since we assume the motion is so small, can just assume A and B are
     # basically the same
-    Ix = (1.0/8.0)*cv2.Sobel( A, cv2.CV_64F, 1, 0 )
-    Iy = (1.0/8.0)*cv2.Sobel( A, cv2.CV_64F, 0, 1 )
+    # According to users on Piazza, using a naive gradient produces better results
+    # (I can't see too much difference though. For the larger motion problems the computed displacement
+    #  still doesn't match the actual displacement)
+    #Ix = (1.0/8.0)*cv2.Sobel( A, cv2.CV_64F, 1, 0 )
+    #Iy = (1.0/8.0)*cv2.Sobel( A, cv2.CV_64F, 0, 1 )
+    Ix = A - np.roll(A, 1, axis=1)
+    Iy = A - np.roll(A, 1, axis=0)
     
     # Run Gaussian or uniform smoothing
     Ixx_blur = cv2.blur( Ix*Ix, (window_size,window_size), borderType=cv2.BORDER_REFLECT )
@@ -240,7 +245,7 @@ def warp(image, U, V, borderSize=10):
     return warped
 #end warp
 
-def hierarchical_LK(A, B, max_level=4):
+def hierarchical_LK(A, B, window_size, max_level=4):
     """Compute optic flow using the Hierarchical Lucas-Kanade method.
 
     Parameters
@@ -253,54 +258,7 @@ def hierarchical_LK(A, B, max_level=4):
         U: raw displacement (in pixels) along X-axis, same size as image, floating-point type
         V: raw displacement (in pixels) along Y-axis, same size and type as U
     """
-    '''
-    # First take
-    # TODO: Your code here
-    k = max_level
     
-    # Reduce A and B to level k
-    A_k = A
-    B_k = B
-    for i in range(k):
-        A_k = reduce(A_k)
-        B_k = reduce(B_k)
-    
-    # Init U and V to be the same size as A_k
-    U = np.zeros( A_k.shape )
-    V = np.zeros( A_k.shape )
-    
-    iteration = 0
-    while k > 0:
-        A_k = A
-        B_k = B
-        for i in range(k):
-            A_k = reduce(A_k)
-            B_k = reduce(B_k)
-        
-        # If this is not the first time expand U and V
-        if iteration != 0:  
-            U = 2*expand(U)
-            V = 2*expand(V)
-        #endif
-        
-        # Warp B_k using U
-        C_k = warp(B_k, U, V)
-        
-        # Compute incremental flow field
-        D_x, D_y = optic_flow_LK(A_k, C_k)
-        
-        # Add to original flow
-        U = U + D_x
-        V = V + D_y
-        
-        # Decrement k
-        k -= 1
-        iteration += 1
-        print U.shape
-    #end while
-    ''' 
-    
-    # Second take
     A_gauss = gaussian_pyramid(A, max_level)
     B_gauss = gaussian_pyramid(B, max_level)
     
@@ -321,9 +279,12 @@ def hierarchical_LK(A, B, max_level=4):
         C_k = warp(B_k, U, V)
         
         # Compute incremental flow field
-        D_x, D_y = optic_flow_LK(A_k, C_k)
+        D_x, D_y = optic_flow_LK(A_k, C_k, window_size)
         
         # Add to original flow
+        # Make sure arrays are of same size
+        U = U[:D_x.shape[0], :D_x.shape[1]]
+        V = V[:D_y.shape[0], :D_y.shape[1]]
         U = U + D_x
         V = V + D_y
     #end for
@@ -373,6 +334,19 @@ def stack_image( img1, img2, img3 ):
     output_img[0:rows,:] = img1
     output_img[rows:2*rows,:] = img2
     output_img[2*rows:3*rows,:] = img3
+    
+    return output_img
+#end stack_image
+
+def stack_image2( img1, img2 ):
+    """ Assume all images are of the same size"""
+    rows = img1.shape[0]
+    columns = img1.shape[1]
+    # output image is the same width, but three
+    # pictures tall
+    output_img = np.zeros((2*rows, columns))
+    output_img[0:rows,:] = img1
+    output_img[rows:2*rows,:] = img2
     
     return output_img
 #end stack_image
@@ -428,7 +402,7 @@ def colorAndQuiver( U, V, stride, scale, filename ):
     cv2.imwrite( os.path.join(output_dir, 'quiver_' + filename), img_quiver)
 #end colorAndQuiver
 
-def colorAndQuiver( U, V, stride, scale ):
+def colorAndQuiver_nosave( U, V, stride, scale ):
     U_norm = norm(U)
     V_norm = norm(V)
     U_colormap = cv2.applyColorMap( U_norm, cv2.COLORMAP_JET)
@@ -447,7 +421,7 @@ def main():
     Shift0    = cv2.imread(os.path.join(input_dir, 'TestSeq', 'Shift0.png'), 0) / 255.0
     ShiftR2   = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR2.png'), 0) / 255.0
     ShiftR5U5 = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR5U5.png'), 0) /255.0
-    '''
+    
     # TODO: Optionally, smooth the images if LK doesn't work well on raw images
     Shift0_blur = cv2.GaussianBlur( Shift0, (25,25), 15, borderType=cv2.BORDER_REFLECT)
     ShiftR2_blur = cv2.GaussianBlur( ShiftR2, (25,25), 15, borderType=cv2.BORDER_REFLECT)
@@ -510,72 +484,105 @@ def main():
     # 3a
     yos_img_02 = cv2.imread(os.path.join(input_dir, 'DataSeq1', 'yos_img_02.jpg'), 0) / 255.0
     yos_img_02_g_pyr = gaussian_pyramid(yos_img_02, 4)
+    yos_img_03 = cv2.imread(os.path.join(input_dir, 'DataSeq1', 'yos_img_03.jpg'), 0) / 255.0
+    yos_img_03_g_pyr = gaussian_pyramid(yos_img_03, 4)
     # TODO: Select appropriate pyramid *level* that leads to best optic flow estimation
     level = 1
-    U, V = optic_flow_LK(yos_img_01_g_pyr[level], yos_img_02_g_pyr[level], 31)
+    U12, V12 = optic_flow_LK(yos_img_01_g_pyr[level], yos_img_02_g_pyr[level], 31)
+    U23, V23 = optic_flow_LK(yos_img_02_g_pyr[level], yos_img_03_g_pyr[level], 31)
     # TODO: Scale up U, V to original image size (note: don't forget to scale values as well!)
-    U_ex = U
-    V_ex = V
+    U12_ex = U12
+    V12_ex = V12
+    U23_ex = U23
+    V23_ex = V23
     for i in range(level):
-        U_ex = 2*expand(U_ex)
-        V_ex = 2*expand(V_ex)
-        # I might need to multiply values here?
+        U12_ex = 2*expand(U12_ex)
+        V12_ex = 2*expand(V12_ex)
+        U23_ex = 2*expand(U23_ex)
+        V23_ex = 2*expand(V23_ex)
     #end for
     # TODO: Save U, V as side-by-side false-color image or single quiver plot
-    colorAndQuiver( U_ex, V_ex, stride, 10, 'ps6-3-a-1.png')   
-
-    # Warp img 02 back to img 01
-    yos_img_02_warped = warp(yos_img_02, U_ex, V_ex)  # TODO: implement this
-    # TODO: Save difference image between yos_img_02_warped and original yos_img_01
-    # Note: Scale values such that zero difference maps to neutral gray, max -ve to black and max +ve to white
+    rows = yos_img_01.shape[0]
+    columns = yos_img_01.shape[1]
+    stacked_color = np.zeros( (2*rows, 2*columns, 3) )
+    stacked_quiver = np.zeros( (2*rows, columns, 3) )
+    stacked_color[0:rows,:], stacked_quiver[0:rows,:] = colorAndQuiver_nosave(U12_ex, V12_ex, 10, 5)
+    stacked_color[rows:2*rows,:], stacked_quiver[rows:2*rows,:] = colorAndQuiver_nosave(U23_ex, V23_ex, 10, 5)
+    cv2.imwrite( os.path.join(output_dir, 'ps6-3-a-1.png'), stacked_color)
+    cv2.imwrite( os.path.join(output_dir, 'quiver_ps6-3-a-1.png'), stacked_quiver)   
+    # Warp images and save differences
+    yos_img_02_warped = warp(yos_img_02, U12_ex, V12_ex)  
     yos_img_01_diff = yos_img_02_warped - yos_img_01
     yos_img_01_diff = norm(yos_img_01_diff)
-    cv2.imwrite( os.path.join(output_dir, 'ps6-3-a-2.png'), yos_img_01_diff )
-
-    # Similarly, you can compute displacements for yos_img_02 and yos_img_03 (but no need to save images)
+    yos_img_03_warped = warp(yos_img_03, U23_ex, V23_ex)
+    yos_img_02_diff = norm( yos_img_03_warped - yos_img_02)
+    stacked_diff = stack_image2(yos_img_01_diff, yos_img_02_diff)
+    cv2.imwrite( os.path.join(output_dir, 'ps6-3-a-2.png'), stacked_diff )
 
     # TODO: Repeat for DataSeq2 (save images)
     ds2_img01 = cv2.imread(os.path.join(input_dir, 'DataSeq2', '0.png'), 0)/255.0
     ds2_img02 = cv2.imread(os.path.join(input_dir, 'DataSeq2', '1.png'), 0)/255.0
+    ds2_img03 = cv2.imread(os.path.join(input_dir, 'DataSeq2', '2.png'), 0)/255.0
     ds2_img01_g_pyr = gaussian_pyramid(ds2_img01, 4)
     ds2_img02_g_pyr = gaussian_pyramid(ds2_img02, 4)
-    level = 0
-    U, V = optic_flow_LK(ds2_img01_g_pyr[level], ds2_img02_g_pyr[level], 31)
-    U_ex = U
-    V_ex = V
+    ds2_img03_g_pyr = gaussian_pyramid(ds2_img03, 4)
+    level = 2
+    U12, V12 = optic_flow_LK(ds2_img01_g_pyr[level], ds2_img02_g_pyr[level], 31)
+    U23, V23 = optic_flow_LK(ds2_img02_g_pyr[level], ds2_img03_g_pyr[level], 31)
+    U12_ex = U12
+    V12_ex = V12
+    U23_ex = U23
+    V23_ex = V23
     for i in range(level):
-        U_ex = 2*expand(U_ex)
-        V_ex = 2*expand(V_ex)
-        # I might need to multiply values here?
+        U12_ex = 2*expand(U12_ex)
+        V12_ex = 2*expand(V12_ex)
+        U23_ex = 2*expand(U23_ex)
+        V23_ex = 2*expand(V23_ex)
     #end for
     # TODO: Save U, V as side-by-side false-color image or single quiver plot
-    colorAndQuiver( U_ex, V_ex, stride, 5, 'ps6-3-a-3.png') 
-    
-    ds2_img02_warped = warp(ds2_img02, U_ex, V_ex)
+    rows = ds2_img01.shape[0]
+    columns = ds2_img01.shape[1]
+    stacked_color = np.zeros( (2*rows, 2*columns, 3) )
+    stacked_quiver = np.zeros( (2*rows, columns, 3) )
+    stacked_color[0:rows,:], stacked_quiver[0:rows,:] = colorAndQuiver_nosave(U12_ex, V12_ex, 10, 5)
+    stacked_color[rows:2*rows,:], stacked_quiver[rows:2*rows,:] = colorAndQuiver_nosave(U23_ex, V23_ex, 10, 5)
+    cv2.imwrite( os.path.join(output_dir, 'ps6-3-a-3.png'), stacked_color)
+    cv2.imwrite( os.path.join(output_dir, 'quiver_ps6-3-a-3.png'), stacked_quiver) 
+    # Warp and save differences
+    ds2_img02_warped = warp(ds2_img02, U12_ex, V12_ex)
     ds2_img01_diff = ds2_img02_warped - ds2_img01
     ds2_img01_diff = norm(ds2_img01_diff)
-    cv2.imwrite( os.path.join(output_dir, 'ps6-3-a-4.png'), ds2_img01_diff )    
-    '''
+    ds2_img03_warped = warp(ds2_img03, U23_ex, V23_ex)
+    ds2_img02_diff = norm( ds2_img03_warped - ds2_img02 )
+    stacked_diff = stack_image2(ds2_img01_diff, ds2_img02_diff)
+    cv2.imwrite( os.path.join(output_dir, 'ps6-3-a-4.png'), stacked_diff )    
+    
     #*********************************************************************************
     # 4a    
     ShiftR10 = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR10.png'), 0) / 255.0
     ShiftR20 = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR20.png'), 0) / 255.0
     ShiftR40 = cv2.imread(os.path.join(input_dir, 'TestSeq', 'ShiftR40.png'), 0) / 255.0
-    U10, V10 = hierarchical_LK(Shift0, ShiftR10)  # TODO: implement this
-    U20, V20 = hierarchical_LK(Shift0, ShiftR20)
-    U40, V40 = hierarchical_LK(Shift0, ShiftR40)
+    # I tried blurring with H LK - Didn't help 
+    U10, V10 = hierarchical_LK(Shift0, ShiftR10, 31)  # TODO: implement this
+    U20, V20 = hierarchical_LK(Shift0, ShiftR20, 61)
+    U40, V40 = hierarchical_LK(Shift0, ShiftR40, 61)
     # Save off color maps and quiver plots
     rows = Shift0.shape[0]
     columns = Shift0.shape[1]
     stacked_color = np.zeros( (3*rows, 2*columns, 3) )
     stacked_quiver = np.zeros( (3*rows, columns, 3) )
-    stacked_color[0:rows,:], stacked_quiver[0:rows,:] = colorAndQuiver(U10, V10, 10, 1)
-    stacked_color[rows:2*rows,:], stacked_quiver[rows:2*rows,:] = colorAndQuiver(U20, V20, 10, 1)
-    stacked_color[2*rows:3*rows,:], stacked_quiver[2*rows:3*rows,:] = colorAndQuiver(U40, V40, 10, 1)
+    stacked_color[0:rows,:], stacked_quiver[0:rows,:] = colorAndQuiver_nosave(U10, V10, 10, 1)
+    stacked_color[rows:2*rows,:], stacked_quiver[rows:2*rows,:] = colorAndQuiver_nosave(U20, V20, 10, 1)
+    stacked_color[2*rows:3*rows,:], stacked_quiver[2*rows:3*rows,:] = colorAndQuiver_nosave(U40, V40, 10, 1)
     cv2.imwrite( os.path.join(output_dir, 'ps6-4-a-1.png'), stacked_color)
     cv2.imwrite( os.path.join(output_dir, 'quiver_ps6-4-a-1.png'), stacked_quiver)
-    # TODO: Save displacement image pairs (U, V), stacked
-    # Hint: You can use np.concatenate()
+    # The displacements for the 20 and 40 pixel images are too great to be handled by the LK
+    # method. They need scaled to be warped properly. However, when this is done, the non-motion
+    # noise part (which has small movement that would normally be filtered out) is magnified.
+    # So you can either have good results around the motion and poor results for the motion
+    # or good results for the motion and lots of noise around the motion. I opted for the 
+    # first choice to show that LK does not work well for large displacement but does
+    # work for small displacement
     ShiftR10_warped = warp(ShiftR10, U10, V10, 15)
     ShiftR20_warped = warp(ShiftR20, U20, V20, 25)
     ShiftR40_warped = warp(ShiftR40, U40, V40, 45)
@@ -588,13 +595,83 @@ def main():
     ShiftR40_diff = norm(ShiftR40_diff)
     stacked_diff = stack_image(ShiftR10_diff, ShiftR20_diff, ShiftR40_diff)
     cv2.imwrite( os.path.join(output_dir, 'ps6-4-a-2.png'), stacked_diff)
-    '''
+    
+    #******************************
     # 4b
     # TODO: Repeat for DataSeq1 (use yos_img_01.png as the original)
-
+    yos_img_01 = cv2.imread(os.path.join(input_dir, 'DataSeq1', 'yos_img_01.jpg'), 0) / 255.0
+    yos_img_02 = cv2.imread(os.path.join(input_dir, 'DataSeq1', 'yos_img_02.jpg'), 0) / 255.0
+    yos_img_03 = cv2.imread(os.path.join(input_dir, 'DataSeq1', 'yos_img_03.jpg'), 0) / 255.0
+    # Do hierarchical LK
+    U12, V12 = hierarchical_LK( yos_img_01, yos_img_02, 31 )
+    U23, V23 = hierarchical_LK( yos_img_02, yos_img_03, 31 )
+    # Save images
+    rows = yos_img_01.shape[0]
+    columns = yos_img_01.shape[1]
+    stacked_color = np.zeros( (2*rows, 2*columns, 3) )
+    stacked_quiver = np.zeros( (2*rows, columns, 3) )
+    stacked_color[0:rows,:], stacked_quiver[0:rows,:] = colorAndQuiver_nosave(U12, V12, 10, 2)
+    stacked_color[rows:2*rows,:], stacked_quiver[rows:2*rows,:] = colorAndQuiver_nosave(U23, V23, 10, 4)
+    cv2.imwrite( os.path.join(output_dir, 'ps6-4-b-1.png'), stacked_color)
+    cv2.imwrite( os.path.join(output_dir, 'quiver_ps6-4-b-1.png'), stacked_quiver)
+    # Warp and find differences
+    img02_warp = warp( yos_img_02, U12, V12, 15)
+    img03_warp = warp( yos_img_03, U23, V23, 15)
+    diff01 = norm(img02_warp - yos_img_01)
+    diff02 = norm(img03_warp - yos_img_02)
+    stacked_diff = stack_image2( diff01, diff02 )
+    cv2.imwrite( os.path.join(output_dir, 'ps6-4-b-2.png'), stacked_diff )
+    
+    #*****************************
     # 4c
     # TODO: Repeat for DataSeq1 (use 0.png as the original)    
-    '''
+    ds2_img01 = cv2.imread(os.path.join(input_dir, 'DataSeq2', '0.png'), 0)/255.0
+    ds2_img02 = cv2.imread(os.path.join(input_dir, 'DataSeq2', '1.png'), 0)/255.0
+    ds2_img03 = cv2.imread(os.path.join(input_dir, 'DataSeq2', '2.png'), 0)/255.0
+    # Do h lk
+    U12, V12 = hierarchical_LK( ds2_img01, ds2_img02, 31)
+    U23, V23 = hierarchical_LK( ds2_img02, ds2_img03, 31)
+    # Save images
+    rows    = ds2_img01.shape[0]
+    columns = ds2_img01.shape[1]
+    stacked_color = np.zeros( (2*rows, 2*columns, 3) )
+    stacked_quiver = np.zeros( (2*rows, columns, 3) )
+    stacked_color[0:rows,:], stacked_quiver[0:rows,:] = colorAndQuiver_nosave(U12, V12, 10, 1)
+    stacked_color[rows:2*rows,:], stacked_quiver[rows:2*rows,:] = colorAndQuiver_nosave(U23, V23, 10, 2)
+    cv2.imwrite( os.path.join(output_dir, 'ps6-4-c-1.png'), stacked_color)
+    cv2.imwrite( os.path.join(output_dir, 'quiver_ps6-4-c-1.png'), stacked_quiver)
+    # Warp and find differences
+    img02_warp = warp( ds2_img02, U12, V12, 15)
+    img03_warp = warp( ds2_img03, U23, V23, 15)
+    diff01 = norm(img02_warp - ds2_img01)
+    diff02 = norm(img03_warp - ds2_img02)
+    stacked_diff = stack_image2( diff01, diff02 )
+    cv2.imwrite( os.path.join(output_dir, 'ps6-4-c-2.png'), stacked_diff )
+    
+    #***********************************************************************************
+    # 5a
+    juggle1 = cv2.imread(os.path.join(input_dir, 'Juggle', '0.png'), 0)/255.0
+    juggle2 = cv2.imread(os.path.join(input_dir, 'Juggle', '1.png'), 0)/255.0
+    juggle3 = cv2.imread(os.path.join(input_dir, 'Juggle', '2.png'), 0)/255.0
+    # Do LK
+    U12, V12 = hierarchical_LK(juggle1, juggle2, 31)
+    U23, V23 = hierarchical_LK(juggle2, juggle3, 31)
+    # Save images
+    rows    = juggle1.shape[0]
+    columns = juggle1.shape[1]
+    stacked_color = np.zeros( (2*rows, 2*columns, 3) )
+    stacked_quiver = np.zeros( (2*rows, columns, 3) )
+    stacked_color[0:rows,:], stacked_quiver[0:rows,:] = colorAndQuiver_nosave(U12, V12, 10, 1)
+    stacked_color[rows:2*rows,:], stacked_quiver[rows:2*rows,:] = colorAndQuiver_nosave(U23, V23, 10, 2)
+    cv2.imwrite( os.path.join(output_dir, 'ps6-5-a-1.png'), stacked_color)
+    cv2.imwrite( os.path.join(output_dir, 'quiver_ps6-5-a-1.png'), stacked_quiver)
+    # Warp and find differences
+    img02_warp = warp( juggle2, U12, V12, 15) # Warp 2 to 1
+    img03_warp = warp( juggle3, U23, V23, 15) # Warp 3 to 2
+    diff01 = norm(img02_warp - juggle1)
+    diff02 = norm(img03_warp - juggle2)
+    stacked_diff = stack_image2( diff01, diff02 )
+    cv2.imwrite( os.path.join(output_dir, 'ps6-5-a-2.png'), stacked_diff )
 
 if __name__ == "__main__":
     main()
