@@ -64,7 +64,7 @@ def normalizeImage(img):
     # We initialize this as float since you will do arithmetic computation.
     out = np.zeros(img.shape, dtype=np.float)
     # WRITE YOUR CODE HERE.
-    out = cv2.normalize(img, out, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1)
+    out = cv2.normalize(img, out, 0, 255, cv2.NORM_MINMAX)
 
     # END OF FUNCTION.
     # We handle casting your matrix to a uint8. If your values do not range from
@@ -101,9 +101,9 @@ def linearWeight(pixel_value):
     if pixel_value > pixel_range_mid:
         weight = pixel_range_max - pixel_value
     else:
-        weight = pixel_value.astype(np.float_)
+        weight = float(pixel_value)
     #endif
-
+    
     # END OF FUNCTION.
     return weight
 
@@ -143,9 +143,9 @@ def getYXLocations(image, intensity_value):
                                 locations of input intensity. Type np.int64.
     """
     # WRITE YOUR CODE HERE.
-    y_locs, x_locs = np.where( image = intensity_value )
+    y_locs, x_locs = np.where( image == intensity_value )
 
-    return y_locs, x_locs    
+    return y_locs.astype(np.int64), x_locs.astype(np.int64)    
     # END OF FUNCTION
 
 def computeResponseCurve(pixels, log_exposures, smoothing_lambda,
@@ -231,10 +231,11 @@ def computeResponseCurve(pixels, log_exposures, smoothing_lambda,
         for j in xrange(num_images):
             wij = weighting_function(pixels[i, j])
             # PART 1: WRITE YOUR CODE HERE
+            pixel_value = pixels[i,j]
+            mat_A[idx_ctr, pixel_value]   = wij
+            mat_A[idx_ctr, pixel_value+1] = -1*wij
 
-
-
-
+            mat_b[idx_ctr, 0] = wij*log_exposures[j]
             # STOP WRITING CODE HERE.
             idx_ctr = idx_ctr + 1
 

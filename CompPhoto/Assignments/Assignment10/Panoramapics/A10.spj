@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<stitchProject version="2.0" cameraMotion="automatic" computedCameraMotion="rotation3D" projection="perspective">
+  <viewRotation yaw="-0.59717467336926777" pitch="-0" roll="0" angleUnit="degrees" />
+  <vignetteCorrection redFactor="0.225806445" greenFactor="0.225806445" blueFactor="0.225806445" globalIntensityScale="1" />
+  <sourceImages>
+    <sourceImage filePath="C:\Users\kilverj\Documents\GitHub\OMSCS\CompPhoto\Assignments\Assignment10\Panoramapics\IMG_20151011_125131.jpg">
+      <radialDistortion k1="-0.116873264" k2="0.172909543" k3="-0.0603241138" k4="0" />
+      <cameraPose yaw="-19.14453409941088" pitch="-2.0194235421248239" roll="-0.70748625224964734" angleUnit="degrees" focalLength="2.8204744022834745" tolerance="4" />
+    </sourceImage>
+    <sourceImage filePath="C:\Users\kilverj\Documents\GitHub\OMSCS\CompPhoto\Assignments\Assignment10\Panoramapics\IMG_20151011_125135.jpg">
+      <radialDistortion k1="-0.116873264" k2="0.172909543" k3="-0.0603241138" k4="0" />
+      <cameraPose yaw="-7.38056235034362" pitch="-1.4962625444500828" roll="0.53237968977848327" angleUnit="degrees" focalLength="2.8204744022834745" tolerance="4" />
+    </sourceImage>
+    <sourceImage filePath="C:\Users\kilverj\Documents\GitHub\OMSCS\CompPhoto\Assignments\Assignment10\Panoramapics\IMG_20151011_125138.jpg">
+      <radialDistortion k1="-0.116873264" k2="0.172909543" k3="-0.0603241138" k4="0" />
+      <cameraPose yaw="6.4777237707837525" pitch="-1.8221841790926239" roll="0.78672405573939785" angleUnit="degrees" focalLength="2.8204744022834745" tolerance="4" />
+    </sourceImage>
+    <sourceImage filePath="C:\Users\kilverj\Documents\GitHub\OMSCS\CompPhoto\Assignments\Assignment10\Panoramapics\IMG_20151011_125141.jpg">
+      <radialDistortion k1="-0.116873264" k2="0.172909543" k3="-0.0603241138" k4="0" />
+      <cameraPose yaw="20.095757695306467" pitch="-1.8856660605550095" roll="-0.68307160313609483" angleUnit="degrees" focalLength="2.8204744022834745" tolerance="4" />
+    </sourceImage>
+  </sourceImages>
+</stitchProject>
