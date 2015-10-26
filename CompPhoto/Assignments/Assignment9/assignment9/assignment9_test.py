@@ -155,8 +155,9 @@ if __name__ == "__main__":
 
     image_dir = "input"
     output_dir = "output"
+    exposure_times = np.float64([1/7.0, 1/3.0, 1.0, 1.2, 2.4 ])
     #exposure_times = np.float64([1/160.0, 1/60.0, 1/40.0, 1/20.0, 1/10.0 ])
-    exposure_times = np.float64([1/646.0, 1/456.0, 1/329.0, 1/225.0, 1/124.0 ])
+    #exposure_times = np.float64([1/646.0, 1/456.0, 1/329.0, 1/225.0, 1/124.0 ])
     log_exposure_times = np.log(exposure_times)
 
     np.random.seed()
