@@ -1,4 +1,8 @@
 """Problem Set 7: Particle Filter Tracking."""
+""" NOTE: To get this to work, I had to do the following:
+    1) From C:\opencv\sources\3rdparty\ffmpeg copy opencv_ffmpeg.dll into C:\Python27
+    2) Rename opencv_ffmpeg.dll to opencv_ffmpeg2411.dll (the rename was required and the 2411 is in reference to the version of OpenCV I am running)
+    """
 
 import numpy as np
 import cv2
@@ -28,17 +32,20 @@ class ParticleFilter(object):
         w = frame.size[1]
         self.num_particles = kwargs.get('num_particles', 100)  # extract num_particles (default: 100)
         # TODO: Your code here - extract any additional keyword arguments you need and initialize state
-        
+        startingEstimate = kwargs.get('startingEst', (frame.shape[0]/2, frame.shape[1]/2))
         # The state needs to contain the row, column locations for the number of particles
         self.state = np.zeros( (self.num_particles, 2) ) # location of center of bounding box
-        # We want to get the particles distributed evenly and randomly
-        # Note: We can 'cheat' here a little. We can distribute the particles around where we got the 
-        # template from. We just need to pass in the template location in kwargs
+        # Using the starting estimate, spread the particles around and a little outside of the bounding
+        # box. We want to have a decent estimate to start, but we also want to account for noise
+        # and uncertainty
+        # TODO***************************************************************************
+        # Right now this is evenly and randomly distributed
         self.state[:,0] = int(np.random.rand(self.num_particles,1)*w)
         self.state[:,1] = int(np.random.rand(self.num_particles,1)*h) 
         # All particles have equal weight at the beginning
         self.weight = np.ones( (self.num_particles, 1) )*(1.0/self.num_particles)
         self.template = template
+    #end init        
 
     def process(self, frame):
         """Process a frame (image) of video and update filter state.
@@ -48,16 +55,7 @@ class ParticleFilter(object):
             frame: color BGR uint8 image of current video frame, values in [0, 255]
         """
         
-        '''
-        for i in range(self.num_particles):            
-            # Sample particle from current distribution (i.e., self.state) according to it's weight
-            particle = 
-            
-            
-        #end for
-        '''
          # TODO: Your code here - use the frame as a new observation (measurement) and update model
-        #***********************************
         
         # Sample num_particles from current distribution (state)
         particles = np.zeros( (self.num_particles, 2) )
@@ -84,7 +82,7 @@ class ParticleFilter(object):
     
     def sensorModel(self, frame, sigma=10):
         """ Compute the mean-squared error between the template and the current frame and use that to
-        compute the sensor model
+        compute the sensor model weights
         """
         # Find the mean-squared error for all the particles in the current state
         ms_err = self.mse(frame)
@@ -158,7 +156,6 @@ class ParticleFilter(object):
         s[:,1] = s[:,1] + np.random.normal(0, sigma, self.num_particles)
         
         self.state = s
-        
     #end updateModel
 
     def render(self, frame_out):
@@ -315,6 +312,7 @@ def main():
 
     # 1a
     # TODO: Implement ParticleFilter
+    x, y, w, h = get_template_rect(os.path.join(input_dir, "pres_debate.txt"))
     run_particle_filter(ParticleFilter,  # particle filter model class
         os.path.join(input_dir, "pres_debate.avi"),  # input video
         get_template_rect(os.path.join(input_dir, "pres_debate.txt")),  # suggested template window (dict)
@@ -325,7 +323,10 @@ def main():
             84: os.path.join(output_dir, 'ps7-1-a-3.png'),
             144: os.path.join(output_dir, 'ps7-1-a-4.png')
         },  # frames to save, mapped to filenames, and 'template' if desired
-        num_particles=300)  # TODO: specify other keyword args that your model expects, e.g. measurement_noise=0.2
+        num_particles=300,
+        startingEst = (y,x),
+        height = h,
+        width = w)  # TODO: specify other keyword args that your model expects, e.g. measurement_noise=0.2
 
     # 1b
     # TODO: Repeat 1a, but vary template window size and discuss trade-offs (no output images required)
@@ -339,6 +340,7 @@ def main():
 
     # 1e
     '''
+    x, y, w, h = get_template_rect(os.path.join(input_dir, "noisy_debate.txt"))
     run_particle_filter(ParticleFilter,
         os.path.join(input_dir, "noisy_debate.avi"),
         get_template_rect(os.path.join(input_dir, "noisy_debate.txt")),
@@ -347,7 +349,10 @@ def main():
             32: os.path.join(output_dir, 'ps7-1-e-2.png'),
             46: os.path.join(output_dir, 'ps7-1-e-3.png')
         },
-        num_particles=50)  # TODO: Tune parameters so that model can continuing tracking through noise
+        num_particles=50,
+        startingEst = (y,x),
+        height = h,
+        width = w)  # TODO: Tune parameters so that model can continuing tracking through noise
     '''
     # 2a
     # TODO: Implement AppearanceModelPF (derived from ParticleFilter)
