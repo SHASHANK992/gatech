@@ -27,13 +27,18 @@ class ParticleFilter(object):
         h = frame.size[0]
         w = frame.size[1]
         self.num_particles = kwargs.get('num_particles', 100)  # extract num_particles (default: 100)
+        # TODO: Your code here - extract any additional keyword arguments you need and initialize state
+        
         # The state needs to contain the row, column locations for the number of particles
         self.state = np.zeros( (self.num_particles, 2) ) # location of center of bounding box
         # We want to get the particles distributed evenly and randomly
+        # Note: We can 'cheat' here a little. We can distribute the particles around where we got the 
+        # template from. We just need to pass in the template location in kwargs
         self.state[:,0] = int(np.random.rand(self.num_particles,1)*w)
         self.state[:,1] = int(np.random.rand(self.num_particles,1)*h) 
+        # All particles have equal weight at the beginning
+        self.weight = np.ones( (self.num_particles, 1) )*(1.0/self.num_particles)
         self.template = template
-        # TODO: Your code here - extract any additional keyword arguments you need and initialize state
 
     def process(self, frame):
         """Process a frame (image) of video and update filter state.
@@ -43,22 +48,56 @@ class ParticleFilter(object):
             frame: color BGR uint8 image of current video frame, values in [0, 255]
         """
         
+        '''
+        for i in range(self.num_particles):            
+            # Sample particle from current distribution (i.e., self.state) according to it's weight
+            particle = 
+            
+            
+        #end for
+        '''
+         # TODO: Your code here - use the frame as a new observation (measurement) and update model
+        #***********************************
         
-        pass  # TODO: Your code here - use the frame as a new observation (measurement) and update model
+        # Sample num_particles from current distribution (state)
+        particles = np.zeros( (self.num_particles, 2) )
+        index = 0
+        # num_samples contains how many particles at each index were drawn
+        num_samples = np.random.multinomial(self.num_particles, self.weights, size=1)
+        # i is the index into the state vector
+        for i in range(self.num_particles):
+            # how many samples to draw at this index
+            samplesToDraw = num_samples[i,0]
+            for j in range(samplesToDraw):
+                particles[index,:] = self.state[i,:]
+                index += 1
+            #end for
+        #end for
+        
+        # Update state using dynamics and the resampled particles
+        self.updateModel( particles, sigma=5 )
+        
+        # Reweight using sensor model
+        # This takes care of the normalization
+        self.sensorModel( frame, sigma=10 )
+    #end process
     
     def sensorModel(self, frame, sigma=10):
         """ Compute the mean-squared error between the template and the current frame and use that to
         compute the sensor model
         """
         # Find the mean-squared error for all the particles in the current state
-        ms_err = mse(frame)
+        ms_err = self.mse(frame)
         # Now compute the measurement probability
         measure = np.zeros( (self.num_particles, 1) )
         for i in range(self.num_particles):
             measure[i,0] = np.exp( -1*ms_err[i,0]/float(2*sigma**2) )
         #endfor
         
-        return measure        
+        # Normalize weights
+        measure = cv2.normalize(measure, measure, 0.0, 1.0, cv2.NORM_MINMAX)
+        
+        self.weight = measure       
     #end sensorModel
     
     def mse(self, image):
@@ -71,9 +110,8 @@ class ParticleFilter(object):
         for i in self.num_particles:
             u = self.state[i,0]
             v = self.state[i,1]
-            # I think I will need to be a little more careful here
-            # If the state is (0, 0), I can't go beyond the image
-            cutout = image[u-rows/2:u+rows/2, v-cols/2:v+cols/2]
+            
+            cutout = self.getCutout(u, v, image)
             
             err = np.sum( (self.template.astype("float") - cutout.astype("float"))**2 )
             err /= float(rows*cols)
@@ -82,13 +120,40 @@ class ParticleFilter(object):
         return err_v
     #end mse
     
+    def getCutout(self, u, v, image):
+        rows = self.template.shape[0]
+        cols = self.template.shape[1]
+        
+        upper = u-rows/2
+        if upper < 0:
+            upper = 0
+        
+        lower = u+rows/2
+        if lower > image.shape[0]:
+            lower = image.shape[0]
+            
+        left = v-cols/2
+        if left < 0:
+            left = 0
+            
+        right = v+cols/2
+        if right > image.shape[1]:
+            right = image.shape[1]
+            
+        cutout = np.zeros( self.template.shape )
+        # I still think there is some problem here, but this is closer to being right
+        cutout[upper:lower, left:right] = image[upper:lower, left:right]
+        
+        return cutout        
+    #end getCutout
     
-    def updateModel(self, sigma=5): # Different sigma from sensor model
+    
+    def updateModel(self, sampledState, sigma=5): # Different sigma from sensor model
         """ Update the current state according to the dynamics model
         Note: This is a different sigma from the sensor model
         """
-        s = self.state
-        
+        s = sampledState
+        # The dynamics model is just independent, additive Gaussian noise
         s[:,0] = s[:,0] + np.random.normal(0, sigma, self.num_particles)
         s[:,1] = s[:,1] + np.random.normal(0, sigma, self.num_particles)
         
@@ -105,8 +170,8 @@ class ParticleFilter(object):
         """
         # Note: This may not be called for all frames, so don't do any model updates here!
         # Compute the weighted average
-        avg, weights = weightedMean(frame_out)
-        spread = stdDevEst(avg, weights)
+        avg, weights = self.weightedMean(frame_out)
+        spread = self.stdDevEst(avg, weights)
         
         # Draw the tracking window
         # I have the center, but how do I know the dimensions?
@@ -260,7 +325,7 @@ def main():
             84: os.path.join(output_dir, 'ps7-1-a-3.png'),
             144: os.path.join(output_dir, 'ps7-1-a-4.png')
         },  # frames to save, mapped to filenames, and 'template' if desired
-        num_particles=50)  # TODO: specify other keyword args that your model expects, e.g. measurement_noise=0.2
+        num_particles=300)  # TODO: specify other keyword args that your model expects, e.g. measurement_noise=0.2
 
     # 1b
     # TODO: Repeat 1a, but vary template window size and discuss trade-offs (no output images required)
@@ -273,6 +338,7 @@ def main():
     # TODO: Repeat 1a, but try to optimize (minimize) num_particles (no output images required)
 
     # 1e
+    '''
     run_particle_filter(ParticleFilter,
         os.path.join(input_dir, "noisy_debate.avi"),
         get_template_rect(os.path.join(input_dir, "noisy_debate.txt")),
@@ -282,7 +348,7 @@ def main():
             46: os.path.join(output_dir, 'ps7-1-e-3.png')
         },
         num_particles=50)  # TODO: Tune parameters so that model can continuing tracking through noise
-
+    '''
     # 2a
     # TODO: Implement AppearanceModelPF (derived from ParticleFilter)
     # TODO: Run it on pres_debate.avi to track Romney's left hand, tweak parameters to track up to frame 140
