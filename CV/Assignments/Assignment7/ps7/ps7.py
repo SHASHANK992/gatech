@@ -28,22 +28,22 @@ class ParticleFilter(object):
             kwargs: keyword arguments needed by particle filter model, including:
             - num_particles: number of particles
         """
-        h = frame.size[0]
-        w = frame.size[1]
         self.num_particles = kwargs.get('num_particles', 100)  # extract num_particles (default: 100)
         # TODO: Your code here - extract any additional keyword arguments you need and initialize state
-        startingEstimate = kwargs.get('startingEst', (frame.shape[0]/2, frame.shape[1]/2))
+        # Starting estimate is in u,v (row, column) coordinates
+        startingEstimate = kwargs.get('startingEst', (frame.shape[0]/2,frame.shape[1]/2))
+        h = kwargs.get('height', 50)
+        w = kwargs.get('width',  50)
         # The state needs to contain the row, column locations for the number of particles
         self.state = np.zeros( (self.num_particles, 2) ) # location of center of bounding box
         # Using the starting estimate, spread the particles around and a little outside of the bounding
         # box. We want to have a decent estimate to start, but we also want to account for noise
-        # and uncertainty
-        # TODO***************************************************************************
-        # Right now this is evenly and randomly distributed
-        self.state[:,0] = int(np.random.rand(self.num_particles,1)*w)
-        self.state[:,1] = int(np.random.rand(self.num_particles,1)*h) 
+        # and uncertainty. I am starting the state centered around the template and having a spread
+        # of twice the width and height of the template
+        self.state[:,0] = startingEstimate[0] + (np.random.rand(self.num_particles)*2*h).astype('int')
+        self.state[:,1] = startingEstimate[1] + (np.random.rand(self.num_particles)*2*w).astype('int')
         # All particles have equal weight at the beginning
-        self.weight = np.ones( (self.num_particles, 1) )*(1.0/self.num_particles)
+        self.weights = np.ones( (self.num_particles, 1) )*(1.0/self.num_particles)
         self.template = template
     #end init        
 
@@ -60,12 +60,17 @@ class ParticleFilter(object):
         # Sample num_particles from current distribution (state)
         particles = np.zeros( (self.num_particles, 2) )
         index = 0
+        # Convert self.weights into a sequence that np can understand
+        weights_seq = []
+        for i in range(self.num_particles):
+            weights_seq.append( self.weights[i,0] )
         # num_samples contains how many particles at each index were drawn
-        num_samples = np.random.multinomial(self.num_particles, self.weights, size=1)
+        num_samples = np.random.multinomial(self.num_particles, weights_seq, size=1)
         # i is the index into the state vector
         for i in range(self.num_particles):
             # how many samples to draw at this index
-            samplesToDraw = num_samples[i,0]
+            samplesToDraw = num_samples[0, i]
+            #print samplesToDraw
             for j in range(samplesToDraw):
                 particles[index,:] = self.state[i,:]
                 index += 1
@@ -77,13 +82,16 @@ class ParticleFilter(object):
         
         # Reweight using sensor model
         # This takes care of the normalization
-        self.sensorModel( frame, sigma=10 )
+        self.weights = self.sensorModel( frame, sigma=10 )
     #end process
     
     def sensorModel(self, frame, sigma=10):
         """ Compute the mean-squared error between the template and the current frame and use that to
         compute the sensor model weights
+        
+        NOTE: I may want to add some noise in here
         """
+            
         # Find the mean-squared error for all the particles in the current state
         ms_err = self.mse(frame)
         # Now compute the measurement probability
@@ -93,9 +101,11 @@ class ParticleFilter(object):
         #endfor
         
         # Normalize weights
-        measure = cv2.normalize(measure, measure, 0.0, 1.0, cv2.NORM_MINMAX)
+        # Find the sum of all the weights and divide out
+        sum_measure = np.sum(measure)
+        measure /= sum_measure
         
-        self.weight = measure       
+        return measure       
     #end sensorModel
     
     def mse(self, image):
@@ -105,7 +115,7 @@ class ParticleFilter(object):
         rows = self.template.shape[0]
         cols = self.template.shape[1]
         err_v = np.zeros( (self.num_particles, 1) )
-        for i in self.num_particles:
+        for i in range(self.num_particles):
             u = self.state[i,0]
             v = self.state[i,1]
             
@@ -125,22 +135,38 @@ class ParticleFilter(object):
         upper = u-rows/2
         if upper < 0:
             upper = 0
+        elif upper >= image.shape[0]:
+            upper = image.shape[0]-1
+        else:
+            upper = int(upper)
         
         lower = u+rows/2
         if lower > image.shape[0]:
-            lower = image.shape[0]
+            lower = image.shape[0]-1
+        elif lower < 0:
+            lower = 0
+        else:
+            lower = int(lower)
             
         left = v-cols/2
         if left < 0:
             left = 0
+        elif left > image.shape[1]:
+            left = image.shape[1]-1
+        else:
+            left = int(left)
             
         right = v+cols/2
         if right > image.shape[1]:
-            right = image.shape[1]
+            right = image.shape[1]-1
+        elif right < 0:
+            right = 0
+        else:
+            right = int(right)
             
         cutout = np.zeros( self.template.shape )
         # I still think there is some problem here, but this is closer to being right
-        cutout[upper:lower, left:right] = image[upper:lower, left:right]
+        cutout[0:lower-upper, 0:right-left] = image[upper:lower, left:right]
         
         return cutout        
     #end getCutout
@@ -169,27 +195,32 @@ class ParticleFilter(object):
         # Compute the weighted average
         avg, weights = self.weightedMean(frame_out)
         spread = self.stdDevEst(avg, weights)
-        
-        # Draw the tracking window
-        # I have the center, but how do I know the dimensions?
-        
-        # Draw the estimate for the standard deviation
-        frame_out = cv2.circle(frame_out, avg, spread.astype('int'), (0,255,0), thickness=2)
-                
+                       
         for i in range(self.num_particles):
             # Draw particles
-            pt1 = (self.state[i,0], self.state[i,1])
-            frame_out = cv2.line(frame_out, pt1, pt1, (0,255,0), thickness=2)
-        #end for              
+            pt1 = (int(self.state[i,1]), int(self.state[i,0]))
+            #print pt1
+            cv2.circle(frame_out, pt1, 1, (0,255,0), thickness=2)
+        #end for  
+        
+        # TODO**********************************************************************************
+        # Draw the tracking window
+        # I have the center, but how do I know the dimensions?
+        # Maybe I need to add height and width as member variables
+        
+        # Draw the estimate for the standard deviation
+        # avg is in (u,v) coordinates (row, columns). Switch to (x, y)
+        cv2.circle(frame_out, (avg[1], avg[0]), spread.astype('int'), (0,0,255), thickness=2)
+    #end render            
         
         
     def weightedMean(self, frame):
-        weights = sensorModel(frame)
+        weights = self.sensorModel(frame)
         
         # Multiply weights
         weighted = np.zeros( self.state.shape )
-        weighted[:0] = weights*self.state[:,0]
-        weighted[:1] = weights*self.state[:,1]
+        weighted[:,0] = np.reshape(weights, (1, self.num_particles))*self.state[:,0]
+        weighted[:,1] = np.reshape(weights, (1, self.num_particles))*self.state[:,1]
         
         avg = (1/float(np.sum(weights)))*(np.sum(weighted, axis=0))
         
@@ -200,7 +231,7 @@ class ParticleFilter(object):
         # For every state, compute the difference between it and the weighted average
         diff = np.zeros( (self.num_particles, 1) )
         for i in range(self.num_particles):
-            diff[i,0] = np.sqrt( (self.state[i,0]-mean[0,0])**2 - (self.state[i,1]-mean[0,1])**2 )
+            diff[i,0] = np.sqrt( (self.state[i,0]-mean[0])**2 + (self.state[i,1]-mean[1])**2 )
         #end for
         
         weighted_diff = np.sum(diff*weights)/float(np.sum(weights))
@@ -312,7 +343,7 @@ def main():
 
     # 1a
     # TODO: Implement ParticleFilter
-    x, y, w, h = get_template_rect(os.path.join(input_dir, "pres_debate.txt"))
+    template_r = get_template_rect(os.path.join(input_dir, "pres_debate.txt"))
     run_particle_filter(ParticleFilter,  # particle filter model class
         os.path.join(input_dir, "pres_debate.avi"),  # input video
         get_template_rect(os.path.join(input_dir, "pres_debate.txt")),  # suggested template window (dict)
@@ -324,9 +355,9 @@ def main():
             144: os.path.join(output_dir, 'ps7-1-a-4.png')
         },  # frames to save, mapped to filenames, and 'template' if desired
         num_particles=300,
-        startingEst = (y,x),
-        height = h,
-        width = w)  # TODO: specify other keyword args that your model expects, e.g. measurement_noise=0.2
+        startingEst = (template_r['y'],template_r['x']),
+        height = template_r['h'],
+        width = template_r['w'])  # TODO: specify other keyword args that your model expects, e.g. measurement_noise=0.2
 
     # 1b
     # TODO: Repeat 1a, but vary template window size and discuss trade-offs (no output images required)
@@ -340,7 +371,7 @@ def main():
 
     # 1e
     '''
-    x, y, w, h = get_template_rect(os.path.join(input_dir, "noisy_debate.txt"))
+    template_r = get_template_rect(os.path.join(input_dir, "noisy_debate.txt"))
     run_particle_filter(ParticleFilter,
         os.path.join(input_dir, "noisy_debate.avi"),
         get_template_rect(os.path.join(input_dir, "noisy_debate.txt")),
@@ -350,9 +381,9 @@ def main():
             46: os.path.join(output_dir, 'ps7-1-e-3.png')
         },
         num_particles=50,
-        startingEst = (y,x),
-        height = h,
-        width = w)  # TODO: Tune parameters so that model can continuing tracking through noise
+        startingEst = (template_r['y'],template_r['x']),
+        height = template_r['h'],
+        width = template_r['w'] )  # TODO: Tune parameters so that model can continuing tracking through noise
     '''
     # 2a
     # TODO: Implement AppearanceModelPF (derived from ParticleFilter)
