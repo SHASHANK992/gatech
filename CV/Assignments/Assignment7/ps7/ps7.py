@@ -31,6 +31,7 @@ class ParticleFilter(object):
         self.num_particles = kwargs.get('num_particles', 100)  # extract num_particles (default: 100)
         # TODO: Your code here - extract any additional keyword arguments you need and initialize state
         self.sigma_sensor = kwargs.get('sigma_MSE', 10) # sigma for the sensor model
+        self.sigma_motion = kwargs.get('sigma_dyn', 10) # sigma for motion model
         # Starting estimate is in u,v (row, column) coordinates
         startingEstimate = kwargs.get('startingEst', (frame.shape[0]/2,frame.shape[1]/2))
         h = kwargs.get('height', 50)
@@ -65,14 +66,14 @@ class ParticleFilter(object):
         particles = self.resample()
         
         # Update state using dynamics and the resampled particles
-        self.updateModel( particles, sigma=5 )
+        self.updateModel( particles )
         
         # Reweight using sensor model
         # This takes care of the normalization
         self.weights = self.sensorModel( frame )
     #end process
     
-    def resample():
+    def resample(self):
         '''Takes samples from existing state to create a new distribution'''
         particles = np.zeros( (self.num_particles, 2) )
         index = 0
@@ -183,14 +184,14 @@ class ParticleFilter(object):
     #end getCutout
     
     
-    def updateModel(self, sampledState, sigma=5): # Different sigma from sensor model
+    def updateModel(self, sampledState): # Different sigma from sensor model
         """ Update the current state according to the dynamics model
         Note: This is a different sigma from the sensor model
         """
         s = sampledState
         # The dynamics model is just independent, additive Gaussian noise
-        s[:,0] = s[:,0] + np.random.normal(0, sigma, self.num_particles)
-        s[:,1] = s[:,1] + np.random.normal(0, sigma, self.num_particles)
+        s[:,0] = s[:,0] + np.random.normal(0, self.sigma_motion, self.num_particles)
+        s[:,1] = s[:,1] + np.random.normal(0, self.sigma_motion, self.num_particles)
         
         self.state = s
     #end updateModel
@@ -204,8 +205,8 @@ class ParticleFilter(object):
         """
         # Note: This may not be called for all frames, so don't do any model updates here!
         # Compute the weighted average
-        avg, weights = self.weightedMean(frame_out)
-        spread = self.stdDevEst(avg, weights)
+        avg = self.weightedMean()
+        spread = self.stdDevEst(avg)
                        
         for i in range(self.num_particles):
             # Draw particles
@@ -215,8 +216,8 @@ class ParticleFilter(object):
         #end for  
         
         # Draw the tracking window
-        pt1 = ( int(avg[1]-self.height/2), int(avg[0]-self.width/2) )
-        pt2 = ( int(avg[1]+self.height/2), int(avg[0]+self.width/2) )
+        pt1 = ( int(avg[1]-self.width/2), int(avg[0]-self.height/2) )
+        pt2 = ( int(avg[1]+self.width/2), int(avg[0]+self.height/2) )
         cv2.rectangle(frame_out, pt1, pt2, (0, 255, 0), thickness=2)
         
         # Draw the estimate for the standard deviation
@@ -225,27 +226,26 @@ class ParticleFilter(object):
     #end render            
         
         
-    def weightedMean(self, frame):
-        weights = self.sensorModel(frame)
+    def weightedMean(self):
         
         # Multiply weights
         weighted = np.zeros( self.state.shape )
-        weighted[:,0] = np.reshape(weights, (1, self.num_particles))*self.state[:,0]
-        weighted[:,1] = np.reshape(weights, (1, self.num_particles))*self.state[:,1]
+        weighted[:,0] = np.reshape(self.weights, (1, self.num_particles))*self.state[:,0]
+        weighted[:,1] = np.reshape(self.weights, (1, self.num_particles))*self.state[:,1]
         
-        avg = (1/float(np.sum(weights)))*(np.sum(weighted, axis=0))
+        avg = (1/float(np.sum(self.weights)))*(np.sum(weighted, axis=0))
         
-        return avg.astype('int'), weights
+        return avg.astype('int')
     #end weightedMean
     
-    def stdDevEst(self, mean, weights):
+    def stdDevEst(self, mean ):
         # For every state, compute the difference between it and the weighted average
         diff = np.zeros( (self.num_particles, 1) )
         for i in range(self.num_particles):
             diff[i,0] = np.sqrt( (self.state[i,0]-mean[0])**2 + (self.state[i,1]-mean[1])**2 )
         #end for
         
-        weighted_diff = np.sum(diff*weights)/float(np.sum(weights))
+        weighted_diff = np.sum(diff*self.weights)/float(np.sum(self.weights))
         
         return weighted_diff
     #end stdDevEst
@@ -258,10 +258,11 @@ class AppearanceModelPF(ParticleFilter):
     def __init__(self, frame, template, **kwargs):
         """Initialize appearance model particle filter object (parameters same as ParticleFilter)."""
         super(AppearanceModelPF, self).__init__(frame, template, **kwargs)  # call base class constructor
+        self.alpha = kwargs.get('alpha', 0.5)
         # TODO: Your code here - additional initialization steps, keyword arguments
 
     # TODO: Override process() to implement appearance model update
-    def process(self, frame):
+    def process(self, frame, iteration=0):
         """Process a frame (image) of video and update filter state.
 
         Parameters
@@ -270,15 +271,45 @@ class AppearanceModelPF(ParticleFilter):
         """
         # I think I can just copy a lot of the code from ParticleFilter.process into here, with just the 
         # added step of updating the template to track
+        # Sample num_particles from current distribution (state)
         
-        pass  # TODO: Your code here - use the frame as a new observation (measurement) and update model
+        particles = self.resample()
+        
+        # Update state using dynamics and the resampled particles
+        self.updateModel( particles )
+        
+        # Reweight using sensor model
+        # This takes care of the normalization
+        self.weights = self.sensorModel( frame )
+        
+        # With the updated weights, calculated the weighted mean
+        # Use the weighted mean to compute the best match, and update the template
+        self.updateTemplate(frame)
+        '''
+        template_name = 'template' + str(iteration) + '.png'
+        cv2.imwrite( os.path.join(output_dir, 'templates', template_name), self.template )
+        frame_name = 'frame' + str(iteration) + '.png'
+        frame_out = frame.copy()
+        self.render(frame_out)
+        cv2.imwrite( os.path.join(output_dir, 'frames', frame_name), frame_out)
+        '''
+        
+    #end process        
 
-    def updateTemplate(self):
+    def updateTemplate(self, frame):
         ''' Update the template to track using the Infinite Impulse Response (IIR) filter'''
+        # Compute the weighted average
+        avg = self.weightedMean()
         
-        pass
+        # Using the weighted average, find the best match to the template
+        best = self.getCutout( avg[0], avg[1], frame )
+        
+        # The new template is a weighted sum of the two templates, the old one and the new best match
+        self.template = (self.alpha*best + (1-self.alpha)*self.template).astype('int')        
+
     #end updateTemplate
-    # TODO: Override render() if desired (shouldn't have to, ideally)
+    
+# end class AppearanceModelPF
 
 
 # Driver/helper code
@@ -379,6 +410,7 @@ def main():
         height = template_r['h'],
         width = template_r['w'])  # TODO: specify other keyword args that your model expects, e.g. measurement_noise=0.2
     '''
+    '''
     # 1b
     # TODO: Repeat 1a, but vary template window size and discuss trade-offs (no output images required)
     # Smaller window does not have enough of subject to track
@@ -438,7 +470,8 @@ def main():
         startingEst = (template_r['y'],template_r['x']),
         height = template_r['h'],
         width = template_r['w'])
-
+    '''
+    '''
     # 1e    
     template_r = get_template_rect(os.path.join(input_dir, "noisy_debate.txt"))
     run_particle_filter(ParticleFilter,
@@ -455,10 +488,31 @@ def main():
         startingEst = (template_r['y'],template_r['x']),
         height = template_r['h'],
         width = template_r['w'] )  # TODO: Tune parameters so that model can continuing tracking through noise
-    
+    '''
     # 2a
     # TODO: Implement AppearanceModelPF (derived from ParticleFilter)
     # TODO: Run it on pres_debate.avi to track Romney's left hand, tweak parameters to track up to frame 140
+    # Get the template for Romney's hand
+    template_r = get_template_rect(os.path.join(input_dir, "hand.txt"))
+    run_particle_filter(AppearanceModelPF,
+        os.path.join(input_dir, "pres_debate.avi"),
+        get_template_rect(os.path.join(input_dir, "hand.txt")),
+        {
+            'template': os.path.join(output_dir, 'ps7-2-a-1.png'),
+            15:  os.path.join(output_dir, 'ps7-2-a-2.png'),
+            50:  os.path.join(output_dir, 'ps7-2-a-3.png'),
+            140: os.path.join(output_dir, 'ps7-2-a-4.png')
+            # At frame 200 it diverged a little bit, at 300 it was back on
+            #300:  os.path.join(output_dir, 'test.png')
+        },
+        num_particles=300,
+        startingEst = (template_r['y'],template_r['x']),
+        height = template_r['h'],
+        width = template_r['w'],
+        sigma_MSE = 10,
+        sigma_dyn = 20,
+        alpha = 0.5 ) 
+    
 
     # 2b
     # TODO: Run AppearanceModelPF on noisy_debate.avi, tweak parameters to track hand up to frame 140
