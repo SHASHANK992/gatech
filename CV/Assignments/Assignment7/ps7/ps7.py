@@ -52,7 +52,7 @@ class ParticleFilter(object):
         self.template = template
     #end init        
 
-    def process(self, frame):
+    def process(self, frame, iteration=0):
         """Process a frame (image) of video and update filter state.
 
         Parameters
@@ -71,6 +71,12 @@ class ParticleFilter(object):
         # Reweight using sensor model
         # This takes care of the normalization
         self.weights = self.sensorModel( frame )
+        '''
+        frame_name = 'frame' + str(iteration) + '.png'
+        frame_out = frame.copy()
+        self.render(frame_out)
+        cv2.imwrite( os.path.join(output_dir, 'frames', frame_name), frame_out)
+        '''
     #end process
     
     def resample(self):
@@ -374,7 +380,7 @@ def run_particle_filter(pf_class, video_filename, template_rect, save_frames={},
                 pf = pf_class(frame, template, **kwargs)
 
             # Process frame
-            pf.process(frame)  # TODO: implement this!
+            pf.process(frame, frame_num)  # TODO: implement this!
 
             # Render and save output, if indicated
             if frame_num in save_frames:
@@ -416,23 +422,24 @@ def main():
     # Smaller window does not have enough of subject to track
     # Larger window is trying to track stuff that does not move with the subject
     template_r = get_template_rect(os.path.join(input_dir, "pres_debate.txt"))
-    template_large = {'x': template_r['x'], 'y': template_r['y'], 'w': template_r['w']+10, 'h': template_r['h']+10}
-    template_small = {'x': template_r['x'], 'y': template_r['y'], 'w': template_r['w']-10, 'h': template_r['h']-10}
+    template_large = {'x': template_r['x'], 'y': template_r['y'], 'w': template_r['w']+200, 'h': template_r['h']+200}
+    template_small = {'x': template_r['x'], 'y': template_r['y'], 'w': template_r['w']-20, 'h': template_r['h']-80}
     run_particle_filter(ParticleFilter,  # particle filter model class
         os.path.join(input_dir, "pres_debate.avi"),  # input video
-        template_large,
+        template_small,
         # Note: To specify your own window, directly pass in a dict: {'x': x, 'y': y, 'w': width, 'h': height}
         {
-            'template': os.path.join(output_dir, 'ps7-1-a-1.png'),
-            28: os.path.join(output_dir, 'ps7-1-a-2.png'),
-            84: os.path.join(output_dir, 'ps7-1-a-3.png'),
-            144: os.path.join(output_dir, 'ps7-1-a-4.png')
+            'template': os.path.join(output_dir, 'template.png'),
+            28: os.path.join(output_dir, 'testb28.png'),
+            84: os.path.join(output_dir, 'testb84.png'),
+            144: os.path.join(output_dir, 'testb144.png')
         },  # frames to save, mapped to filenames, and 'template' if desired
         num_particles=300,
         startingEst = (template_r['y'],template_r['x']),
-        height = template_r['h'],
-        width = template_r['w'])
-
+        height = template_small['h'],
+        width = template_small['w'])
+    '''
+    '''
     # 1c
     # TODO: Repeat 1a, but vary the sigma_MSE parameter (no output images required)
     # Note: To add a parameter, simply pass it in here as a keyword arg and extract it back in __init__()
@@ -442,17 +449,16 @@ def main():
         get_template_rect(os.path.join(input_dir, "pres_debate.txt")),  # suggested template window (dict)
         # Note: To specify your own window, directly pass in a dict: {'x': x, 'y': y, 'w': width, 'h': height}
         {
-            'template': os.path.join(output_dir, 'ps7-1-a-1.png'),
-            28: os.path.join(output_dir, 'ps7-1-a-2.png'),
-            84: os.path.join(output_dir, 'ps7-1-a-3.png'),
-            144: os.path.join(output_dir, 'ps7-1-a-4.png')
+            28: os.path.join(output_dir, 'testc28.png'),
+            84: os.path.join(output_dir, 'testc84.png'),
+            144: os.path.join(output_dir, 'testc144.png')
         },  # frames to save, mapped to filenames, and 'template' if desired
         num_particles=300,
         startingEst = (template_r['y'],template_r['x']),
         height = template_r['h'],
         width = template_r['w'],
         sigma_MSE = 5)
-
+    '''
     # 1d
     # TODO: Repeat 1a, but try to optimize (minimize) num_particles (no output images required)
     template_r = get_template_rect(os.path.join(input_dir, "pres_debate.txt"))
@@ -461,16 +467,16 @@ def main():
         get_template_rect(os.path.join(input_dir, "pres_debate.txt")),  # suggested template window (dict)
         # Note: To specify your own window, directly pass in a dict: {'x': x, 'y': y, 'w': width, 'h': height}
         {
-            'template': os.path.join(output_dir, 'ps7-1-a-1.png'),
-            28: os.path.join(output_dir, 'ps7-1-a-2.png'),
-            84: os.path.join(output_dir, 'ps7-1-a-3.png'),
-            144: os.path.join(output_dir, 'ps7-1-a-4.png')
+            28: os.path.join(output_dir, 'testd28.png'),
+            84: os.path.join(output_dir, 'testd84.png'),
+            144: os.path.join(output_dir, 'testd144.png')
         },  # frames to save, mapped to filenames, and 'template' if desired
-        num_particles=20,
+        # I can get by with just 2, but 5 seems to work well
+        num_particles=5,
         startingEst = (template_r['y'],template_r['x']),
         height = template_r['h'],
         width = template_r['w'])
-    '''
+    
     '''
     # 1e    
     template_r = get_template_rect(os.path.join(input_dir, "noisy_debate.txt"))
@@ -489,10 +495,12 @@ def main():
         height = template_r['h'],
         width = template_r['w'] )  # TODO: Tune parameters so that model can continuing tracking through noise
     '''
+    
     # 2a
     # TODO: Implement AppearanceModelPF (derived from ParticleFilter)
     # TODO: Run it on pres_debate.avi to track Romney's left hand, tweak parameters to track up to frame 140
     # Get the template for Romney's hand
+    '''
     template_r = get_template_rect(os.path.join(input_dir, "hand.txt"))
     run_particle_filter(AppearanceModelPF,
         os.path.join(input_dir, "pres_debate.avi"),
@@ -502,8 +510,6 @@ def main():
             15:  os.path.join(output_dir, 'ps7-2-a-2.png'),
             50:  os.path.join(output_dir, 'ps7-2-a-3.png'),
             140: os.path.join(output_dir, 'ps7-2-a-4.png')
-            # At frame 200 it diverged a little bit, at 300 it was back on
-            #300:  os.path.join(output_dir, 'test.png')
         },
         num_particles=300,
         startingEst = (template_r['y'],template_r['x']),
@@ -512,11 +518,28 @@ def main():
         sigma_MSE = 10,
         sigma_dyn = 20,
         alpha = 0.5 ) 
-    
-
+    '''
+    '''
     # 2b
     # TODO: Run AppearanceModelPF on noisy_debate.avi, tweak parameters to track hand up to frame 140
-
+    template_r = get_template_rect(os.path.join(input_dir, "hand.txt"))
+    run_particle_filter(AppearanceModelPF,
+        os.path.join(input_dir, "noisy_debate.avi"),
+        get_template_rect(os.path.join(input_dir, "hand.txt")),
+        {
+            'template': os.path.join(output_dir, 'ps7-2-b-1.png'),
+            15:  os.path.join(output_dir, 'ps7-2-b-2.png'),
+            50:  os.path.join(output_dir, 'ps7-2-b-3.png'),
+            140: os.path.join(output_dir, 'ps7-2-b-4.png')
+        },
+        num_particles=300,
+        startingEst = (template_r['y'],template_r['x']),
+        height = template_r['h'],
+        width = template_r['w'],
+        sigma_MSE = 10,
+        sigma_dyn = 20,
+        alpha = 0.5 ) 
+    '''
     # EXTRA CREDIT
     # 3: Use color histogram distance instead of MSE (you can implement a derived class similar to AppearanceModelPF)
     # 4: Implement a more sophisticated model to deal with occlusions and size/perspective changes
