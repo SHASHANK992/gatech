@@ -147,6 +147,8 @@ class ParticleFilter(object):
     #end mse
     
     def getCutout(self, u, v, image):
+        ''' Assumes u and v are the locations of the center of the template'''
+        
         rows = self.template.shape[0]
         cols = self.template.shape[1]
         
@@ -184,6 +186,8 @@ class ParticleFilter(object):
             
         cutout = np.zeros( self.template.shape )
         # I still think there is some problem here, but this is closer to being right
+        # Since the assumption was that the object being tracked would remain in the center,
+        # this should cover all the cases I need
         cutout[0:lower-upper, 0:right-left] = image[upper:lower, left:right]
         
         return cutout        
@@ -257,6 +261,48 @@ class ParticleFilter(object):
     #end stdDevEst
     
 #end class
+
+class MeanShiftLitePF(ParticleFilter):
+    ''' Question: should I inherit from just PF or also from AM PF? 
+    I think I will try just PF first and see what hand tracking does. If it doesn't work, I will try
+    using AM PF 
+    '''
+    def __init__(self, frame, template, **kwargs):
+        """Initialize appearance model particle filter object (parameters same as ParticleFilter)."""
+        super(MeanShiftLitePF, self).__init__(frame, template, **kwargs)  # call base class constructor
+        
+        # Compute histogram for template
+    #end init
+    
+    def sensorModel(self, frame):
+        # Compute a histogram for the image
+        
+        
+        # Find the chi-squared error for all the particles in the current state using the 
+        # histrogram
+        chi_err = self.chi_sq(frame)
+        # Now compute the measurement probability
+        measure = np.zeros( (self.num_particles, 1) )
+        for i in range(self.num_particles):
+            measure[i,0] = np.exp( -1*chi_err[i,0]/float(2*self.sigma_sensor**2) )
+        #endfor
+        
+        # Normalize weights
+        # Find the sum of all the weights and divide out
+        sum_measure = np.sum(measure)
+        measure /= sum_measure
+        
+        return measure     
+        
+        pass
+    #end sensorModel
+    
+    def chi_sq(self, image):
+        
+        pass
+    #end msl
+    
+#end class MeanShiftLitePF
 
 class AppearanceModelPF(ParticleFilter):
     """A variation of particle filter tracker that updates its appearance model over time."""
@@ -457,7 +503,8 @@ def main():
         startingEst = (template_r['y'],template_r['x']),
         height = template_r['h'],
         width = template_r['w'],
-        sigma_MSE = 5)
+        sigma_MSE = 10)
+    '''
     '''
     # 1d
     # TODO: Repeat 1a, but try to optimize (minimize) num_particles (no output images required)
@@ -476,7 +523,7 @@ def main():
         startingEst = (template_r['y'],template_r['x']),
         height = template_r['h'],
         width = template_r['w'])
-    
+    '''
     '''
     # 1e    
     template_r = get_template_rect(os.path.join(input_dir, "noisy_debate.txt"))
@@ -495,12 +542,12 @@ def main():
         height = template_r['h'],
         width = template_r['w'] )  # TODO: Tune parameters so that model can continuing tracking through noise
     '''
-    
+    '''
     # 2a
     # TODO: Implement AppearanceModelPF (derived from ParticleFilter)
     # TODO: Run it on pres_debate.avi to track Romney's left hand, tweak parameters to track up to frame 140
     # Get the template for Romney's hand
-    '''
+    
     template_r = get_template_rect(os.path.join(input_dir, "hand.txt"))
     run_particle_filter(AppearanceModelPF,
         os.path.join(input_dir, "pres_debate.avi"),
