@@ -49,9 +49,9 @@ def videoVolume(images):
                       images[0].shape[2]), dtype=np.uint8)
 
     # WRITE YOUR CODE HERE.
-
-
-
+    for i in range(len(images)):
+        output[i,:,:,:] = images[i,:,:,:]
+    #end for
 
     # END OF FUNCTION.
     return output
@@ -88,9 +88,23 @@ def sumSquaredDifferences(video_volume):
     
     output = np.zeros((len(video_volume), len(video_volume)), dtype=np.float)
     # WRITE YOUR CODE HERE.
-
-
-
+    for i in range(len(video_volume)):
+        for j in range(len(video_volume)):
+            image1 = video_volume[i,:,:,:]
+            image2 = video_volume[j,:,:,:]
+            
+            diff = image1 - image2
+            
+            # square difference
+            diff_sq = diff**2
+            
+            # sum
+            sum_sq_diff = np.sum(diff_sq)
+            
+            # add to output array
+            output[i,j] = sum_sq_diff
+        #end for
+    #end for
 
     # END OF FUNCTION.
     return output
@@ -150,7 +164,7 @@ def transitionDifference(ssd_difference):
     output = np.zeros((ssd_difference.shape[0] - 4,
                        ssd_difference.shape[1] - 4), dtype=ssd_difference.dtype)
     # WRITE YOUR CODE HERE.
-
+    
 
 
 
@@ -192,9 +206,18 @@ def findBiggestLoop(transition_diff, alpha):
     largest_score = 0
 
     # WRITE YOUR CODE HERE.
-
-
-
+    start_idx = 0
+    end_idx   = 0
+    for start_idx in range(transition_diff.shape[0]):
+        for end_idx in range(start_idx, transistion_diff.shape[0]):
+            score = alpha*(end-start) - transition_diff[end_idx, start_idx]
+            
+            if score > largest_score:
+                largest_score = score
+                start = start_idx
+                end = end_idx
+        #end for
+    #end for
 
     # END OF FUNCTION.
     return start, end
@@ -216,9 +239,9 @@ def synthesizeLoop(video_volume, start, end):
 
     output = [] 
     # WRITE YOUR CODE HERE.
-
-
-
+    for i in range(start, end):
+        output.append( video_volume[i, :, :, :] )
+    #end for
 
     # END OF FUNCTION.
     return output
