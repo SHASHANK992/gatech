@@ -262,48 +262,6 @@ class ParticleFilter(object):
     
 #end class
 
-class MeanShiftLitePF(ParticleFilter):
-    ''' Question: should I inherit from just PF or also from AM PF? 
-    I think I will try just PF first and see what hand tracking does. If it doesn't work, I will try
-    using AM PF 
-    '''
-    def __init__(self, frame, template, **kwargs):
-        """Initialize appearance model particle filter object (parameters same as ParticleFilter)."""
-        super(MeanShiftLitePF, self).__init__(frame, template, **kwargs)  # call base class constructor
-        
-        # Compute histogram for template
-    #end init
-    
-    def sensorModel(self, frame):
-        # Compute a histogram for the image
-        
-        
-        # Find the chi-squared error for all the particles in the current state using the 
-        # histrogram
-        chi_err = self.chi_sq(frame)
-        # Now compute the measurement probability
-        measure = np.zeros( (self.num_particles, 1) )
-        for i in range(self.num_particles):
-            measure[i,0] = np.exp( -1*chi_err[i,0]/float(2*self.sigma_sensor**2) )
-        #endfor
-        
-        # Normalize weights
-        # Find the sum of all the weights and divide out
-        sum_measure = np.sum(measure)
-        measure /= sum_measure
-        
-        return measure     
-        
-        pass
-    #end sensorModel
-    
-    def chi_sq(self, image):
-        
-        pass
-    #end msl
-    
-#end class MeanShiftLitePF
-
 class AppearanceModelPF(ParticleFilter):
     """A variation of particle filter tracker that updates its appearance model over time."""
 
@@ -345,7 +303,6 @@ class AppearanceModelPF(ParticleFilter):
         self.render(frame_out)
         cv2.imwrite( os.path.join(output_dir, 'frames', frame_name), frame_out)
         '''
-        
     #end process        
 
     def updateTemplate(self, frame):
@@ -358,10 +315,85 @@ class AppearanceModelPF(ParticleFilter):
         
         # The new template is a weighted sum of the two templates, the old one and the new best match
         self.template = (self.alpha*best + (1-self.alpha)*self.template).astype('int')        
-
     #end updateTemplate
     
 # end class AppearanceModelPF
+
+class MeanShiftLitePF(ParticleFilter):
+    ''' Question: should I inherit from just PF or also from AM PF? 
+    I think I will try just PF first and see what hand tracking does. If it doesn't work, I will try
+    using AM PF 
+    '''
+    def __init__(self, frame, template, **kwargs):
+        """Initialize appearance model particle filter object (parameters same as ParticleFilter)."""
+        super(MeanShiftLitePF, self).__init__(frame, template, **kwargs)  # call base class constructor
+        
+        # Compute histogram for template
+        self.numBins = kwargs.get('numberBins', 8)
+        self.template_hist = self.createAndNormHist(self.template)
+    #end init
+    
+    def createAndNormHist(self, image):
+        '''Takes in a color image and outputs a 1x3*numBins histogram, normalized to 1'''
+        hist = np.zeros((3, self.numBins), dtype = np.float)
+        hist[0,:], notUsed = np.histogram(image[:,:,0], self.numBins)
+        hist[1,:], notUsed = np.histogram(image[:,:,1], self.numBins)
+        hist[2,:], notUsed = np.histogram(image[:,:,2], self.numBins)
+        
+        hist_sum = np.sum(hist)
+        hist_norm = hist / hist_sum
+        
+        hist_norm = np.reshape( hist_norm, (1, 3*self.numBins) )
+        
+        return hist_norm
+    #end createAndNormHist
+    
+    def sensorModel(self, frame):
+        # Compute a histogram for the template
+        self.template_hist = self.createAndNormHist(self.template)
+        
+        # Find the chi-squared error for all the particles in the current state using the 
+        # histrogram
+        chi_err = self.chi_sq(frame)
+        # Now compute the measurement probability
+        measure = np.zeros( (self.num_particles, 1) )
+        for i in range(self.num_particles):
+            measure[i,0] = np.exp( -1*chi_err[i,0]/float(2*self.sigma_sensor**2) )
+        #endfor
+        
+        # Normalize weights
+        # Find the sum of all the weights and divide out
+        sum_measure = np.sum(measure)
+        measure /= sum_measure
+        
+        return measure          
+    #end sensorModel
+    
+    def chi_sq(self, image):
+        err_v = np.zeros( (self.num_particles, 1) )
+        # For each particle
+        for i in range( self.num_particles):
+            # Get the part of the image it thinks is the current state
+            u = self.state[i,0]
+            v = self.state[i,1]
+            
+            cutout = self.getCutout(u, v, image)
+            
+            # Build a histogram
+            part_hist = self.createAndNormHist(cutout)
+            
+            # Compute chi-squared error
+            num   = (self.template_hist - part_hist)**2
+            denom = (self.template_hist + part_hist)
+            err = 0.5*np.sum(num/denom)
+            
+            err_v[i,0] = err
+        #end for
+        
+        return err_v
+    #end chi_sq
+    
+#end class MeanShiftLitePF
 
 
 # Driver/helper code
@@ -445,7 +477,6 @@ def main():
 
     # 1a
     # TODO: Implement ParticleFilter
-    '''
     template_r = get_template_rect(os.path.join(input_dir, "pres_debate.txt"))
     run_particle_filter(ParticleFilter,  # particle filter model class
         os.path.join(input_dir, "pres_debate.avi"),  # input video
@@ -461,8 +492,7 @@ def main():
         startingEst = (template_r['y'],template_r['x']),
         height = template_r['h'],
         width = template_r['w'])  # TODO: specify other keyword args that your model expects, e.g. measurement_noise=0.2
-    '''
-    '''
+
     # 1b
     # TODO: Repeat 1a, but vary template window size and discuss trade-offs (no output images required)
     # Smaller window does not have enough of subject to track
@@ -484,8 +514,7 @@ def main():
         startingEst = (template_r['y'],template_r['x']),
         height = template_small['h'],
         width = template_small['w'])
-    '''
-    '''
+
     # 1c
     # TODO: Repeat 1a, but vary the sigma_MSE parameter (no output images required)
     # Note: To add a parameter, simply pass it in here as a keyword arg and extract it back in __init__()
@@ -504,8 +533,7 @@ def main():
         height = template_r['h'],
         width = template_r['w'],
         sigma_MSE = 10)
-    '''
-    '''
+
     # 1d
     # TODO: Repeat 1a, but try to optimize (minimize) num_particles (no output images required)
     template_r = get_template_rect(os.path.join(input_dir, "pres_debate.txt"))
@@ -523,8 +551,7 @@ def main():
         startingEst = (template_r['y'],template_r['x']),
         height = template_r['h'],
         width = template_r['w'])
-    '''
-    '''
+
     # 1e    
     template_r = get_template_rect(os.path.join(input_dir, "noisy_debate.txt"))
     run_particle_filter(ParticleFilter,
@@ -541,17 +568,16 @@ def main():
         startingEst = (template_r['y'],template_r['x']),
         height = template_r['h'],
         width = template_r['w'] )  # TODO: Tune parameters so that model can continuing tracking through noise
-    '''
-    '''
+
     # 2a
     # TODO: Implement AppearanceModelPF (derived from ParticleFilter)
     # TODO: Run it on pres_debate.avi to track Romney's left hand, tweak parameters to track up to frame 140
     # Get the template for Romney's hand
     
-    template_r = get_template_rect(os.path.join(input_dir, "hand.txt"))
+    template_r = get_template_rect("hand.txt")
     run_particle_filter(AppearanceModelPF,
         os.path.join(input_dir, "pres_debate.avi"),
-        get_template_rect(os.path.join(input_dir, "hand.txt")),
+        get_template_rect("hand.txt"),
         {
             'template': os.path.join(output_dir, 'ps7-2-a-1.png'),
             15:  os.path.join(output_dir, 'ps7-2-a-2.png'),
@@ -565,14 +591,13 @@ def main():
         sigma_MSE = 10,
         sigma_dyn = 20,
         alpha = 0.5 ) 
-    '''
-    '''
+
     # 2b
     # TODO: Run AppearanceModelPF on noisy_debate.avi, tweak parameters to track hand up to frame 140
-    template_r = get_template_rect(os.path.join(input_dir, "hand.txt"))
+    template_r = get_template_rect("hand.txt")
     run_particle_filter(AppearanceModelPF,
         os.path.join(input_dir, "noisy_debate.avi"),
-        get_template_rect(os.path.join(input_dir, "hand.txt")),
+        get_template_rect("hand.txt"),
         {
             'template': os.path.join(output_dir, 'ps7-2-b-1.png'),
             15:  os.path.join(output_dir, 'ps7-2-b-2.png'),
@@ -586,9 +611,46 @@ def main():
         sigma_MSE = 10,
         sigma_dyn = 20,
         alpha = 0.5 ) 
-    '''
+
     # EXTRA CREDIT
+
     # 3: Use color histogram distance instead of MSE (you can implement a derived class similar to AppearanceModelPF)
+    template_r = get_template_rect(os.path.join(input_dir, "pres_debate.txt"))
+    run_particle_filter(MeanShiftLitePF,  # particle filter model class
+        os.path.join(input_dir, "pres_debate.avi"),  # input video
+        get_template_rect(os.path.join(input_dir, "pres_debate.txt")),  # suggested template window (dict)
+        # Note: To specify your own window, directly pass in a dict: {'x': x, 'y': y, 'w': width, 'h': height}
+        {
+            'template': os.path.join(output_dir, 'ps7-3-a-1.png'),
+            28: os.path.join(output_dir, 'ps7-3-a-2.png'),
+            84: os.path.join(output_dir, 'ps7-3-a-3.png'),
+            144: os.path.join(output_dir, 'ps7-3-a-4.png')
+        },  # frames to save, mapped to filenames, and 'template' if desired
+        num_particles=300,
+        sigma_MSE = 0.2,
+        startingEst = (template_r['y'],template_r['x']),
+        height = template_r['h'],
+        width = template_r['w'])  # TODO: specify other keyword args that your model expects, e.g. measurement_noise=0.2
+    
+    # 3b
+    template_r = get_template_rect("hand.txt")
+    run_particle_filter(MeanShiftLitePF,
+        os.path.join(input_dir, "pres_debate.avi"),
+        get_template_rect("hand.txt"),
+        {
+            'template': os.path.join(output_dir, 'ps7-3-b-1.png'),
+            15:  os.path.join(output_dir, 'ps7-3-b-2.png'),
+            50:  os.path.join(output_dir, 'ps7-3-b-3.png'),
+            140: os.path.join(output_dir, 'ps7-3-b-4.png')
+        },
+        num_particles=300,
+        startingEst = (template_r['y'],template_r['x']),
+        height = template_r['h'],
+        width = template_r['w'],
+        sigma_MSE = 0.1,
+        sigma_dyn = 30,
+        numberBins = 8    ) 
+    
     # 4: Implement a more sophisticated model to deal with occlusions and size/perspective changes
 
 
