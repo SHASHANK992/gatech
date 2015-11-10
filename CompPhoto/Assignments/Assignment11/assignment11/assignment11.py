@@ -50,7 +50,7 @@ def videoVolume(images):
 
     # WRITE YOUR CODE HERE.
     for i in range(len(images)):
-        output[i,:,:,:] = images[i,:,:,:]
+        output[i,:,:,:] = images[i]
     #end for
 
     # END OF FUNCTION.
@@ -89,9 +89,9 @@ def sumSquaredDifferences(video_volume):
     output = np.zeros((len(video_volume), len(video_volume)), dtype=np.float)
     # WRITE YOUR CODE HERE.
     for i in range(len(video_volume)):
-        for j in range(len(video_volume)):
-            image1 = video_volume[i,:,:,:]
-            image2 = video_volume[j,:,:,:]
+        for j in range(i, len(video_volume)):
+            image1 = video_volume[i,:,:,:].astype(float)
+            image2 = video_volume[j,:,:,:].astype(float)
             
             diff = image1 - image2
             
@@ -103,6 +103,7 @@ def sumSquaredDifferences(video_volume):
             
             # add to output array
             output[i,j] = sum_sq_diff
+            output[j,i] = sum_sq_diff
         #end for
     #end for
 
@@ -164,9 +165,21 @@ def transitionDifference(ssd_difference):
     output = np.zeros((ssd_difference.shape[0] - 4,
                        ssd_difference.shape[1] - 4), dtype=ssd_difference.dtype)
     # WRITE YOUR CODE HERE.
-    
-
-
+    # REMEMBER TO UNCOMMENT FROM UNIT TEST
+    for i in range(2, ssd_difference.shape[0]-2):
+        for j in range(2, ssd_difference.shape[0]-2):
+            temp = np.zeros((1,5))
+            temp[0,0] = ssd_difference[i-2, j-2]
+            temp[0,1] = ssd_difference[i-1, j-1]
+            temp[0,2] = ssd_difference[i  , j]
+            temp[0,3] = ssd_difference[i+1, j+1]
+            temp[0,4] = ssd_difference[i+2, j+2]
+            
+            prod = temp * binomialFilter5()
+            
+            output[i-2, j-2] = np.sum(prod)
+        #end for
+    #end for   
 
     # END OF FUNCTION.
     return output
@@ -209,8 +222,8 @@ def findBiggestLoop(transition_diff, alpha):
     start_idx = 0
     end_idx   = 0
     for start_idx in range(transition_diff.shape[0]):
-        for end_idx in range(start_idx, transistion_diff.shape[0]):
-            score = alpha*(end-start) - transition_diff[end_idx, start_idx]
+        for end_idx in range(start_idx, transition_diff.shape[0]):
+            score = alpha*(end_idx-start_idx) - transition_diff[end_idx, start_idx]
             
             if score > largest_score:
                 largest_score = score
@@ -239,8 +252,8 @@ def synthesizeLoop(video_volume, start, end):
 
     output = [] 
     # WRITE YOUR CODE HERE.
-    for i in range(start, end):
-        output.append( video_volume[i, :, :, :] )
+    for i in range(start, end+1): # range() is exclusive, but "end" is inclusive. Add 1 to compensate
+        output.append( video_volume[i, :, :, :].astype(np.uint8) )
     #end for
 
     # END OF FUNCTION.
