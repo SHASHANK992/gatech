@@ -24,6 +24,12 @@ class MotionHistoryBuilder(object):
         """
         # TODO: Your code here - initialize variables, read keyword arguments (if any)
         self.mhi = np.zeros(frame.shape[:2], dtype=np.float_)  # e.g. motion history image
+        self.threshold = kwargs.get('threshold', 127)
+        self.tau       = kwargs.get('tau', 45)
+        self.kernelSize = kwargs.get('kSize', 11)
+        self.blurSigma = kwargs.get('blurSigma', 5.0)
+        frame_bw = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        self.old_frame = cv2.GaussianBlur(frame_bw, (self.kernelSize,self.kernelSize), self.blurSigma, borderType=cv2.BORDER_REFLECT)
 
     def process(self, frame):
         """Process a frame of video, return binary image indicating motion areas.
@@ -37,8 +43,37 @@ class MotionHistoryBuilder(object):
             motion_image: binary image (type: bool or uint8), values: 0 (static) or 1 (moving)
         """
         # TODO: Your code here - compute binary motion image, update MHI
+        # Blur new frame
+        frame_copy = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        frame_copy = cv2.GaussianBlur(frame_copy, (self.kernelSize,self.kernelSize), self.blurSigma, borderType=cv2.BORDER_REFLECT)
+        
+        # compute absolute difference between old frame and new frame
+        diff_img = abs(self.old_frame - frame_copy)
+        
+        # threshold
+        motion_image = diff_img > self.threshold
+        
+        # Update motion history image
+        self.update_MHI(motion_image)
+        
+        # Set up for next image
+        self.old_frame = frame_copy
+        
         return motion_image  # note: make sure you return a binary image with 0s and 1s
 
+    def update_MHI(self, motion_image):
+        '''Updates the motion history image'''
+        for i in range(self.mhi.shape[0]):
+            for j in range(self.mhi.shape[1]):
+                if motion_image[i, j] == 1:
+                    self.mhi[i,j] = self.tau
+                else:
+                    self.mhi[i,j] = max(self.mhi[i,j]-1, 0)
+                #end if
+            #end for
+        #end for
+    #end update_MHI
+    
     def get_MHI(self):
         """Return motion history image computed so far.
 
@@ -48,7 +83,9 @@ class MotionHistoryBuilder(object):
         """
         # TODO: Make sure MHI is updated in process(), perform any final steps here (e.g. normalize to [0, 1])
         # Note: This method may not be called for every frame (typically, only once)
-        return self.mhi
+        #norm_mhi = np.zeros( self.mhi.shape, dtype=np.float)
+        norm_mhi = cv2.normalize(self.mhi, alpha=0.0, beta=1.0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_64F)
+        return norm_mhi
 
 
 class Moments(object):
@@ -219,26 +256,35 @@ def match_features(a_features_dict, b_features_dict, n_actions):
 
 def main():
     # Note: Comment out parts of this code as necessary
-
+    '''
     # 1a
     build_motion_history_image(MotionHistoryBuilder,  # motion history builder class
         os.path.join(input_dir, "PS8A1P1T1.avi"),  # input video
-        save_frames={
+        save_frames={                # output motion images to save, mapped to filenames
             10: os.path.join(output_dir, 'ps8-1-a-1.png'),
             20: os.path.join(output_dir, 'ps8-1-a-2.png'),
             30: os.path.join(output_dir, 'ps8-1-a-3.png')
-        })  # output motion images to save, mapped to filenames
-    # TODO: Specify any other keyword args that your motion history builder expects, e.g. theta, tau
-
+        },
+        threshold=200,
+        tau=45,
+        kSize=11,
+        blurSigma=5.0)  
+        # I still need to clean up the images here a bit. They are very fuzzy
+    '''
+    
     # 1b
     build_motion_history_image(MotionHistoryBuilder,  # motion history builder class
         os.path.join(input_dir, "PS8A1P1T1.avi"),  # TODO: choose sequence (person, trial) for action A1
         mhi_frame=90,  # TODO: pick a good frame to obtain MHI at, i.e. when action just ends
-        mhi_filename=os.path.join(output_dir, 'ps8-1-b-1.png'))
+        mhi_filename=os.path.join(output_dir, 'ps8-1-b-1.png'),
+        threshold=200,
+        tau=60,
+        kSize=11,
+        blurSigma=5.0)
     # TODO: Specify any other keyword args that your motion history builder expects, e.g. theta, tau
 
     # TODO: Similarly for actions A2 & A3
-
+    '''
     # 2a
     # Compute MHI and MEI features (unscaled and scaled central moments) for each video
     central_moment_features = {}  # 16 features (8 MHI, 8 MEI) as one vector, key: (<action>, <participant>, <trial>)
@@ -292,7 +338,7 @@ def main():
     # TODO: Similarly for participants P2 & P3
 
     # Note: Feel free to modify this driver function, but do not modify the interface for other functions/methods!
-
+   '''
 
 if __name__ == "__main__":
     main()
