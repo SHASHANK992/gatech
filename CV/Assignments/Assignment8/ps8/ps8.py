@@ -52,6 +52,12 @@ class MotionHistoryBuilder(object):
         
         # threshold
         motion_image = diff_img > self.threshold
+        #motion_image = motion_image.astype(np.uint8)
+        #print type(motion_image[0,0])
+        
+        # Use morphological open operator to remove noise
+        kernel = np.ones((5,5), dtype=np.uint8)
+        motion_image = cv2.morphologyEx(motion_image.astype(np.uint8), cv2.MORPH_OPEN, kernel)
         
         # Update motion history image
         self.update_MHI(motion_image)
@@ -271,20 +277,20 @@ def main():
         blurSigma=5.0)  
         # I still need to clean up the images here a bit. They are very fuzzy
     '''
-    
+    '''
     # 1b
     build_motion_history_image(MotionHistoryBuilder,  # motion history builder class
         os.path.join(input_dir, "PS8A1P1T1.avi"),  # TODO: choose sequence (person, trial) for action A1
-        mhi_frame=90,  # TODO: pick a good frame to obtain MHI at, i.e. when action just ends
+        mhi_frame=100,  # TODO: pick a good frame to obtain MHI at, i.e. when action just ends
         mhi_filename=os.path.join(output_dir, 'ps8-1-b-1.png'),
         threshold=200,
-        tau=60,
+        tau=90,
         kSize=11,
         blurSigma=5.0)
     # TODO: Specify any other keyword args that your motion history builder expects, e.g. theta, tau
-
-    # TODO: Similarly for actions A2 & A3
     '''
+    # TODO: Similarly for actions A2 & A3
+    
     # 2a
     # Compute MHI and MEI features (unscaled and scaled central moments) for each video
     central_moment_features = {}  # 16 features (8 MHI, 8 MEI) as one vector, key: (<action>, <participant>, <trial>)
@@ -325,7 +331,7 @@ def main():
     scaled_moments_confusion = match_features(scaled_moment_features, scaled_moment_features, n_actions)
     print "Confusion matrix (scaled central moments):-"
     print scaled_moments_confusion
-
+    '''
     # 2b
     # Match features by testing one participant at a time (i.e. taking them out)
     # Note: Pick one between central_moment_features and scaled_moment_features
