@@ -105,9 +105,92 @@ class Moments(object):
             image: single-channel image, uint8 or float
         """
         # TODO: Your code here - compute all desired moments here (recommended)
+        # Perhaps scale image so that it exists only over some defined range (say 0.0 to 1.0)
+        image_copy = cv2.normalize(image, alpha=0.0, beta=1.0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_64F)
+        
+        M10, M01, M00 = self.compute_regular_moments(image_copy)
+        
         self.central_moments = None  # array: [mu20, mu11, mu02, mu30, mu21, mu12, mu03, mu22]
+        xbar = M10/M00
+        ybar = M01/M00
+        self.central_moments = self.compute_central_moments(image_copy, xbar, ybar)
         self.scaled_moments = None   # array: [nu20, nu11, nu02, nu30, nu21, nu12, nu03, nu22]
+        self.scaled_moments = self.compute_scaled_moments(self.central_moments, M00)
         # Note: Make sure computed moments are in correct order
+        
+    def compute_regular_moments(self, image):
+        '''Compute the regular moments of an image (i.e., not central moment)'''
+        # I think there are some faster ways to compute this. 
+        M00 = 0
+        M01 = 0
+        M10 = 0
+        
+        for x in range(image.shape[1]):
+            for y in range(image.shape[0]):
+                px = image[y,x]
+                
+                M00 += px
+                M10 += x*px
+                M01 += y*px
+            #end for
+        #end for
+        return M10, M01, M00
+    #end compute regular moments
+    
+    def compute_central_moments(self, image, xbar, ybar):
+        ''' Compute the central moments of an image'''
+        mu20 = 0
+        mu11 = 0
+        mu02 = 0
+        mu30 = 0
+        mu21 = 0
+        mu12 = 0
+        mu03 = 0
+        mu22 = 0
+                
+        for x in range(image.shape[1]):
+            for y in range(image.shape[0]):
+                px = image[y,x]
+                
+                mu20 += px*(x-xbar)**2
+                mu11 += px*(x-xbar)*(y-ybar)
+                mu02 += px*(y-ybar)**2
+                mu30 += px*(x-xbar)**3
+                mu21 += px*((x-xbar)**2)*(y-ybar)
+                mu12 += px*(x-xbar)*(y-ybar)**2
+                mu03 += px*(y-ybar)**3
+                mu22 += px*((x-xbar)**2)*(y-ybar)**2
+            #end for
+        #end for
+        moment_array = np.array([ mu20, mu11, mu02, mu30, mu21, mu12, mu03, mu22 ])
+        return moment_array
+    #end compute_central_moments
+    
+    def compute_scaled_moments(self, central_moments, M00):
+        """Compute scaled image moments
+           M00 is the same as mu00            """
+        # [nu20, nu11, nu02, nu30, nu21, nu12, nu03, nu22]
+        mu20 = central_moments[0]
+        mu11 = central_moments[1]
+        mu02 = central_moments[2]
+        mu30 = central_moments[3]
+        mu21 = central_moments[4]
+        mu12 = central_moments[5]
+        mu03 = central_moments[6]
+        mu22 = central_moments[7]
+        
+        nu20 = mu20/(M00**(1+2/2.))
+        nu11 = mu11/(M00**(1+2/2.))
+        nu02 = mu02/(M00**(1+2/2.))
+        nu30 = mu03/(M00**(1+3/2.))
+        nu21 = mu21/(M00**(1+3/2.))
+        nu12 = mu12/(M00**(1+3/2.))
+        nu03 = mu03/(M00**(1+3/2.))
+        nu22 = mu22/(M00**(1+4/2.))
+        
+        scaled_moments = np.array([ nu20, nu11, nu02, nu30, nu21, nu12, nu03, nu22 ])
+        return scaled_moments
+    #end compute_scaled_moments
 
     def get_central_moments(self):
         """Return central moments as NumPy array.
@@ -117,7 +200,7 @@ class Moments(object):
         Returns
         -------
             self.central_moments: float array of central moments
-        """
+        """        
         return self.central_moments
 
     def get_scaled_moments(self):
@@ -137,7 +220,7 @@ def compute_feature_difference(a_features, b_features):
 
     Parameters
     ----------
-        a_features: feaures from one video, MHI & MEI moments in a 16-element 1D array
+        a_features: features from one video, MHI & MEI moments in a 16-element 1D array
         b_features: like a_features, from other video
 
     Returns
@@ -146,6 +229,15 @@ def compute_feature_difference(a_features, b_features):
     """
     # TODO: Your code here - return feature difference using an appropriate measure
     # Tip: Scale/weight difference values to get better results as moment magnitudes differ
+    
+    # I NEED TO GET A BETTER DIFFERENCE COMPUTATION HERE!!!!!!!!!!!!
+    # Weight by the type of moment being used
+    
+    # For iteration 1, I am just going to use Euclidean distance
+    diff = a_features - b_features
+    diff = np.sqrt(diff**2)
+    diff = np.sum(diff)    
+    
     return diff
 
 
