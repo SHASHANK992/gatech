@@ -52,12 +52,12 @@ class MotionHistoryBuilder(object):
         
         # threshold
         motion_image = diff_img > self.threshold
-        #motion_image = motion_image.astype(np.uint8)
-        #print type(motion_image[0,0])
         
         # Use morphological open operator to remove noise
-        kernel = np.ones((5,5), dtype=np.uint8)
+        kernel = np.ones((7,7), dtype=np.uint8)
         motion_image = cv2.morphologyEx(motion_image.astype(np.uint8), cv2.MORPH_OPEN, kernel)
+        # Dilate to "fill in" some of the gaps
+        motion_image = cv2.dilate(motion_image.astype(np.uint8), kernel, iterations=1)
         
         # Update motion history image
         self.update_MHI(motion_image)
@@ -107,68 +107,46 @@ class Moments(object):
         # TODO: Your code here - compute all desired moments here (recommended)
         # Perhaps scale image so that it exists only over some defined range (say 0.0 to 1.0)
         image_copy = cv2.normalize(image, alpha=0.0, beta=1.0, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_64F)
+                
+        # array: [mu20, mu11, mu02, mu30, mu21, mu12, mu03, mu22]
+        self.central_moments = self.compute_central_moments(image_copy)
+        # array: [nu20, nu11, nu02, nu30, nu21, nu12, nu03, nu22]
+        self.scaled_moments = self.compute_scaled_moments(self.central_moments, image_copy)
+        # Note: Make sure computed moments are in correct order
+    
+    def compute_central_moments(self, image):
+        ''' Compute the central moments of an image'''
         
-        M10, M01, M00 = self.compute_regular_moments(image_copy)
+        # Compute regular moments
+        M00 = np.sum(image)
+        yx_grid = np.mgrid[0:image.shape[0],0:image.shape[1]]
+        x_grid = yx_grid[1]
+        y_grid = yx_grid[0]
+        # y moment
+        M01 = np.sum(image*y_grid)
+        # x moment
+        M10 = np.sum(image*x_grid)
         
-        self.central_moments = None  # array: [mu20, mu11, mu02, mu30, mu21, mu12, mu03, mu22]
         xbar = M10/M00
         ybar = M01/M00
-        self.central_moments = self.compute_central_moments(image_copy, xbar, ybar)
-        self.scaled_moments = None   # array: [nu20, nu11, nu02, nu30, nu21, nu12, nu03, nu22]
-        self.scaled_moments = self.compute_scaled_moments(self.central_moments, M00)
-        # Note: Make sure computed moments are in correct order
         
-    def compute_regular_moments(self, image):
-        '''Compute the regular moments of an image (i.e., not central moment)'''
-        # I think there are some faster ways to compute this. 
-        M00 = 0
-        M01 = 0
-        M10 = 0
-        
-        for x in range(image.shape[1]):
-            for y in range(image.shape[0]):
-                px = image[y,x]
+        mu20 = np.sum(((x_grid-xbar)**2)*image)
+        mu11 = np.sum((y_grid-ybar)*(x_grid-xbar)*image)
+        mu02 = np.sum(((y_grid-ybar)**2)*image)
+        mu30 = np.sum(((x_grid-xbar)**3)*image)
+        mu21 = np.sum((y_grid-ybar)*((x_grid-xbar)**2)*image)
+        mu12 = np.sum(((y_grid-ybar)**2)*(x_grid-xbar)*image)
+        mu03 = np.sum(((y_grid-ybar)**3)*image)
+        mu22 = np.sum(((y_grid-ybar)**2)*((x_grid-xbar)**2)*image)
                 
-                M00 += px
-                M10 += x*px
-                M01 += y*px
-            #end for
-        #end for
-        return M10, M01, M00
-    #end compute regular moments
-    
-    def compute_central_moments(self, image, xbar, ybar):
-        ''' Compute the central moments of an image'''
-        mu20 = 0
-        mu11 = 0
-        mu02 = 0
-        mu30 = 0
-        mu21 = 0
-        mu12 = 0
-        mu03 = 0
-        mu22 = 0
-                
-        for x in range(image.shape[1]):
-            for y in range(image.shape[0]):
-                px = image[y,x]
-                
-                mu20 += px*(x-xbar)**2
-                mu11 += px*(x-xbar)*(y-ybar)
-                mu02 += px*(y-ybar)**2
-                mu30 += px*(x-xbar)**3
-                mu21 += px*((x-xbar)**2)*(y-ybar)
-                mu12 += px*(x-xbar)*(y-ybar)**2
-                mu03 += px*(y-ybar)**3
-                mu22 += px*((x-xbar)**2)*(y-ybar)**2
-            #end for
-        #end for
         moment_array = np.array([ mu20, mu11, mu02, mu30, mu21, mu12, mu03, mu22 ])
         return moment_array
     #end compute_central_moments
     
-    def compute_scaled_moments(self, central_moments, M00):
+    def compute_scaled_moments(self, central_moments, image):
         """Compute scaled image moments
            M00 is the same as mu00            """
+        M00 = np.sum(image)
         # [nu20, nu11, nu02, nu30, nu21, nu12, nu03, nu22]
         mu20 = central_moments[0]
         mu11 = central_moments[1]
@@ -229,6 +207,7 @@ def compute_feature_difference(a_features, b_features):
     """
     # TODO: Your code here - return feature difference using an appropriate measure
     # Tip: Scale/weight difference values to get better results as moment magnitudes differ
+    # [nu20, nu11, nu02, nu30, nu21, nu12, nu03, nu22]
     
     # I NEED TO GET A BETTER DIFFERENCE COMPUTATION HERE!!!!!!!!!!!!
     # Weight by the type of moment being used
@@ -354,7 +333,7 @@ def match_features(a_features_dict, b_features_dict, n_actions):
 
 def main():
     # Note: Comment out parts of this code as necessary
-    '''
+    
     # 1a
     build_motion_history_image(MotionHistoryBuilder,  # motion history builder class
         os.path.join(input_dir, "PS8A1P1T1.avi"),  # input video
@@ -365,11 +344,9 @@ def main():
         },
         threshold=200,
         tau=45,
-        kSize=11,
-        blurSigma=5.0)  
-        # I still need to clean up the images here a bit. They are very fuzzy
-    '''
-    '''
+        kSize=25,
+        blurSigma=15.0)  
+    
     # 1b
     build_motion_history_image(MotionHistoryBuilder,  # motion history builder class
         os.path.join(input_dir, "PS8A1P1T1.avi"),  # TODO: choose sequence (person, trial) for action A1
@@ -377,12 +354,31 @@ def main():
         mhi_filename=os.path.join(output_dir, 'ps8-1-b-1.png'),
         threshold=200,
         tau=90,
-        kSize=11,
-        blurSigma=5.0)
+        kSize=25,
+        blurSigma=15.0)
+    # TODO: Specify any other keyword args that your motion history builder expects, e.g. theta, tau
+
+    # TODO: Similarly for actions A2 & A3
+    build_motion_history_image(MotionHistoryBuilder,  # motion history builder class
+        os.path.join(input_dir, "PS8A2P1T1.avi"),  # TODO: choose sequence (person, trial) for action A1
+        mhi_frame=71,  # TODO: pick a good frame to obtain MHI at, i.e. when action just ends
+        mhi_filename=os.path.join(output_dir, 'ps8-1-b-2.png'),
+        threshold=200,
+        tau=70,
+        kSize=25,
+        blurSigma=15.0)
+    # TODO: Specify any other keyword args that your motion history builder expects, e.g. theta, tau
+
+    build_motion_history_image(MotionHistoryBuilder,  # motion history builder class
+        os.path.join(input_dir, "PS8A3P1T1.avi"),  # TODO: choose sequence (person, trial) for action A1
+        mhi_frame=105,  # TODO: pick a good frame to obtain MHI at, i.e. when action just ends
+        mhi_filename=os.path.join(output_dir, 'ps8-1-b-3.png'),
+        threshold=200,
+        tau=100,
+        kSize=25,
+        blurSigma=15.0)
     # TODO: Specify any other keyword args that your motion history builder expects, e.g. theta, tau
     '''
-    # TODO: Similarly for actions A2 & A3
-    
     # 2a
     # Compute MHI and MEI features (unscaled and scaled central moments) for each video
     central_moment_features = {}  # 16 features (8 MHI, 8 MEI) as one vector, key: (<action>, <participant>, <trial>)
@@ -390,10 +386,35 @@ def main():
     
     default_params = dict(mhi_frame=60)  # params for build_motion_history(), overriden by custom_params for specified videos
     # Note: To specify custom parameters for a video, add to the dict below:
-    #   (<action>, <participant>, <trial>): dict(<param1>=<value1>, <param2>=<value2>, ...)
+    #   (<action>, <participant>, <trial>): dict(<param1>=<value1>, <param2>=<value2>, ...)    
     custom_params = {
-        (1, 1, 3): dict(mhi_frame=90),  # PS8A1P1T3.avi
-        (1, 2, 3): dict(mhi_frame=55)  # PS8A1P2T3.avi
+        (1, 1, 1): dict(mhi_frame=106, threshold=200, tau=100, kSize=25, blurSigma=15.0),
+        (1, 1, 2): dict(mhi_frame=93,  threshold=200, tau=90,  kSize=25, blurSigma=15.0),             
+        (1, 1, 3): dict(mhi_frame=110, threshold=200, tau=105, kSize=25, blurSigma=15.0),  # PS8A1P1T3.avi
+        (1, 2, 1): dict(mhi_frame=70,  threshold=200, tau=65,  kSize=25, blurSigma=15.0), 
+        (1, 2, 2): dict(mhi_frame=64,  threshold=200, tau=64,  kSize=25, blurSigma=15.0),
+        (1, 2, 3): dict(mhi_frame=68,  threshold=200, tau=65,  kSize=25, blurSigma=15.0),  # PS8A1P2T3.avi
+        (1, 3, 1): dict(mhi_frame=83,  threshold=200, tau=78,  kSize=25, blurSigma=15.0),
+        (1, 3, 2): dict(mhi_frame=79,  threshold=200, tau=75,  kSize=25, blurSigma=15.0),
+        (1, 3, 3): dict(mhi_frame=77,  threshold=200, tau=74,  kSize=25, blurSigma=15.0),
+        (2, 1, 1): dict(mhi_frame=71,  threshold=200, tau=70,  kSize=25, blurSigma=15.0),
+        (2, 1, 2): dict(mhi_frame=83,  threshold=200, tau=82,  kSize=25, blurSigma=15.0),
+        (2, 1, 3): dict(mhi_frame=84,  threshold=200, tau=84,  kSize=25, blurSigma=15.0),
+        (2, 2, 1): dict(mhi_frame=60,  threshold=200, tau=60,  kSize=25, blurSigma=15.0),
+        (2, 2, 2): dict(mhi_frame=64,  threshold=200, tau=63,  kSize=25, blurSigma=15.0),
+        (2, 2, 3): dict(mhi_frame=73,  threshold=200, tau=72,  kSize=25, blurSigma=15.0),
+        (2, 3, 1): dict(mhi_frame=78,  threshold=200, tau=75,  kSize=25, blurSigma=15.0),
+        (2, 3, 2): dict(mhi_frame=76,  threshold=200, tau=74,  kSize=25, blurSigma=15.0),
+        (2, 3, 3): dict(mhi_frame=81,  threshold=200, tau=80,  kSize=25, blurSigma=15.0),
+        (3, 1, 1): dict(mhi_frame=105, threshold=200, tau=100, kSize=25, blurSigma=15.0),
+        (3, 1, 2): dict(mhi_frame=100, threshold=200, tau=99,  kSize=25, blurSigma=15.0),
+        (3, 1, 3): dict(mhi_frame=95,  threshold=200, tau=94,  kSize=25, blurSigma=15.0),
+        (3, 2, 1): dict(mhi_frame=75,  threshold=200, tau=75,  kSize=25, blurSigma=15.0),
+        (3, 2, 2): dict(mhi_frame=84,  threshold=200, tau=83,  kSize=25, blurSigma=15.0),
+        (3, 2, 3): dict(mhi_frame=78,  threshold=200, tau=77,  kSize=25, blurSigma=15.0),
+        (3, 3, 1): dict(mhi_frame=77,  threshold=200, tau=76,  kSize=25, blurSigma=15.0),
+        (3, 3, 2): dict(mhi_frame=93,  threshold=200, tau=92,  kSize=25, blurSigma=15.0),
+        (3, 3, 3): dict(mhi_frame=88,  threshold=200, tau=87,  kSize=25, blurSigma=15.0)
     }
 
     # Loop for each action, participant, trial
@@ -408,6 +429,7 @@ def main():
                 mhi = build_motion_history_image(MotionHistoryBuilder, video_filename, **dict(default_params, **custom_params.get((a, p, t), {})))
                 #cv2.imshow("MHI: PS8A{}P{}T{}.avi".format(a, p, t), mhi)  # [debug]
                 #cv2.waitKey(1)  # uncomment if using imshow
+                #cv2.imwrite(os.path.join(output_dir, "MHI", "MHI_A{}P{}T{}.png".format(a,p,t)), mhi*255)
                 mei = np.uint8(mhi > 0)
                 mhi_moments = Moments(mhi)
                 mei_moments = Moments(mei)
@@ -423,7 +445,7 @@ def main():
     scaled_moments_confusion = match_features(scaled_moment_features, scaled_moment_features, n_actions)
     print "Confusion matrix (scaled central moments):-"
     print scaled_moments_confusion
-    '''
+        
     # 2b
     # Match features by testing one participant at a time (i.e. taking them out)
     # Note: Pick one between central_moment_features and scaled_moment_features
@@ -434,9 +456,20 @@ def main():
     print confusion_P1
 
     # TODO: Similarly for participants P2 & P3
+    features_P2 = {key: feature for key, feature in scaled_moment_features.iteritems() if key[1] == 2}
+    features_sans_P2 = {key: feature for key, feature in scaled_moment_features.iteritems() if key[1] != 2}
+    confusion_P2 = match_features(features_P2, features_sans_P2, n_actions)
+    print "Confusion matrix for P2:-"
+    print confusion_P2
+    
+    features_P3 = {key: feature for key, feature in scaled_moment_features.iteritems() if key[1] == 3}
+    features_sans_P3 = {key: feature for key, feature in scaled_moment_features.iteritems() if key[1] != 3}
+    confusion_P3 = match_features(features_P3, features_sans_P3, n_actions)
+    print "Confusion matrix for P3:-"
+    print confusion_P3
 
     # Note: Feel free to modify this driver function, but do not modify the interface for other functions/methods!
-   '''
+    '''
 
 if __name__ == "__main__":
     main()
