@@ -23,7 +23,14 @@ for filename in filenames:
   name, ext = os.path.splitext(filename)
   if ext in exts:
     img = cv2.imread(os.path.join(args.img_dir, filename))
+    #cv2.imwrite(os.path.join('temp', filename), img)
     if not writer.isOpened():
       writer.open(os.path.join(args.img_dir, 'video.avi'), 
+          #cv2.cv.CV_FOURCC('m','p','4','v'), 30, (img.shape[0], img.shape[1]))
           cv2.cv.CV_FOURCC('I','4','2','0'), 30, (img.shape[0], img.shape[1]))
+      #print img.shape
+    #end if
     writer.write(img)
+    #print img.shape
+  #end if
+#end for

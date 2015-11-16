@@ -232,6 +232,7 @@ def findBiggestLoop(transition_diff, alpha):
         #end for
     #end for
 
+    print start, end
     # END OF FUNCTION.
     return start, end
 
