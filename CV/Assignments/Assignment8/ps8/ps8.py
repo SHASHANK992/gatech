@@ -53,12 +53,6 @@ class MotionHistoryBuilder(object):
         # threshold
         motion_image = diff_img > self.threshold
         
-        # Use morphological open operator to remove noise
-        #kernel = np.ones((7,7), dtype=np.uint8)
-        #motion_image = cv2.morphologyEx(motion_image.astype(np.uint8), cv2.MORPH_OPEN, kernel)
-        # Dilate to "fill in" some of the gaps
-        #motion_image = cv2.dilate(motion_image.astype(np.uint8), kernel, iterations=1)
-        
         # Update motion history image
         self.update_MHI(motion_image)
         
@@ -329,7 +323,7 @@ def match_features(a_features_dict, b_features_dict, n_actions):
 
 def main():
     # Note: Comment out parts of this code as necessary
-    '''
+    
     # 1a
     build_motion_history_image(MotionHistoryBuilder,  # motion history builder class
         os.path.join(input_dir, "PS8A1P1T1.avi"),  # input video
@@ -338,12 +332,11 @@ def main():
             20: os.path.join(output_dir, 'ps8-1-a-2.png'),
             30: os.path.join(output_dir, 'ps8-1-a-3.png')
         },
-        threshold=200,
+        threshold=5,
         tau=45,
         kSize=25,
         blurSigma=15.0)  
-    '''
-    '''
+
     # 1b
     build_motion_history_image(MotionHistoryBuilder,  # motion history builder class
         os.path.join(input_dir, "PS8A1P1T1.avi"),  # TODO: choose sequence (person, trial) for action A1
@@ -375,30 +368,6 @@ def main():
         kSize=25,
         blurSigma=15.0)
     # TODO: Specify any other keyword args that your motion history builder expects, e.g. theta, tau
-    '''
-    '''
-    # Using morhpological open operator and the uint8 images (which I am pretty sure is wrong)
-    build_motion_history_image(MotionHistoryBuilder,  # motion history builder class
-        os.path.join(input_dir, "PS8A1P2T3.avi"),  # TODO: choose sequence (person, trial) for action A1
-        mhi_frame=65,  # TODO: pick a good frame to obtain MHI at, i.e. when action just ends
-        mhi_filename=os.path.join(output_dir, 'testA1P2T3.png'),
-        threshold=225,
-        tau=60,
-        kSize=25,
-        blurSigma=15.0)
-    '''
-    
-    '''
-    build_motion_history_image(MotionHistoryBuilder,  # motion history builder class
-        os.path.join(input_dir, "PS8A1P2T3.avi"),  # TODO: choose sequence (person, trial) for action A1
-        mhi_frame=65,  # TODO: pick a good frame to obtain MHI at, i.e. when action just ends
-        mhi_filename=os.path.join(output_dir, 'testA1P2T3.png'),
-        threshold=5,
-        tau=60,
-        kSize=25,
-        blurSigma=15.0)
-    # TODO: Specify any other keyword args that your motion history builder expects, e.g. theta, tau
-    '''
     
     # 2a
     # Compute MHI and MEI features (unscaled and scaled central moments) for each video
@@ -413,33 +382,29 @@ def main():
         (1, 1, 2): dict(mhi_frame=93,  threshold=5, tau=90,  kSize=25, blurSigma=15.0),             
         (1, 1, 3): dict(mhi_frame=110, threshold=5, tau=105, kSize=25, blurSigma=15.0),  # PS8A1P1T3.avi
         (1, 2, 1): dict(mhi_frame=70,  threshold=5, tau=65,  kSize=25, blurSigma=15.0), 
-        (1, 2, 2): dict(mhi_frame=60,  threshold=5, tau=50,  kSize=25, blurSigma=15.0),
+        (1, 2, 2): dict(mhi_frame=64,  threshold=5, tau=45,  kSize=25, blurSigma=15.0),
         (1, 2, 3): dict(mhi_frame=68,  threshold=5, tau=65,  kSize=25, blurSigma=15.0),  # PS8A1P2T3.avi
         (1, 3, 1): dict(mhi_frame=83,  threshold=5, tau=45,  kSize=45, blurSigma=25.0),
         (1, 3, 2): dict(mhi_frame=79,  threshold=5, tau=45,  kSize=45, blurSigma=25.0),
         (1, 3, 3): dict(mhi_frame=77,  threshold=5, tau=44,  kSize=45, blurSigma=25.0),
         (2, 1, 1): dict(mhi_frame=71,  threshold=5, tau=70,  kSize=25, blurSigma=15.0),
-        #(2, 1, 2): dict(mhi_frame=83,  threshold=200, tau=82,  kSize=25, blurSigma=15.0),
         (2, 1, 2): dict(mhi_frame=83,  threshold=5, tau=82,  kSize=25, blurSigma=15.0),
         (2, 1, 3): dict(mhi_frame=84,  threshold=5, tau=84,  kSize=25, blurSigma=15.0),
-        (2, 2, 1): dict(mhi_frame=60,  threshold=5, tau=60,  kSize=25, blurSigma=15.0),
-        #(2, 2, 2): dict(mhi_frame=64,  threshold=200, tau=63,  kSize=25, blurSigma=15.0),
-        (2, 2, 2): dict(mhi_frame=64,  threshold=5, tau=63,  kSize=25, blurSigma=15.0),
+        (2, 2, 1): dict(mhi_frame=50,  threshold=3, tau=50,  kSize=25, blurSigma=15.0),
+        (2, 2, 2): dict(mhi_frame=64,  threshold=3, tau=60,  kSize=25, blurSigma=15.0),
         (2, 2, 3): dict(mhi_frame=73,  threshold=5, tau=72,  kSize=25, blurSigma=15.0),
         (2, 3, 1): dict(mhi_frame=78,  threshold=5, tau=75,  kSize=25, blurSigma=15.0),
         (2, 3, 2): dict(mhi_frame=76,  threshold=5, tau=74,  kSize=25, blurSigma=15.0),
         (2, 3, 3): dict(mhi_frame=81,  threshold=5, tau=80,  kSize=25, blurSigma=15.0),
-        #(3, 1, 1): dict(mhi_frame=105, threshold=200, tau=100, kSize=25, blurSigma=15.0),
-        (3, 1, 1): dict(mhi_frame=105, threshold=5, tau=80, kSize=25, blurSigma=15.0),
-        (3, 1, 2): dict(mhi_frame=100, threshold=5, tau=99,  kSize=25, blurSigma=15.0),
-        #(3, 1, 3): dict(mhi_frame=95,  threshold=200, tau=94,  kSize=25, blurSigma=15.0),
-        (3, 1, 3): dict(mhi_frame=95,  threshold=5, tau=94,  kSize=25, blurSigma=15.0),
+        (3, 1, 1): dict(mhi_frame=105, threshold=5, tau=80,  kSize=25, blurSigma=15.0),
+        (3, 1, 2): dict(mhi_frame=100, threshold=10, tau=75,  kSize=25, blurSigma=15.0),
+        (3, 1, 3): dict(mhi_frame=95,  threshold=5, tau=70,  kSize=25, blurSigma=15.0),
         (3, 2, 1): dict(mhi_frame=75,  threshold=5, tau=75,  kSize=25, blurSigma=15.0),
         (3, 2, 2): dict(mhi_frame=84,  threshold=5, tau=83,  kSize=25, blurSigma=15.0),
         (3, 2, 3): dict(mhi_frame=78,  threshold=5, tau=77,  kSize=25, blurSigma=15.0),
         (3, 3, 1): dict(mhi_frame=77,  threshold=5, tau=76,  kSize=25, blurSigma=15.0),
         (3, 3, 2): dict(mhi_frame=80,  threshold=5, tau=45,  kSize=45, blurSigma=25.0),
-        (3, 3, 3): dict(mhi_frame=88,  threshold=5, tau=45,  kSize=45, blurSigma=25.0)
+        (3, 3, 3): dict(mhi_frame=88,  threshold=15, tau=45,  kSize=45, blurSigma=25.0)
     }
 
     # Loop for each action, participant, trial
