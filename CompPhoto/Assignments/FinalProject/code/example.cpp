@@ -149,14 +149,17 @@ int main(int argc, char **argv)
     // Step 3 - Smooth out the trajectory using an averaging window
     vector <Trajectory> smoothed_trajectory; // trajectory at all frames
 
-    for(size_t i=0; i < trajectory.size(); i++) {
+    for(size_t i=0; i < trajectory.size(); i++) 
+    {
         double sum_x = 0;
         double sum_y = 0;
         double sum_a = 0;
         int count = 0;
 
-        for(int j=-SMOOTHING_RADIUS; j <= SMOOTHING_RADIUS; j++) {
-            if(i+j >= 0 && i+j < trajectory.size()) {
+        for(int j=-SMOOTHING_RADIUS; j <= SMOOTHING_RADIUS; j++) 
+        {
+            if(i+j >= 0 && i+j < trajectory.size()) 
+            {
                 sum_x += trajectory[i+j].x;
                 sum_y += trajectory[i+j].y;
                 sum_a += trajectory[i+j].a;
