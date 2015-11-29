@@ -131,6 +131,9 @@ def main():
     dy = transforms[1,2,:]
     da = np.arctan2(transforms[1,0,:], transforms[0,0,:])
     
+    np.savetxt('dx.txt', dx)
+    np.savetxt('dy.txt', dy)
+    
     x_path = np.zeros(dx.shape)
     y_path = np.zeros(dy.shape)
     a_path = np.zeros(da.shape)
@@ -148,7 +151,8 @@ def main():
     #end for
     
     # Here would be a good place to save off the transform matrices so we can plot the paths
-    #np.savetxt('xpath.txt', x_path)
+    np.savetxt('xpath.txt', x_path)
+    np.savetxt('ypath.txt', y_path)
     
     #*******************************************************
     # Smooth camera path
@@ -159,7 +163,8 @@ def main():
     y_path_avg = moving_avg(y_path, 30)
     a_path_avg = moving_avg(a_path, 30)
     
-    #np.savetxt('xpath_avg.txt', x_path_avg)
+    np.savetxt('xpath_avg.txt', x_path_avg)
+    np.savetxt('ypath_avg.txt', y_path_avg)
     
     #************************************************************
     # Compute new transforms using smoothed path
@@ -190,10 +195,13 @@ def main():
         new_da[i] = da[i] + diff_a
     #end for
     
+    np.savetxt('new_dx.txt', new_dx)
+    np.savetxt('new_dy.txt', new_dy)
+    
     #********************************************
     # Apply new transforms to video
     #********************************************
-    crop_size = 30
+    crop_size = 100
     fourcc = cv2.cv.CV_FOURCC('D','I','V','X')
     video_out = cv2.VideoWriter('output.avi', 
                                  fourcc,
@@ -224,7 +232,6 @@ def main():
         # Crop frame 
         frame_warp = frame_warp[crop_size:frame_warp.shape[0]-crop_size, crop_size:frame_warp.shape[1]-crop_size]
         
-        #cv2.imwrite( '..\\video\\output\\frame' + str(i) + '.png', frame_warp)
         video_out.write(frame_warp)
     #end for
     video.release()
