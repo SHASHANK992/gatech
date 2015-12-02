@@ -80,7 +80,7 @@ def main():
     
     # While there are still frames, iterate over the frames
     currIdx = 0
-    transforms = np.zeros( (2, 3, numFrames-1) )
+    transforms = np.zeros( (3, 3, numFrames-1) )
     retval, frame2 = video.read()
     while retval:
         nextPts, status, err = cv2.calcOpticalFlowPyrLK(frame1, frame2, prevPts)
@@ -102,7 +102,7 @@ def main():
         
         # Determine transformation from flow
         # Just use a rigid transform (translation, rotation)
-        transformMatrix = cv2.estimateRigidTransform(prevPts, nextPts, fullAffine=False)
+        transformMatrix, mask = cv2.findHomography(prevPts, nextPts, method=cv2.RANSAC, ransacReprojThreshold=5.0)
         # For future work, try doing a full homography
         
         # Add transformation matrix to list
@@ -127,76 +127,49 @@ def main():
     # At this point, we have the sequence of matrices that have the deltas between each frame
     # However, I need the actual path. 
     # Use the pairwise differences to build the actual camera path
-    dx = transforms[0,2,:]
-    dy = transforms[1,2,:]
-    da = np.arctan2(transforms[1,0,:], transforms[0,0,:])
     
-    #np.savetxt('dx.txt', dx)
-    #np.savetxt('dy.txt', dy)
+    transforms_cum = np.zeros( (3,3, transforms.shape[2]) )
     
-    x_path = np.zeros(dx.shape)
-    y_path = np.zeros(dy.shape)
-    a_path = np.zeros(da.shape)
-    x = 0.0
-    y = 0.0
-    a = 0.0
-    for i in range(dx.shape[0]):
-        x += dx[i]
-        y += dy[i]
-        a += da[i]
-        
-        x_path[i] = x
-        y_path[i] = y
-        a_path[i] = a
+    transforms_sum = np.zeros( (3,3) )
+    for i in range(transforms.shape[2]):
+        transforms_sum += transforms[:,:,i]
+        transforms_cum[:,:,i] = transforms_sum
     #end for
-    
-    # Here would be a good place to save off the transform matrices so we can plot the paths
-    #np.savetxt('xpath.txt', x_path)
-    #np.savetxt('ypath.txt', y_path)
     
     #*******************************************************
     # Smooth camera path
     #*******************************************************
     # Now that we have all the transformations, use a moving average window to calculate the
     # better camera path
-    x_path_avg = moving_avg(x_path, 30)
-    y_path_avg = moving_avg(y_path, 30)
-    a_path_avg = moving_avg(a_path, 30)
-    
-    #np.savetxt('xpath_avg.txt', x_path_avg)
-    #np.savetxt('ypath_avg.txt', y_path_avg)
+    smooth = np.zeros(transforms_cum.shape)
+    smooth[0,0,:] = moving_avg(transforms_cum[0,0,:], 50)
+    smooth[0,1,:] = moving_avg(transforms_cum[0,1,:], 50)
+    smooth[0,2,:] = moving_avg(transforms_cum[0,2,:], 50)
+    smooth[1,0,:] = moving_avg(transforms_cum[1,0,:], 50)
+    smooth[1,1,:] = moving_avg(transforms_cum[1,1,:], 50)
+    smooth[1,2,:] = moving_avg(transforms_cum[1,2,:], 50)
+    smooth[2,0,:] = moving_avg(transforms_cum[2,0,:], 50)
+    smooth[2,1,:] = moving_avg(transforms_cum[2,1,:], 50)
+    smooth[2,2,:] = moving_avg(transforms_cum[2,2,:], 50)
     
     #************************************************************
     # Compute new transforms using smoothed path
     #************************************************************
-    new_dx = np.zeros(dx.shape)
-    new_dy = np.zeros(dy.shape)
-    new_da = np.zeros(da.shape)
-    
-    x = 0
-    y = 0
-    a = 0
-    for i in range(dx.shape[0]):
+    new_transforms = np.zeros( transforms.shape )
+
+    transform_sum = np.zeros( (3,3) )
+    for i in range(transforms.shape[2]):
         # Keep track of where the camera position is
-        x += dx[i]
-        y += dy[i]
-        a += da[i]
+        transform_sum += transforms[:,:,i]
         
-        # Find the diffence between where the camera is and
+        # Find the difference between where the camera is and
         # where it should be (i.e, smoothed trajectory)
-        diff_x = x_path_avg[i] - x
-        diff_y = y_path_avg[i] - y
-        diff_a = a_path_avg[i] - a
+        diff_transform = smooth[:,:,i] - transforms[:,:,i]
         
-        # Now use this difference with the old path dx to find
+        # Now use this difference with the old path to find
         # the new set of differences
-        new_dx[i] = dx[i] + diff_x
-        new_dy[i] = dy[i] + diff_y
-        new_da[i] = da[i] + diff_a
+        new_transforms[:,:,i] = transforms[:,:,i] + diff_transform
     #end for
-    
-    #np.savetxt('new_dx.txt', new_dx)
-    #np.savetxt('new_dy.txt', new_dy)
     
     #********************************************
     # Apply new transforms to video
@@ -216,18 +189,8 @@ def main():
         if retval == False:
             break;
         
-        # Construct the transform
-        transform_temp = np.zeros( (2, 3) )
-        transform_temp[0,0] =  np.cos(da[i])
-        transform_temp[0,1] = -np.sin(da[i])
-        transform_temp[1,0] =  np.sin(da[i])
-        transform_temp[1,1] =  np.cos(da[i])
-        
-        transform_temp[0,2] = new_dx[i]
-        transform_temp[1,2] = new_dy[i]
-        
         # Apply the transform
-        frame_warp = cv2.warpAffine(frame, transform_temp, dsize=(frame.shape[1], frame.shape[0]))
+        frame_warp = cv2.warpPerspective(frame, new_transforms[:,:,i], dsize=(frame.shape[1], frame.shape[0]) )
         
         # Crop frame 
         frame_warp = frame_warp[crop_size:frame_warp.shape[0]-crop_size, crop_size:frame_warp.shape[1]-crop_size]
