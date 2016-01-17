@@ -7,12 +7,21 @@ def test_population_accuracy():
     std_dev_p = stdev_p(test)
     
     print "Population std dev: ", std_dev_p
+    
+    test = [2, 4, 4, 4, 5, 5, 7, 9]
+    std_dev_p = stdev_p(test)
+    
+    print "Population std dev: ", std_dev_p
     return 0
     
 def test_sample_accuracy():
     test = [2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]
     std_dev_s = stdev_s(test)
     
+    print "Sample std dev: ", std_dev_s
+    
+    test = [2, 4, 4, 4, 5, 5, 7, 9]
+    std_dev_s = stdev_s(test)
     print "Sample std dev: ", std_dev_s
     return 0
     
@@ -46,6 +55,59 @@ def test_sample_speed():
     
     return 0
 
+def test_population_empty():
+    test = []
+    std_dev_p = stdev_p(test)
+    
+    print "Population std dev: ", std_dev_p
+    return 0
+
+def test_population_nan():
+    test = [1, 2, float('nan')]
+    std_dev_p = stdev_p(test)
+    
+    print "Population std dev: ", std_dev_p
+    
+    test = [ float('nan')]
+    std_dev_p = stdev_p(test)
+    
+    print "Population std dev: ", std_dev_p
+    return 0
+    
+def test_sample_empty():
+    test = []
+    std_dev_s = stdev_s(test)
+    
+    print "Sample std dev: ", std_dev_s
+    return 0
+
+def test_population_one():
+    test = [1]
+    std_dev_p = stdev_p(test)
+    print "Population std dev: ", std_dev_p
+    return 0
+
+def test_sample_one():
+    test = [1]
+    std_dev_s = stdev_s(test)
+    
+    print "Sample std dev: ", std_dev_s
+    return 0
+    
+def test_sample_nan():
+    test = [1, 2, float('nan')]
+    std_dev_s = stdev_s(test)
+    
+    print "Sample std dev: ", std_dev_s
+    return 0
+   
+def test_population_none():
+    test = None
+    std_dev_p = stdev_p(test)
+    
+    print "Population std dev: ", std_dev_p
+    return 0
+
 
 if __name__ == "__main__":
     test_population_accuracy()
@@ -55,3 +117,17 @@ if __name__ == "__main__":
     test_population_speed()
     
     test_sample_speed()
+    
+    test_population_empty()
+    
+    test_population_nan()
+    
+    test_population_one()
+    
+    test_sample_empty()
+    
+    test_sample_one()
+    
+    test_sample_nan()
+    
+    #test_population_none()

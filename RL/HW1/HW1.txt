@@ -1,0 +1,24 @@
+# HW 1: DieN
+
+Note: 
+If you read the homework, I haven't specified how you need to submit the homework. I will give out those instructions by Monday. However you are welcome to start thinking about the homework and working on it.
+
+Problem:
+The game DieN is played in the following way.
+ 
+Consider a die with N sides (where N is an integer greater than 1) and a nonempty set B of integers between 1 and N (inclusive). The rules of the game are:
+ 
+ 1. You start with 0 dollars.
+ 2. Roll an N-sided die with a different number from 1 to N printed on each
+ side.
+   - If you roll a number not in B, you receive that many dollars. (E.g., if
+   you roll the number 2 and 2 is not in B, then you receive 2 dollars.)
+   - If you roll a number in B, then you lose all of your obtained money and
+   the game ends.
+ 3. After you roll the die (and don't roll a number in B), you have the option
+ to quit the game. If you quit, you keep all the money you've earned to that
+ point. If you continue to roll, go back to step 2.
+ 
+For this problem, determine an optimal policy for playing the game DieN with N = 30 and B = {n: 1 <= n <= 30 and n is not prime}. (The policy should depend on your current bankroll.)
+ 
+What is the expected value of this game if you follow an optimal policy?
