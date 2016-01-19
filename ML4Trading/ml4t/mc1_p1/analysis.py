@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import datetime as dt
 from util import get_data, plot_data
-import datetime as dt
 
 # This is the function that will be tested by the autograder
 # The student must update this code to properly implement the functionality
@@ -35,10 +34,8 @@ def assess_portfolio( sd = dt.datetime(2008,1,1), ed = dt.datetime(2009,1,1), \
     daily_value = values_position.sum(axis=1)
     
     # Put daily values into a data frame
-    port_val = pd.DataFrame(index=dates) # Create frame with only dates
-    port_val = port_val.join(prices_SPY) # Join with the SPY frame
-    port_val = port_val.dropna(subset=["SPY"]) # Remove empty dates
-    port_val['Daily Value'] = daily_value/daily_value[0] # Put in normalized daily value data
+    # Add to existing data frame as new column
+    prices['Daily Value'] = daily_value/daily_value[0]
     
     daily_return = (daily_value/np.roll(daily_value,1)) - 1
     daily_return[0] = 0
@@ -59,10 +56,9 @@ def assess_portfolio( sd = dt.datetime(2008,1,1), ed = dt.datetime(2009,1,1), \
     
     if gen_plot:
         # add code to plot here
-        df_temp = pd.concat([ port_val['Daily Value'], prices_SPY_norm], keys=['Portfolio', 'SPY'], axis=1)
+        df_temp = pd.concat([ prices['Daily Value'], prices_SPY_norm], keys=['Portfolio', 'SPY'], axis=1)
         plot_data(df_temp)
         pass
-    
     
     return cr, adr, sddr, sr, ev
 
