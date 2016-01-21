@@ -45,15 +45,14 @@ def assess_portfolio( sd = dt.datetime(2008,1,1), ed = dt.datetime(2009,1,1), \
     # Cumulative return (final value / initial value)
     cr = (daily_value[-1]/daily_value[0])-1
     # Standard deviation of daily return
-    sddr = np.std(daily_return)
+    sddr = np.std(daily_return[1:],ddof=1)
     # Sharp ratio
     k = np.sqrt(sf)
-    sr = k*(np.mean(daily_return-rfr))/(np.std(daily_return-rfr))
+    sr = k*(np.mean(daily_return[1:]-rfr))/(np.std(daily_return[1:]-rfr, ddof=1))
     # Ending value
     ev = daily_value[-1]
 
     # Compare daily portfolio value with SPY using a normalized plot
-    
     if gen_plot:
         # add code to plot here
         df_temp = pd.concat([ prices['Daily Value'], prices_SPY_norm], keys=['Portfolio', 'SPY'], axis=1)
@@ -61,6 +60,8 @@ def assess_portfolio( sd = dt.datetime(2008,1,1), ed = dt.datetime(2009,1,1), \
         pass
     
     return cr, adr, sddr, sr, ev
+
+
 
 if __name__ == "__main__":
     # This code WILL NOT be tested by the auto grader

@@ -20,16 +20,19 @@ def DieN_policy( sum_of_rewards, B = [1,4,6,8,9,10,12,14,15,16,18,20,21,22,24,25
     # To determine whether to take the risk to roll again and lose all the accumulated
     # reward, I need to do an expectation
     # For regret, that is the probability that I roll a number in B * the amount of regret
-    EV_regret = (len(B)/N)*regret
+    EV_regret = (float(len(B))/N)*regret
     
     # For reward, is is just the probability that I roll a number not in B times the reward itself
-    EV_reward = (1/N)*sum(A)
+    EV_reward = (1.0/N)*sum(A)
     
     ret_val = ""
-    if EV_regret >= EV_reward:
+    if abs(EV_regret) >= EV_reward:
         ret_val = "Don't roll again. Quit."
     else:
         ret_val = "Roll. The expected value of the reward is greater than the expected value of regret."
         
     return ret_val
-    
+
+
+if __name__ == "__main__":
+    print DieN_policy(5)
