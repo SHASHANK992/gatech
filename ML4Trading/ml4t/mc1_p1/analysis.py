@@ -168,3 +168,38 @@ if __name__ == "__main__":
     print "Volatility (stdev of daily returns):", sddr
     print "Average Daily Return:", adr
     print "Cumulative Return:", cr
+    
+    
+    
+    #********************************************************
+    # Test 4
+    #*********************************************************
+    start_date = dt.datetime(2010,1,1)
+    end_date = dt.datetime(2010,12,31)
+    symbols = ['GOOG', 'AAPL', 'GLD', 'XOM']
+    allocations = [0.2, 0.2, 0.4, 0.2]
+    start_val = 1000000  
+    risk_free_rate = 0.0
+    sample_freq = 252
+
+    # Assess the portfolio
+    cr, adr, sddr, sr, ev = assess_portfolio(sd = start_date, ed = end_date,\
+        syms = symbols, \
+        allocs = allocations,\
+        sv = start_val, \
+        gen_plot = True)
+
+    # Print statistics
+    print ""
+    print ""
+    print "*****************************************"
+    print "Test 4"
+    print "*****************************************"
+    print "Start Date:", start_date
+    print "End Date:", end_date
+    print "Symbols:", symbols
+    print "Allocations:", allocations
+    print "Sharpe Ratio:", sr
+    print "Volatility (stdev of daily returns):", sddr
+    print "Average Daily Return:", adr
+    print "Cumulative Return:", cr
