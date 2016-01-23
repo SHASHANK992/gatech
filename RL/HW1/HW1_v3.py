@@ -20,21 +20,20 @@ def DieN_expectedValue(N=30, B=[0,1,1,0,1,0,1,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,1,0,
     #endfor
     
     # With your current stakes, calculate value of rolling again
-    ev_init = (1.0/N)*(sum(A) - len(B_list)*stake)
+    ev_state = (1.0/N)*(sum(A) - len(B_list)*stake)
     ev = 0 
     # If this value is positive, roll again!
-    if ev_init > 0:
+    if ev_state > 0:
         for val in A:
-            print "Roll again! Stake =  ", val+stake
+            #print "Roll again! Stake =  ", val+stake
             ev_temp = DieN_expectedValue(N, B, val+stake)
             
-            if ev_temp < stake:
-                ev += float(val+stake)/N
+            ev += ev_temp/float(N)
         #end for
     # Otherwise, I want to quit the game and return my current winnings
     else:
-        print "Quitting. Winnings = ", stake
-        ev = stake/float(N)
+        #print "Quitting. Winnings = ", stake
+        ev = stake
     #end if
     
     return ev
@@ -44,7 +43,7 @@ if __name__ == "__main__":
     ev = DieN_expectedValue(N=8, B=[1,0,1,0,1,1,1,0])
     print "Expected Value: ", ev
     
-    '''
+    
     ev = DieN_expectedValue(N=4, B=[0,1,1,1])
     print "Expected Value: ", ev
-    '''
+    
