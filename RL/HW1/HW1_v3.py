@@ -18,22 +18,28 @@ def DieN_expectedValue(N=30, B=[0,1,1,0,1,0,1,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,1,0,
         if i not in B_list:
             A.append(i)
     #endfor
-    
+        
     # With your current stakes, calculate value of rolling again
-    #ev = stake + (1.0/N)*(sum(A) - len(B)*stake)
     ev = (1.0/N)*(sum(A) - len(B)*stake)
+    print ev
     
     # If this value is positive, then I want to find the path that gives me
     # maximum reward
-    if ev > 0:
-        ev_temp = 0
+    if ev >= 0:
+        ev_max = 0
         for val in A:
-            ev_temp += DieN_expectedValue(N, B, val+stake)
+            print "Recursion: ", val
+            ev_temp = DieN_expectedValue(N, B, val+stake)
+            
+            if ev_temp > ev_max:
+                ev_max = ev_temp
         #end for
         
-        ev += ev_temp/float(len(B))
+        ev = ev_max/len(B)
+        
     # Otherwise, I want to quit the game and return my current winnings
     else:
+        print "Returning: ", stake
         ev = stake
     #end if
     
