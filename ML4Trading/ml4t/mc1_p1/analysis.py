@@ -40,17 +40,24 @@ def assess_portfolio( sd = dt.datetime(2008,1,1), ed = dt.datetime(2009,1,1), \
     daily_return = (daily_value/np.roll(daily_value,1)) - 1
     daily_return[0] = 0
     
-    # Average daily return
-    adr = np.mean(daily_return[1:])
     # Cumulative return (final value / initial value)
     cr = (daily_value[-1]/daily_value[0])-1
     # Standard deviation of daily return
     sddr = np.std(daily_return[1:],ddof=1)
-    # Sharp ratio
-    k = np.sqrt(sf)
-    sr = k*(np.mean(daily_return[1:]-rfr))/(np.std(daily_return[1:]-rfr, ddof=1))
     # Ending value
     ev = daily_value[-1]
+    
+    # For these statistics, I need to factor in the period being used
+    iter_value = np.ceil(252.0/sf)
+    period_value = daily_value[0::iter_value]
+    period_return = (period_value/np.roll(period_value,1)) - 1
+    
+    # Average period return
+    apr = np.mean(period_return[1:])
+    
+    # Sharp ratio
+    k = np.sqrt(sf)
+    sr = k*(np.mean(period_return[1:]-rfr))/(np.std(period_return[1:]-rfr, ddof=1))
 
     # Compare daily portfolio value with SPY using a normalized plot
     if gen_plot:
@@ -59,7 +66,7 @@ def assess_portfolio( sd = dt.datetime(2008,1,1), ed = dt.datetime(2009,1,1), \
         plot_data(df_temp)
         pass
     
-    return cr, adr, sddr, sr, ev
+    return cr, apr, sddr, sr, ev
 
 
 
