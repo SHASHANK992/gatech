@@ -20,6 +20,9 @@ def find_optimal_allocations(prices):
     """
 
     # TODO: Your code here
+    
+    
+    
     return allocs
 
 
@@ -55,6 +58,8 @@ def optimize_portfolio(start_date, end_date, symbols):
     normed_SPY = prices_SPY / prices_SPY.ix[0, :]
     df_temp = pd.concat([port_val, normed_SPY], keys=['Portfolio', 'SPY'], axis=1)
     plot_data(df_temp, title="Daily Portfolio Value and SPY")
+    
+    return allocs, cum_ret, avg_daily_ret, std_daily_ret
 
 
 def test_run():
