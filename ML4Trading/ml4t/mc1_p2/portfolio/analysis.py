@@ -87,3 +87,11 @@ def get_portfolio_stats(port_val):
      
     return cum_ret, avg_daily_ret, std_daily_ret, sharpe_ratio
 #end get_portfolio_stats
+
+def compute_SR(prices, alloc):
+    daily_val = get_portfolio_value(prices, alloc)
+    
+    cr, adr, stddr, sr = get_portfolio_stats(daily_val)
+    
+    return sr
+#end compute_SR

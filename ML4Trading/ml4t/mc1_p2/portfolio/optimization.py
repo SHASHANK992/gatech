@@ -2,9 +2,10 @@
 
 import pandas as pd
 import numpy as np
+import scipy.optimize as spo
 
 from util import get_data, plot_data
-from analysis import get_portfolio_value, get_portfolio_stats
+from analysis import get_portfolio_value, get_portfolio_stats, compute_SR
 
 
 def find_optimal_allocations(prices):
@@ -20,10 +21,26 @@ def find_optimal_allocations(prices):
     """
 
     # TODO: Your code here
+    cols = prices.values.shape[1]
+    # Initial guess - all equally allocated
+    X_guess = np.ones((cols),dtype=np.float)/cols
     
+    # Construct bounds
+    # Each stock has to have an allocation between 0.0 and 1.0
+    # (Not sure if it needs to be a list or a tuple of tuples)
+    b = []
+    for i in range(cols):
+        b.append( (0.0,1.0) )
+    #end for
     
+    # Construct constraints
+    # The sum of all the allocations has to equal 1.0
+    c = ({ 'type':'eq', 'fun': lambda inputs: 1.0 - np.sum(inputs) })
     
-    return allocs
+    # Minimize
+    res = spo.optimize( compute_SR(prices,alloc), X_guess, method='SLSQP', bounds=b,constraints=c)
+    
+    return res.x
 
 
 def optimize_portfolio(start_date, end_date, symbols):
