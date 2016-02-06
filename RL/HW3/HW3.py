@@ -36,7 +36,7 @@ def findMissingComponents(n, xPresent, yPresent, xMissing, yMissing, k):
 #end findMissingComponents
 
 if __name__ == "__main__":
-
+    '''
     print "\n\n\n*************************************************"
     print " Test 0"
     print "*************************************************"
@@ -47,5 +47,27 @@ if __name__ == "__main__":
     yMissing = 1
     k = 115
     print findMissingComponents(n, x, y, xMissing, yMissing, k)
+    '''
+    
+    '''
+    print "\n\n\n*************************************************"
+    print "Problem 2"
+    print "*************************************************"
+    x = [ -127, 54, 225, 221, -15, -237, 242, -87, 233, 127, 18, 17, -128, 132 ]
+    y = [ 25, 208, -224, 235, -86, 125, -115, -231, 106, 12, -184, 254, -78, -94 ]
+    print "X ordered: ", sorted(x)
+    print "Y ordered: ", sorted(y)
+    '''
+    
+    
+    print "\n\n\n*************************************************"
+    print "Problem 3"
+    print "*************************************************"
+    x = [ -53, 117, 119, 217, -28, -42, -241, 238, -8, 132, -13, -53 ]
+    y = [ -218, -157, -61, -104, 68, -255, -138, -159, 20, 39, 248, -253 ]  
+    print "X ordered: ", sorted(x)
+    print "Y ordered: ", sorted(y)
+    
+    
 
 #end main
