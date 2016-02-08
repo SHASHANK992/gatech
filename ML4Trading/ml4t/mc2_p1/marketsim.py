@@ -7,17 +7,45 @@ import os
 from util import get_data, plot_data
 
 def compute_portvals(orders_file = "./orders/orders.csv", start_val = 1000000):
-    # this is the function the autograder will call to test your code
-    # TODO: Your code here
-    current_cash = start_val
     
-    # Create an empty 
+    # 1 - Read orders file
+    orders = pd.read_csv(orders_file, index_col='Date', parse_dates=True, na_values=['nan']) 
+    orders.sort_index(axis=0, inplace=True)
+    # Get start and end dates
+    dates = orders.index.tolist()
+    start_date = dates[0]
+    end_date   = dates[-1]
+    # Get list of stock symbols
+    syms = orders.values[:,0]
+    sym_set = set(syms)
+    syms = list(sym_set)
     
-    # Open CSV file for reading and skip the first line
+    # 2 - Get adjusted close prices for relevant stocks
+    dates = pd.date_range(start_date, end_date)
+    prices_all = get_data(syms, dates)         # Adds SPY
+    prices = prices_all[syms]                  # only portfolio symbols
+    prices_SPY = prices_all['SPY']             # only SPY, for comparison later
     
-    # For each line in the CSV file
+    # 3 - Add column for cash
+    price_values = prices.values              
+    prices['Cash'] = np.ones((price_values.shape[0], 1), dtype=np.float)  # Add cash row
     
-    # Get the 
+    # 4 - Data frame for trades
+    trades = prices.copy()
+    
+    
+    
+    # 5 - Data frame for holdings
+    
+    
+    
+    # 6 - Create new data from for daily values
+    #     Holdings times prices
+    
+    
+    # 7 - Daily portfolio value is the sum of each row
+    
+    
     
     
     
@@ -30,7 +58,7 @@ def compute_portvals(orders_file = "./orders/orders.csv", start_val = 1000000):
     start_date = dt.datetime(2008,1,1)
     end_date = dt.datetime(2008,1,2)
     portvals = get_data(['IBM'], pd.date_range(start_date, end_date))
-    print portvals
+    
 
     return portvals
 
@@ -76,4 +104,4 @@ def test_code():
 if __name__ == "__main__":
     #test_code()
     
-    temp = compute_portvals()
+    temp = compute_portvals(orders_file = "./orders/orders2.csv")
