@@ -12,17 +12,17 @@ def compute_portvals(orders_file = "./orders/orders.csv", start_val = 1000000):
     orders = pd.read_csv(orders_file, index_col='Date', parse_dates=True, na_values=['nan']) 
     orders.sort_index(axis=0, inplace=True)
     # Get start and end dates
-    dates = orders.index.tolist()
-    start_date = dates[0]
-    end_date   = dates[-1]
+    order_dates = orders.index.tolist()
+    start_date = order_dates[0]
+    end_date   = order_dates[-1]
     # Get list of stock symbols
     syms = orders.values[:,0]
     sym_set = set(syms)
     syms = list(sym_set)
     
     # 2 - Get adjusted close prices for relevant stocks
-    dates = pd.date_range(start_date, end_date)
-    prices_all = get_data(syms, dates)         # Adds SPY
+    price_dates = pd.date_range(start_date, end_date)
+    prices_all = get_data(syms, price_dates)         # Adds SPY
     prices = prices_all[syms]                  # only portfolio symbols
     prices_SPY = prices_all['SPY']             # only SPY, for comparison later
     
@@ -31,13 +31,44 @@ def compute_portvals(orders_file = "./orders/orders.csv", start_val = 1000000):
     prices['Cash'] = np.ones((price_values.shape[0], 1), dtype=np.float)  # Add cash row
     
     # 4 - Data frame for trades
+    #  Copy from prices and zero everything out
     trades = prices.copy()
+    syms.append('Cash')
+    trades[syms] = 0.0
     
-    
-    
+    order_val = orders.values
+    for i in range(0, len(order_dates)):
+        order = order_val[i,:]
+        
+        # Parse symbol
+        stock_sym = order[0]
+        # Parse quantity 
+        volume = order[2]
+        #Parse buy/sell
+        if order[1] == 'BUY':
+            multiplier = 1.0
+        if order[1] == 'SELL':
+            multiplier = -1.0
+        
+        # Add to trades file
+        trades.loc[order_dates[i]][stock_sym] = multiplier*volume 
+    #end for    
+        
     # 5 - Data frame for holdings
+    holdings = trades.copy()
+    holdings[syms] = 0.0
+    # Initialize cash value
+    holdings.loc[start_date]['Cash'] = start_val
     
-    
+    for i in range(0,price_values.shape[0]):
+        if i == 0:
+            # Don't look at previous row. It doesn't mean anything
+        else:
+            # Look at previous row
+            
+        #end if    
+    #end for
+        
     
     # 6 - Create new data from for daily values
     #     Holdings times prices
