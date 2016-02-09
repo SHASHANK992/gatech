@@ -42,6 +42,7 @@ def compute_portvals(orders_file = "./orders/orders.csv", start_val = 1000000):
         
         # Parse symbol
         stock_sym = order[0]
+        stock_price = prices.loc[order_dates[i]][stock_sym]
         # Parse quantity 
         volume = order[2]
         #Parse buy/sell
@@ -51,47 +52,42 @@ def compute_portvals(orders_file = "./orders/orders.csv", start_val = 1000000):
             multiplier = -1.0
         
         # Add to trades file
-        trades.loc[order_dates[i]][stock_sym] = multiplier*volume 
+        trades.loc[order_dates[i]][stock_sym] = multiplier*volume
+        trades.loc[order_dates[i]]['Cash'] += -1*multiplier*volume*stock_price
     #end for    
-        
+    
     # 5 - Data frame for holdings
     holdings = trades.copy()
     holdings[syms] = 0.0
     # Initialize cash value
     holdings.loc[start_date]['Cash'] = start_val
     
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+    # Left off here
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    previous_row = holdings.iloc[0]    
     for i in range(0,price_values.shape[0]):
-        if i == 0:
-            # Don't look at previous row. It doesn't mean anything
-        else:
-            # Look at previous row
-            
-        #end if    
-    #end for
+        if i > 0:
+            # Take previous row
+            previous_row = holdings.iloc[i-1]
+        # Add the corresponding row from trades
+        trade_row = trades.iloc[i]
         
+        holdings.iloc[i] = previous_row + trade_row           
+    #end for
     
     # 6 - Create new data from for daily values
     #     Holdings times prices
+    daily_values = holdings.multiply(prices)
     
-    
+    print daily_values
+    '''
     # 7 - Daily portfolio value is the sum of each row
-    
-    
-    
-    
-    
-    
-    
-    
-
-    # In the template, instead of computing the value of the portfolio, we just
-    # read in the value of IBM over 6 months
-    start_date = dt.datetime(2008,1,1)
-    end_date = dt.datetime(2008,1,2)
-    portvals = get_data(['IBM'], pd.date_range(start_date, end_date))
-    
-
-    return portvals
+    daily_values_array = daily_values.values
+    daily_value = daily_values_array.sum(axis=1)   
+    '''
+    daily_value= 0
+    return daily_value
 
 def test_code():
     # this is a helper function you can use to test your code
