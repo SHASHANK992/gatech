@@ -1,0 +1,21 @@
+Instructor notes on solving this problem
+
+1. Read CSV orders file
+   - look in symbols column to see all the symbols you want to read
+   - get start and end dates from this as well
+2. Read adjusted closing for relevant stocks
+3. Add column to prices df for cash
+    - Make this all ones for easy use later
+4. Make new data frame for trades
+    - Stores deltas in holdings
+    - Go line by line through orders file and fill in 
+    - Not tallying just yet
+5. New data frame for holdings
+    - On each day, what the actual holdings for stocks and cash
+    - Init with just cash
+    - take previous line and add data from corresponding trades file
+6. New data frame for value
+    - holdings times prices
+    - (why we made cash column in prices all ones)
+7. Daily portfolio value is then the sum of each row
+
