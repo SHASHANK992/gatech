@@ -1,0 +1,670 @@
+{
+  "gamma":0.75,
+  "states": [
+    {
+      "id": 0,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 1,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 1,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    }
+    {
+      "id": 2,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "actions": [
+        {
+          "id": 0,
+          "transitions": [
+            {
+              "id": 0,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 0
+            },
+            {
+              "id": 1,
+              "probability": 0.5,
+              "reward": 0,
+              "to": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
