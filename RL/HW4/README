@@ -1,7 +1,3 @@
 The java executable requires Java 1.8
 
-What kind of problem would encourage a short-sighted policy as long as possible? 
-- I am thinking that a small gamma value will be part of this. A smaller gamma "looks
-  into the future" less (not as far), so making this very small will make it short 
-  sighted
-- 
+Read Littman 1996 sections 2.3.2 and 2.4.3
