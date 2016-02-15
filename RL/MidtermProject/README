@@ -1,5 +1,17 @@
-For BURLAP, look into GraphDefinedDomain
+To build and run on Windows:
+
+javac -cp ../lib/*;. BoundedRandomWalk.java
+java -cp ../lib/*;. BoundedRandomWalk
+
+Make sure you have the Java Development kit (JDK) installed.
+Used Burlap v 2.0
+
+
 
 
 Useful links
 https://webdocs.cs.ualberta.ca/~sutton/book/ebook/node73.html
+
+
+Burlap documentation
+http://burlap.cs.brown.edu/doc/index.html
