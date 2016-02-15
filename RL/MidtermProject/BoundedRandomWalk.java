@@ -38,12 +38,12 @@ public class BoundedRandomWalk
     double[] stateValues;
     double gamma;
     double lr;
-    double lambda;
+    double[] lambda;
     
     public static void main(String[] args)
     {
         //Make new instance of BoundedRandomWalk
-        BoundedRandomWalk brw = new BoundedRandomWalk( 0.7, 0.9, 0.0);
+        BoundedRandomWalk brw = new BoundedRandomWalk( 0.7, 0.9 );
     
         // Open up file(s) for writing results
         try
@@ -56,7 +56,7 @@ public class BoundedRandomWalk
     }
     
     
-    public BoundedRandomWalk( double gamma, double learningRate, double lambda )
+    public BoundedRandomWalk( double gamma, double learningRate )
     {
         // Bounded random walk to be modelled:
         //                        Start here 
@@ -78,6 +78,15 @@ public class BoundedRandomWalk
         stateValues[4] = 2.0/3.0;
         stateValues[5] = 5.0/6.0;
         stateValues[6] = 1.0;
+        
+        lambda = new double[7];
+        lambda[0] = 0.0;
+        lambda[1] = 0.1;
+        lambda[2] = 0.3;
+        lambda[3] = 0.5;
+        lambda[4] = 0.7;
+        lambda[5] = 0.9;
+        lambda[6] = 1.0;
         				
         // Create new domain generator
         numStates = 7;        
@@ -170,5 +179,33 @@ public class BoundedRandomWalk
         return "Not implemented";
     }
     */
+    
+    
+    // 100 training sets, each with 10 sequences
+    // Is each sequence a path through the random walk? So I need 1000 sequences?
+    // Maybe more like 2 loops. Outer one is 100, inner one is 10. For each value of lambda, run 100 iterations with 10 sequences in
+    // each iteration
+    
+    // Experiment 1
+    // For figure 3, weights (i.e., state values) were not updated until the entire training set (of 10 sequences) was presented. 
+    // Each training set was presented repeatedly until the procedure no longer produced any significant changes to the weight vector
+    // "Repeated presentations" paradigm
+    
+    
+    // Experiment 2, figure 4
+    // Concerns question of learning rate when training set is presented only once (not repeatedly until convergence)
+    // Training set presented only once
+    // Weights updated after each sequence, not at the end of each training set
+    // 100 training sets
+    // A range of learning rates (alpha) were used
+    // All weights (state values) were started with 0.5 to avoid bias
+    // lambda = same as above (0.0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0)
+    // alpha = increments of 0.02 starting at 0.1 to 0.7
+    
+    // Experiment 3, figure 5
+    // Best error level for each lambda value (uses optimal learning rate alpha)
+    // Use alphas from Figure 4 for each of the prior lambdas
+    // So experiment 4 should output the best alpha for each lambda
+    // This experiment just re-displays those results
     
 }
