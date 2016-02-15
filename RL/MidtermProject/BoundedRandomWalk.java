@@ -4,6 +4,7 @@ import java.io.*;
 import burlap.behavior.singleagent.planning.stochastic.valueiteration.ValueIteration;
 import burlap.oomdp.statehashing.DiscretizingHashableStateFactory;
 import burlap.oomdp.statehashing.HashableState;
+import burlap.oomdp.core.states.MutableState;
 import burlap.domain.singleagent.graphdefined.GraphDefinedDomain;
 import burlap.oomdp.auxiliary.DomainGenerator;
 import burlap.oomdp.auxiliary.common.NullTermination;
@@ -23,9 +24,8 @@ public class BoundedRandomWalk
 {
     DomainGenerator          dg;
     Domain                   domain;
-    HashableState                    initState;
-    //RewardFunction           rf;
-    BRWRewardFunction                  rf;
+    MutableState            initState;
+    BRWRewardFunction        rf;
     TerminalFunction         tf;
     DiscretizingHashableStateFactory hashFactory;
     BoltzmannActor           boltActor;
@@ -110,7 +110,7 @@ public class BoundedRandomWalk
                 
         // Create actual domain
         this.domain = this.dg.generateDomain();        
-        this.initState = (HashableState)GraphDefinedDomain.getState(this.domain, 3); // Initial state is the middle one
+        this.initState = (MutableState)GraphDefinedDomain.getState(this.domain, 3); // Initial state is the middle one
         
         // Define reward function, terminal states, and state hash factory
         this.rf = new BRWRewardFunction();
