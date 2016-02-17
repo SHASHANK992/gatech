@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.Map;
 import java.io.*;
 
 import burlap.behavior.singleagent.planning.stochastic.valueiteration.ValueIteration;
@@ -8,6 +9,7 @@ import burlap.oomdp.core.states.MutableState;
 import burlap.domain.singleagent.graphdefined.GraphDefinedDomain;
 import burlap.oomdp.auxiliary.DomainGenerator;
 import burlap.oomdp.auxiliary.common.NullTermination;
+import burlap.domain.singleagent.graphdefined.GraphTF;
 import burlap.oomdp.core.*;
 import burlap.oomdp.singleagent.GroundedAction;
 import burlap.oomdp.singleagent.RewardFunction;
@@ -33,30 +35,63 @@ public class BoundedRandomWalk
     ActorCritic              ac;
     static PrintWriter       writer;
     
-    
+    MutableState[] states;
+        
     int numStates;
     double[] stateValues;
     double gamma;
     double lr;
-    double[] lambda;
+    double lambda;
     
     public static void main(String[] args)
     {
+        double[] lambdas = new double[7];
+        lambdas[0] = 0.0;
+        lambdas[1] = 0.1;
+        lambdas[2] = 0.3;
+        lambdas[3] = 0.5;
+        lambdas[4] = 0.7;
+        lambdas[5] = 0.9;
+        lambdas[6] = 1.0;
+        
         //Make new instance of BoundedRandomWalk
-        BoundedRandomWalk brw = new BoundedRandomWalk( 0.7, 0.9 );
-    
+        BoundedRandomWalk brw = new BoundedRandomWalk( 0.7, 0.9, lambdas[2] );
+        
+        // Might want to reset solver at certain points...
+        
+        
+        for(int i=0; i<10; i++)
+        {
+            brw.ac.planFromState(brw.initState);
+        }
+        
+        System.out.println(brw.tdl.value(brw.states[0]));
+            System.out.println(brw.tdl.value(brw.states[1]));
+            System.out.println(brw.tdl.value(brw.states[2]));
+            System.out.println(brw.tdl.value(brw.states[3]));
+            System.out.println(brw.tdl.value(brw.states[4]));
+            System.out.println(brw.tdl.value(brw.states[5]));
+            System.out.println(brw.tdl.value(brw.states[6]));
+        
+        /*
         // Open up file(s) for writing results
         try
         {
             writer = new PrintWriter("output.txt", "UTF-8");
             
+            //writer.print("Hello");
+            
             writer.close();
         }
-        catch(Exception ex){};
+        catch(Exception ex)
+        {  
+            System.out.println("Exception!");
+        };
+        */
     }
     
     
-    public BoundedRandomWalk( double gamma, double learningRate )
+    public BoundedRandomWalk( double gamma, double learningRate, double lamda )
     {
         // Bounded random walk to be modelled:
         //                        Start here 
@@ -78,16 +113,7 @@ public class BoundedRandomWalk
         stateValues[4] = 2.0/3.0;
         stateValues[5] = 5.0/6.0;
         stateValues[6] = 1.0;
-        
-        lambda = new double[7];
-        lambda[0] = 0.0;
-        lambda[1] = 0.1;
-        lambda[2] = 0.3;
-        lambda[3] = 0.5;
-        lambda[4] = 0.7;
-        lambda[5] = 0.9;
-        lambda[6] = 1.0;
-        				
+                				
         // Create new domain generator
         numStates = 7;        
         this.dg = new GraphDefinedDomain(numStates);
@@ -120,10 +146,18 @@ public class BoundedRandomWalk
         // Create actual domain
         this.domain = this.dg.generateDomain();        
         this.initState = (MutableState)GraphDefinedDomain.getState(this.domain, 3); // Initial state is the middle one
+        states = new MutableState[7];
+        states[0] = (MutableState)GraphDefinedDomain.getState(this.domain, 0);
+        states[1] = (MutableState)GraphDefinedDomain.getState(this.domain, 1);
+        states[2] = (MutableState)GraphDefinedDomain.getState(this.domain, 2);
+        states[3] = (MutableState)GraphDefinedDomain.getState(this.domain, 3);
+        states[4] = (MutableState)GraphDefinedDomain.getState(this.domain, 4);
+        states[5] = (MutableState)GraphDefinedDomain.getState(this.domain, 5);
+        states[6] = (MutableState)GraphDefinedDomain.getState(this.domain, 6);
         
         // Define reward function, terminal states, and state hash factory
         this.rf = new BRWRewardFunction();
-        this.tf = new NullTermination();        
+        this.tf = new GraphTF(0, 6);        
         this.hashFactory = new DiscretizingHashableStateFactory(2.5); // Not sure what this value does
                         
         // Set up TD Lambda
@@ -138,6 +172,7 @@ public class BoundedRandomWalk
         
         // Set up actor/critic
         this.ac = new ActorCritic(this.domain, this.gamma, this.boltActor, this.tdl );
+        this.ac.initializeForPlanning(this.rf, this.tf, 10);
     }
     
     public static class BRWRewardFunction extends GraphRF
@@ -150,36 +185,14 @@ public class BoundedRandomWalk
         {
            double r = 0.0;
             
-            if(s == ts2)
+            if(sprime == ts2)
             {
                 r = 1.0;
             }
             
             return r;
         }
-    }
-    
-    /*
-    private ValueIteration computeValue(double gamma)
-    {
-        double maxDelta = 0.001;
-        int maxIterations = 1000;
-        
-        ValueIteration vi = new ValueIteration(this.domain, this.rf, this.tf, gamma,
-                this.hashFactory, maxDelta, maxIterations);
-        
-        vi.planFromState(this.initialState)
-              
-        return vi;
-    }
-    
-    public String bestFirstAction(double gamma)
-    {
-        
-        return "Not implemented";
-    }
-    */
-    
+    }    
     
     // 100 training sets, each with 10 sequences
     // Is each sequence a path through the random walk? So I need 1000 sequences?
