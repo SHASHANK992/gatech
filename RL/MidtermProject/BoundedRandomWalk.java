@@ -1,6 +1,7 @@
 import java.util.List;
 import java.util.Map;
 import java.io.*;
+import java.lang.Math;
 
 import burlap.behavior.singleagent.planning.stochastic.valueiteration.ValueIteration;
 import burlap.oomdp.statehashing.DiscretizingHashableStateFactory;
@@ -33,7 +34,6 @@ public class BoundedRandomWalk
     BoltzmannActor           boltActor;
     TDLambda                 tdl;
     ActorCritic              ac;
-    static PrintWriter       writer;
     
     MutableState[] states;
         
@@ -54,8 +54,11 @@ public class BoundedRandomWalk
         lambdas[5] = 0.9;
         lambdas[6] = 1.0;
         
+        BoundedRandomWalk.Experiment1(lambdas);
+        
+        /*
         //Make new instance of BoundedRandomWalk
-        BoundedRandomWalk brw = new BoundedRandomWalk( 0.7, 0.9, lambdas[2] );
+        BoundedRandomWalk brw = new BoundedRandomWalk( 0.7, 0.1, lambdas[2], 1 );
         
         // Might want to reset solver at certain points...
         
@@ -72,6 +75,8 @@ public class BoundedRandomWalk
             System.out.println(brw.tdl.value(brw.states[4]));
             System.out.println(brw.tdl.value(brw.states[5]));
             System.out.println(brw.tdl.value(brw.states[6]));
+        
+        */
         
         /*
         // Open up file(s) for writing results
@@ -91,7 +96,7 @@ public class BoundedRandomWalk
     }
     
     
-    public BoundedRandomWalk( double gamma, double learningRate, double lamda )
+    public BoundedRandomWalk( double gamma, double learningRate, double lamda, int numEpisodes )
     {
         // Bounded random walk to be modelled:
         //                        Start here 
@@ -113,6 +118,7 @@ public class BoundedRandomWalk
         stateValues[4] = 2.0/3.0;
         stateValues[5] = 5.0/6.0;
         stateValues[6] = 1.0;
+              
                 				
         // Create new domain generator
         numStates = 7;        
@@ -164,7 +170,7 @@ public class BoundedRandomWalk
         this.gamma = gamma;
         this.lr = learningRate;
         this.lambda = lambda;
-        double vinit = 0.0;
+        double vinit = 0.5;
         this.tdl = new TDLambda(this.rf, this.tf, this.gamma, this.hashFactory, this.lr, vinit, this.lambda);
         
         // Set up actor
@@ -172,7 +178,7 @@ public class BoundedRandomWalk
         
         // Set up actor/critic
         this.ac = new ActorCritic(this.domain, this.gamma, this.boltActor, this.tdl );
-        this.ac.initializeForPlanning(this.rf, this.tf, 10);
+        this.ac.initializeForPlanning(this.rf, this.tf, numEpisodes);
     }
     
     public static class BRWRewardFunction extends GraphRF
@@ -193,6 +199,121 @@ public class BoundedRandomWalk
             return r;
         }
     }    
+    
+    
+    private static void Experiment1(double[] lambdas)
+    {
+        double[] oldVal = new double[5];
+        double[] newVal = new double[5];
+        
+        double gamma = 0.7;
+        double learning_rate = 0.1;
+        int numberOfEpisodes = 10;
+        
+        PrintWriter writer;
+        
+        oldVal[0] = 0.0;
+        oldVal[1] = 0.0;
+        oldVal[2] = 0.0;
+        oldVal[3] = 0.0;
+        oldVal[4] = 0.0;
+        
+        newVal[0] = 0.5;
+        newVal[1] = 0.5;
+        newVal[2] = 0.5;
+        newVal[3] = 0.5;
+        newVal[4] = 0.5;
+        
+        try
+        {
+            writer = new PrintWriter("Experiment1Output.txt", "UTF-8");
+            
+            // For each value of lambda
+            for(int l_index=0; l_index <7; l_index++)
+            {
+                // For 100 training sets
+                for(int i=0; i<100; i++)
+                {
+                    // Create a new bounded random walk with the given value of lambda and using number of episodes set to 10
+                    // (10 sequences at a time, then update weights)
+                    BoundedRandomWalk brw = new BoundedRandomWalk(gamma, learning_rate, lambdas[l_index], numberOfEpisodes);
+                    
+                    // Apply training set until convergence
+                    /* 
+                    TODO
+                    Most of this code is correct. I go over all the lambdas for 100 training sets. The problem is that I do not have a 
+                    actual static training sets. I simply use "plan from state" which I am not really sure how it works. I think I need to 
+                    generate a static training set to use for all cases. As it stands right now I get basically the same values no matter what
+                    my value for lambda is. They all converge to about the same error
+                    */
+                    do
+                    {
+                        oldVal[0] = newVal[0]; oldVal[1] = newVal[1]; oldVal[2] = newVal[2];
+                        oldVal[3] = newVal[3]; oldVal[4] = newVal[4];
+                        
+                        brw.ac.planFromState(brw.initState);
+                        
+                        newVal[0] = brw.tdl.value(brw.states[1]);
+                        newVal[1] = brw.tdl.value(brw.states[2]);
+                        newVal[2] = brw.tdl.value(brw.states[3]);
+                        newVal[3] = brw.tdl.value(brw.states[1]);
+                        newVal[4] = brw.tdl.value(brw.states[5]);
+                        
+                    } while(brw.stateValueDifferences(oldVal, newVal) > 0.01);
+                    
+                    // Print RMS error to file
+                    writer.println( lambdas[l_index] + "," + i + "," + brw.computeRMSError(newVal) );
+                    
+                    // Reset old value
+                    oldVal[0] = 0.0;
+                    oldVal[1] = 0.0;
+                    oldVal[2] = 0.0;
+                    oldVal[3] = 0.0;
+                    oldVal[4] = 0.0;
+                    
+                    // Resetting the BoundedRandomWalk is not necessary since I create a new one for each training set
+                }
+            }
+            writer.close();
+        }
+        catch(Exception ex)
+        {
+            System.out.println("Exception!");
+        }
+    }
+    
+    private double stateValueDifferences( double[] oldVal, double[] newVal )
+    {
+        // Use RMS here to compute differences between the weights as a whole
+        double[] diff = new double[5];
+        
+        diff[0] = java.lang.Math.pow(oldVal[0] - newVal[0], 2);
+        diff[1] = java.lang.Math.pow(oldVal[1] - newVal[1], 2);
+        diff[2] = java.lang.Math.pow(oldVal[2] - newVal[2], 2);
+        diff[3] = java.lang.Math.pow(oldVal[3] - newVal[3], 2);
+        diff[4] = java.lang.Math.pow(oldVal[4] - newVal[4], 2);
+        
+        double diff_sum = diff[0] + diff[1] + diff[2] + diff[3] + diff[4];
+        
+        return java.lang.Math.pow(diff_sum, 0.5);
+    }
+    
+    private double computeRMSError(double[] computedStateVals )
+    {
+        double[] diff = new double[5];
+        
+        diff[0] = java.lang.Math.pow(computedStateVals[0] - this.stateValues[1], 2);
+        diff[1] = java.lang.Math.pow(computedStateVals[1] - this.stateValues[2], 2);
+        diff[2] = java.lang.Math.pow(computedStateVals[2] - this.stateValues[3], 2);
+        diff[3] = java.lang.Math.pow(computedStateVals[3] - this.stateValues[4], 2);
+        diff[4] = java.lang.Math.pow(computedStateVals[4] - this.stateValues[5], 2);
+        
+        double diff_sum = diff[0] + diff[1] + diff[2] + diff[3] + diff[4];
+        
+        return java.lang.Math.pow(diff_sum, 0.5);
+    }
+    
+
     
     // 100 training sets, each with 10 sequences
     // Is each sequence a path through the random walk? So I need 1000 sequences?
