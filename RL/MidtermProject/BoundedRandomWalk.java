@@ -56,43 +56,8 @@ public class BoundedRandomWalk
         
         BoundedRandomWalk.Experiment1(lambdas);
         
-        /*
-        //Make new instance of BoundedRandomWalk
-        BoundedRandomWalk brw = new BoundedRandomWalk( 0.7, 0.1, lambdas[2], 1 );
+        BoundedRandomWalk.Experiment2(lambdas);
         
-        // Might want to reset solver at certain points...
-        
-        
-        for(int i=0; i<10; i++)
-        {
-            brw.ac.planFromState(brw.initState);
-        }
-        
-        System.out.println(brw.tdl.value(brw.states[0]));
-            System.out.println(brw.tdl.value(brw.states[1]));
-            System.out.println(brw.tdl.value(brw.states[2]));
-            System.out.println(brw.tdl.value(brw.states[3]));
-            System.out.println(brw.tdl.value(brw.states[4]));
-            System.out.println(brw.tdl.value(brw.states[5]));
-            System.out.println(brw.tdl.value(brw.states[6]));
-        
-        */
-        
-        /*
-        // Open up file(s) for writing results
-        try
-        {
-            writer = new PrintWriter("output.txt", "UTF-8");
-            
-            //writer.print("Hello");
-            
-            writer.close();
-        }
-        catch(Exception ex)
-        {  
-            System.out.println("Exception!");
-        };
-        */
     }
     
     
@@ -231,6 +196,8 @@ public class BoundedRandomWalk
             // For each value of lambda
             for(int l_index=0; l_index <7; l_index++)
             {
+                double error_sum = 0.0;
+                
                 // For 100 training sets
                 for(int i=0; i<100; i++)
                 {
@@ -261,8 +228,8 @@ public class BoundedRandomWalk
                         
                     } while(brw.stateValueDifferences(oldVal, newVal) > 0.01);
                     
-                    // Print RMS error to file
-                    writer.println( lambdas[l_index] + "," + i + "," + brw.computeRMSError(newVal) );
+                    // Save RMS error as running sum
+                    error_sum += brw.computeRMSError(newVal);
                     
                     // Reset old value
                     oldVal[0] = 0.0;
@@ -273,6 +240,9 @@ public class BoundedRandomWalk
                     
                     // Resetting the BoundedRandomWalk is not necessary since I create a new one for each training set
                 }
+                
+                // Save average RMS error to file
+                writer.println( lambdas[l_index] + "," + error_sum/100.0);
             }
             writer.close();
         }
@@ -311,6 +281,64 @@ public class BoundedRandomWalk
         double diff_sum = diff[0] + diff[1] + diff[2] + diff[3] + diff[4];
         
         return java.lang.Math.pow(diff_sum, 0.5);
+    }
+    
+    public static void Experiment2(double[] lambdas)
+    {
+        double gamma = 0.7;
+        int numberOfEpisodes = 1;
+        try
+        {
+            PrintWriter writer = new PrintWriter("Experiment2Output.txt", "UTF-8");
+            
+            for(int lambda_idx=0; lambda_idx < 7; lambda_idx++)
+            {
+                for(double learning_rate=0.1; learning_rate <= 0.7; learning_rate+= 0.1)
+                {
+                    // Keep track of RMS error for this combo of lambda and learning rate
+                    double error_sum = 0.0;
+                    
+                    // For each of 100 training sets
+                    for(int i=0; i<100; i++)
+                    {
+                        // Create a new bounded random walk object
+                        BoundedRandomWalk brw = new BoundedRandomWalk(gamma, learning_rate, lambdas[lambda_idx], numberOfEpisodes);
+                        
+                        // For each training set of 10 sequences
+                        for(int j=0; j<10; j++)
+                        {
+                            // Run the sequence (episode) and update the weights
+                            brw.ac.planFromState(brw.initState);
+                        }
+                        
+                        // Get state values
+                        double[] computedStateVals = new double[5];
+                        computedStateVals[0] = brw.tdl.value(brw.states[1]);
+                        computedStateVals[1] = brw.tdl.value(brw.states[2]);
+                        computedStateVals[2] = brw.tdl.value(brw.states[3]);
+                        computedStateVals[3] = brw.tdl.value(brw.states[4]);
+                        computedStateVals[4] = brw.tdl.value(brw.states[5]);
+                        
+                        // Find the RMS error of this training set (of 10 sequences)                        
+                        // Add to running sum
+                        error_sum += brw.computeRMSError(computedStateVals);
+                    }
+                    
+                    // Compute average error                    
+                    // Save average error to file
+                    writer.println( lambdas[lambda_idx] + "," + learning_rate + "," + error_sum/100.0);
+                }
+                
+            }
+            
+            writer.close();
+        }
+        catch(Exception ex)
+        {
+            System.out.println("Exception!");
+        }
+        
+        
     }
     
 
