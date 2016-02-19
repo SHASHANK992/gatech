@@ -61,7 +61,7 @@ public class BoundedRandomWalk
     }
     
     
-    public BoundedRandomWalk( double gamma, double learningRate, double lamda, int numEpisodes )
+    public BoundedRandomWalk( double gamma, double learningRate, double lambda, int numEpisodes )
     {
         // Bounded random walk to be modelled:
         //                        Start here 
@@ -177,24 +177,18 @@ public class BoundedRandomWalk
         
         PrintWriter writer;
         
-        oldVal[0] = 0.0;
-        oldVal[1] = 0.0;
-        oldVal[2] = 0.0;
-        oldVal[3] = 0.0;
-        oldVal[4] = 0.0;
-        
-        newVal[0] = 0.5;
-        newVal[1] = 0.5;
-        newVal[2] = 0.5;
-        newVal[3] = 0.5;
-        newVal[4] = 0.5;
+        newVal[0] = 0.0;
+        newVal[1] = 0.0;
+        newVal[2] = 0.0;
+        newVal[3] = 0.0;
+        newVal[4] = 0.0;
         
         try
         {
             writer = new PrintWriter("Experiment1Output.txt", "UTF-8");
             
             // For each value of lambda
-            for(int l_index=0; l_index <7; l_index++)
+            for(int l_index=0; l_index <lambdas.length; l_index++)
             {
                 double error_sum = 0.0;
                 
@@ -214,7 +208,7 @@ public class BoundedRandomWalk
                     my value for lambda is. They all converge to about the same error
                     */
                     do
-                    {
+                    {                        
                         oldVal[0] = newVal[0]; oldVal[1] = newVal[1]; oldVal[2] = newVal[2];
                         oldVal[3] = newVal[3]; oldVal[4] = newVal[4];
                         
@@ -223,7 +217,7 @@ public class BoundedRandomWalk
                         newVal[0] = brw.tdl.value(brw.states[1]);
                         newVal[1] = brw.tdl.value(brw.states[2]);
                         newVal[2] = brw.tdl.value(brw.states[3]);
-                        newVal[3] = brw.tdl.value(brw.states[1]);
+                        newVal[3] = brw.tdl.value(brw.states[4]);
                         newVal[4] = brw.tdl.value(brw.states[5]);
                         
                     } while(brw.stateValueDifferences(oldVal, newVal) > 0.01);
@@ -291,7 +285,7 @@ public class BoundedRandomWalk
         {
             PrintWriter writer = new PrintWriter("Experiment2Output.txt", "UTF-8");
             
-            for(int lambda_idx=0; lambda_idx < 7; lambda_idx++)
+            for(int lambda_idx=0; lambda_idx < lambdas.length; lambda_idx++)
             {
                 for(double learning_rate=0.1; learning_rate <= 0.7; learning_rate+= 0.1)
                 {
