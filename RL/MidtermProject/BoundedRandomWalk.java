@@ -1,4 +1,3 @@
-import java.util.List;
 import java.util.Map;
 import java.io.*;
 import java.lang.Math;
@@ -20,8 +19,28 @@ import burlap.domain.singleagent.graphdefined.GraphRF;
 import burlap.behavior.singleagent.learning.actorcritic.critics.TDLambda;
 import burlap.behavior.singleagent.learning.actorcritic.actor.BoltzmannActor;
 import burlap.behavior.singleagent.learning.actorcritic.ActorCritic;
+import burlap.behavior.singleagent.EpisodeAnalysis;
+import java.util.ArrayList;
+import java.util.LinkedList;
 
-// implement ActorCritic class and then run planFromState
+/*
+There are ways to save off and read in Episode Analysis lists.
+
+This is how I should make my training sets - experience MDP 1000 times. Record
+EpisodeAnalysis list to file. Upon next training session, read in the same file.
+
+Now I need to figure out how to run an episodeanalysis and not just do planFromState
+
+TDLambda has a critiqueAndUpdate method. Perhaps this is what I need to use instead
+of planFromState. It seems like this might update upon each s,a,s' transition. This could
+prove problematic for experiment 1 when I only want it to update after each training
+set
+
+ActorCritic also has a runLearningEpisode method, which sounds promising, but 
+at this time I can't see how to use the EpisodeAnalysis with this method
+*/
+
+
 
 public class BoundedRandomWalk
 {
@@ -45,6 +64,8 @@ public class BoundedRandomWalk
     
     public static void main(String[] args)
     {
+        EpisodeAnalysis[] trainingSets;
+        
         double[] lambdas = new double[7];
         lambdas[0] = 0.0;
         lambdas[1] = 0.1;
@@ -54,10 +75,37 @@ public class BoundedRandomWalk
         lambdas[5] = 0.9;
         lambdas[6] = 1.0;
         
-        BoundedRandomWalk.Experiment1(lambdas);
+        String directory = ".\\trainingData";
+        File f = new File(directory);
         
-        BoundedRandomWalk.Experiment2(lambdas);
+        if(!f.exists())
+        {
+            BoundedRandomWalk.generateTrainingSet(directory);
+        }
         
+        trainingSets = BoundedRandomWalk.readTrainingSet(directory);
+                
+        BoundedRandomWalk.Experiment1(lambdas, trainingSets);
+        
+        //BoundedRandomWalk.Experiment2(lambdas, trainingSets);
+        
+        
+        
+        /*
+        BoundedRandomWalk brw = new BoundedRandomWalk( 0.7, 0.1, 0.0, 100 );
+        //for(int i=0; i<10; i++)
+        //{
+            brw.ac.planFromState(brw.initState);
+        //}
+        double[] test = new double[5];
+        test[0] = brw.tdl.value(brw.states[1]);
+        test[1] = brw.tdl.value(brw.states[2]);
+        test[2] = brw.tdl.value(brw.states[3]);
+        test[3] = brw.tdl.value(brw.states[4]);
+        test[4] = brw.tdl.value(brw.states[5]);
+        
+        System.out.println(test[0] + "," + test[1] + "," + test[2] + "," + test[3] + "," +  test[4]);
+        */
     }
     
     
@@ -165,8 +213,40 @@ public class BoundedRandomWalk
         }
     }    
     
+    public static void generateTrainingSet(String directory)
+    {
+        // Create a new bounded random walk object
+        // The gamma, learning rate, and lambda values don't matter here
+        // The number of episodes does. 
+        BoundedRandomWalk brw = new BoundedRandomWalk(0.7, 0.7, 0.7, 1000);
+        brw.ac.setNumEpisodesToStore(1000);
+                       
+        // Experience the MDP
+        brw.ac.planFromState(brw.initState);
+                
+        // Save episodes to a file
+        LinkedList<EpisodeAnalysis> tSets = (LinkedList)brw.ac.getAllStoredLearningEpisodes();
+        
+        EpisodeAnalysis.writeEpisodesToDisk(tSets, directory, "episode");
+    }
     
-    private static void Experiment1(double[] lambdas)
+    public static EpisodeAnalysis[] readTrainingSet(String directory)
+    {   
+        // Here I don't think any of the parameters matter. I just need the
+        // domain
+        BoundedRandomWalk brw = new BoundedRandomWalk(0.7, 0.7, 0.7, 1);
+        
+        // Save this list as an array
+        ArrayList<EpisodeAnalysis> trainingSets = (ArrayList)EpisodeAnalysis.parseFilesIntoEAList(directory, brw.domain);
+        
+        EpisodeAnalysis[] tSets = new EpisodeAnalysis[1000];
+        trainingSets.toArray(tSets);
+        
+        // Return the list as an array
+        return tSets;
+    }
+    
+    private static void Experiment1(double[] lambdas, EpisodeAnalysis[] tSets)
     {
         double[] oldVal = new double[5];
         double[] newVal = new double[5];
@@ -190,6 +270,7 @@ public class BoundedRandomWalk
             // For each value of lambda
             for(int l_index=0; l_index <lambdas.length; l_index++)
             {
+                
                 double error_sum = 0.0;
                 
                 // For 100 training sets
@@ -277,7 +358,7 @@ public class BoundedRandomWalk
         return java.lang.Math.pow(diff_sum, 0.5);
     }
     
-    public static void Experiment2(double[] lambdas)
+    public static void Experiment2(double[] lambdas, EpisodeAnalysis[] tSets)
     {
         double gamma = 0.7;
         int numberOfEpisodes = 1;
@@ -287,8 +368,9 @@ public class BoundedRandomWalk
             
             for(int lambda_idx=0; lambda_idx < lambdas.length; lambda_idx++)
             {
-                for(double learning_rate=0.1; learning_rate <= 0.7; learning_rate+= 0.1)
+                for(double learning_rate=0.0; learning_rate <= 0.9; learning_rate+= 0.05)
                 {
+                    
                     // Keep track of RMS error for this combo of lambda and learning rate
                     double error_sum = 0.0;
                     
