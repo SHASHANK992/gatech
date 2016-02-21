@@ -7,6 +7,10 @@ Make sure you have the Java Development kit (JDK) installed.
 Used Burlap v 2.0
 
 
+The current implementation for Experiment 1 DOES NOT WORK. The critiqueAndUpdate method is not
+updating the state values. The data I used in my report was from an implementation more like
+Experiment2 than what is currently in place.
+
 
 
 Useful links
@@ -15,3 +19,6 @@ https://webdocs.cs.ualberta.ca/~sutton/book/ebook/node73.html
 
 Burlap documentation
 http://burlap.cs.brown.edu/doc/index.html
+
+Video link:
+https://youtu.be/PAYI64U2za4

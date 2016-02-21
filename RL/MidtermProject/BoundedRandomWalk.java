@@ -1,18 +1,14 @@
-import java.util.Map;
 import java.io.*;
 import java.lang.Math;
 
-import burlap.behavior.singleagent.planning.stochastic.valueiteration.ValueIteration;
+
 import burlap.oomdp.statehashing.DiscretizingHashableStateFactory;
-import burlap.oomdp.statehashing.HashableState;
 import burlap.oomdp.core.states.MutableState;
 import burlap.domain.singleagent.graphdefined.GraphDefinedDomain;
 import burlap.oomdp.auxiliary.DomainGenerator;
-import burlap.oomdp.auxiliary.common.NullTermination;
 import burlap.domain.singleagent.graphdefined.GraphTF;
 import burlap.oomdp.core.*;
 import burlap.oomdp.singleagent.GroundedAction;
-import burlap.oomdp.singleagent.RewardFunction;
 import burlap.domain.singleagent.graphdefined.GraphRF;
 // TDLamba is a critic for the actorCritic stuff. I am guessing that
 // my BoundedRandomWalk class will be what the actor uses
@@ -20,6 +16,7 @@ import burlap.behavior.singleagent.learning.actorcritic.critics.TDLambda;
 import burlap.behavior.singleagent.learning.actorcritic.actor.BoltzmannActor;
 import burlap.behavior.singleagent.learning.actorcritic.ActorCritic;
 import burlap.behavior.singleagent.EpisodeAnalysis;
+import burlap.behavior.singleagent.learning.actorcritic.CritiqueResult;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -80,6 +77,7 @@ public class BoundedRandomWalk
         
         if(!f.exists())
         {
+            System.out.println("Training data not found. Generating anew...");
             BoundedRandomWalk.generateTrainingSet(directory);
         }
         
@@ -218,12 +216,14 @@ public class BoundedRandomWalk
         // Create a new bounded random walk object
         // The gamma, learning rate, and lambda values don't matter here
         // The number of episodes does. 
-        BoundedRandomWalk brw = new BoundedRandomWalk(0.7, 0.7, 0.7, 1000);
+        BoundedRandomWalk brw = new BoundedRandomWalk(0.7, 0.7, 0.7, 1);
         brw.ac.setNumEpisodesToStore(1000);
-                       
-        // Experience the MDP
-        brw.ac.planFromState(brw.initState);
-                
+        
+        for(int i = 0; i < 1000; i++)
+        {
+            // Experience the MDP
+            brw.ac.planFromState(brw.initState);
+        }       
         // Save episodes to a file
         LinkedList<EpisodeAnalysis> tSets = (LinkedList)brw.ac.getAllStoredLearningEpisodes();
         
@@ -253,7 +253,7 @@ public class BoundedRandomWalk
         
         double gamma = 0.7;
         double learning_rate = 0.1;
-        int numberOfEpisodes = 10;
+        int numberOfEpisodes = 1;
         
         PrintWriter writer;
         
@@ -268,7 +268,7 @@ public class BoundedRandomWalk
             writer = new PrintWriter("Experiment1Output.txt", "UTF-8");
             
             // For each value of lambda
-            for(int l_index=0; l_index <lambdas.length; l_index++)
+            for(int l_index=0; l_index < lambdas.length; l_index++)
             {
                 
                 double error_sum = 0.0;
@@ -276,44 +276,85 @@ public class BoundedRandomWalk
                 // For 100 training sets
                 for(int i=0; i<100; i++)
                 {
-                    // Create a new bounded random walk with the given value of lambda and using number of episodes set to 10
-                    // (10 sequences at a time, then update weights)
+                    // For each training set, create a new bounded random walk
                     BoundedRandomWalk brw = new BoundedRandomWalk(gamma, learning_rate, lambdas[l_index], numberOfEpisodes);
+                    int stepsToConvergence = 0;
                     
-                    // Apply training set until convergence
-                    /* 
-                    TODO
-                    Most of this code is correct. I go over all the lambdas for 100 training sets. The problem is that I do not have a 
-                    actual static training sets. I simply use "plan from state" which I am not really sure how it works. I think I need to 
-                    generate a static training set to use for all cases. As it stands right now I get basically the same values no matter what
-                    my value for lambda is. They all converge to about the same error
-                    */
+                    // Repeat training set until convergence
                     do
-                    {                        
+                    {   
+                        // New old state values
                         oldVal[0] = newVal[0]; oldVal[1] = newVal[1]; oldVal[2] = newVal[2];
                         oldVal[3] = newVal[3]; oldVal[4] = newVal[4];
                         
-                        brw.ac.planFromState(brw.initState);
+                        // Used to update actor at end of each training set
+                        ArrayList<CritiqueResult> cr_list = new ArrayList<CritiqueResult>();
                         
+                        // For each episode in each training set
+                        for(int j=0; j<10; j++)
+                        {
+                            // Initialize episode
+                            brw.tdl.initializeEpisode(brw.initState);
+                            
+                            EpisodeAnalysis ts = tSets[i*10 + j];
+                                                        
+                            for(int idx=0; idx < ts.actionSequence.size(); idx++ )
+                            {
+                                
+                                //System.out.println("Critique and update!");
+                                MutableState s = (MutableState)ts.getState(idx);
+                                MutableState sprime = (MutableState)ts.getState(idx+1);
+                                GroundedAction ga = ts.getAction(idx);
+                                
+                                //System.out.println(s.toString());
+                                //System.out.println(sprime.toString());
+                                //System.out.println(ga.toString());
+                                
+                                // For each state, action, next state tuple, run TD lambda
+                                CritiqueResult cr = brw.tdl.critiqueAndUpdate(s, ga, sprime); 
+                                
+                                cr_list.add(cr);
+                            }
+                            
+                            // End learning episode
+                            brw.tdl.endEpisode();
+                        }
+                        
+                        // Once we have gone through all the training set, update the actor
+                        for(int idx=0; idx < cr_list.size(); idx++)
+                        {
+                            brw.boltActor.updateFromCritqique(cr_list.get(idx));
+                        }
+                        
+                        // Update the state values
                         newVal[0] = brw.tdl.value(brw.states[1]);
                         newVal[1] = brw.tdl.value(brw.states[2]);
                         newVal[2] = brw.tdl.value(brw.states[3]);
                         newVal[3] = brw.tdl.value(brw.states[4]);
                         newVal[4] = brw.tdl.value(brw.states[5]);
                         
-                    } while(brw.stateValueDifferences(oldVal, newVal) > 0.01);
+                        stepsToConvergence++;
+                    }while(brw.stateValueDifferences(oldVal, newVal) > 0.01);
+                    
+                    
+                    
+                    System.out.println("State values: " + newVal[0] + ", " + newVal[1] + ", " + newVal[2] + ", " + newVal[3] + ", " + newVal[4]);
+                    
+                    
+                    System.out.println("Steps to convergence: " + stepsToConvergence);
                     
                     // Save RMS error as running sum
                     error_sum += brw.computeRMSError(newVal);
-                    
+                   
                     // Reset old value
-                    oldVal[0] = 0.0;
-                    oldVal[1] = 0.0;
-                    oldVal[2] = 0.0;
-                    oldVal[3] = 0.0;
-                    oldVal[4] = 0.0;
+                    newVal[0] = 0.0;
+                    newVal[1] = 0.0;
+                    newVal[2] = 0.0;
+                    newVal[3] = 0.0;
+                    newVal[4] = 0.0;
                     
-                    // Resetting the BoundedRandomWalk is not necessary since I create a new one for each training set
+                    // Resetting bounded random walk is not necessary here because
+                    // I create a new one for each training set
                 }
                 
                 // Save average RMS error to file
