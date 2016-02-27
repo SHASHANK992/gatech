@@ -1,0 +1,50 @@
+The order book for Company X is in the current state:
+(Note: Bid is a buy order, Ask is a sell order)
+
+Order   Price   Quantity
+Bid     10.00   100
+Ask     10.50   50
+Ask     10.25   100
+Ask     11.00   25
+
+Next comes the following buy order:
+
+Bid     10.50   75
+
+Which of the following will be the state of the order book after this order is processed?
+
+A) 
+Bid     10.00   100
+Ask     10.25   100
+
+
+B)
+Bid     10.00   100
+Ask     10.50   50
+Ask     10.25   25
+Ask     11.00   25
+
+
+C)
+Bid     10.00   100
+Ask     10.25   75
+Ask     11.00   25
+
+
+
+D)
+Bid     10.00   100
+Bid     10.50   75
+Ask     10.50   50
+Ask     10.25   100
+Ask     11.00   25
+
+
+*********************
+Solution
+*********************
+The market will supply the buy order with the lowest price that meets the desired purchase price. In this example, that price is
+$10.25. Since there are 100 shares at this price, there will be 25 shares left after the buy order has been processed.
+The rest of the order book remains unchanged.
+
+I have put option (A) and (C) as the other attractive answers in case the student is not informed of how the market operates. 
