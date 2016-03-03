@@ -2,6 +2,7 @@
 
 import os
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 def symbol_to_path(symbol, base_dir=os.path.join("..", "data")):
@@ -32,3 +33,20 @@ def plot_data(df, title="Stock prices", xlabel="Date", ylabel="Price"):
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     plt.show()
+
+
+def get_portfolio_stats(port_val):
+    cum_ret = (port_val[-1]/port_val[0])-1
+    
+    daily_return = (port_val/np.roll(port_val,1))-1
+    
+    avg_daily_ret = np.mean(daily_return[1:])
+    
+    std_daily_ret = np.std(daily_return[1:], ddof=1)
+    
+    # Assume risk free rate = 0.0 and 252 trading dates per year
+    k = np.sqrt(252.0)
+    sharpe_ratio = k*(avg_daily_ret/std_daily_ret)
+    
+    return cum_ret, avg_daily_ret, std_daily_ret, sharpe_ratio
+# get_portfolio_stats

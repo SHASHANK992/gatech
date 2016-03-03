@@ -23,7 +23,7 @@ we must wait until we exit (sell 100 shares) before we can take any other positi
 
 # Using fixed start and end dates with only one stock (IBM)
 # Dec 31, 2007 to Dec 31, 2009
-def generate_plot(window_size=20, syms=['IBM'], sd=dt.datetime(2007,12, 31), ed = dt.datetime(2009, 12, 31)):
+def process_Bollinger_Bands(window_size=20, syms=['IBM'], sd=dt.datetime(2007,12, 31), ed = dt.datetime(2009, 12, 31)):
     
     prices_dates = pd.date_range(sd, ed)
     prices_all = get_data(syms, prices_dates)
@@ -53,22 +53,20 @@ def generate_plot(window_size=20, syms=['IBM'], sd=dt.datetime(2007,12, 31), ed 
     prices['Lower Band'] = lower_band
 
     # Plot data frame
-    #plot_handle = plot_data(prices)
+    plot_handle = plot_data(prices)
 
     # Now we need to take this data and find where to make trades
     orders = prices_orig.copy()
     orders[syms] = np.NaN
     generate_orders(prices, orders)
-
-    # Get only the non-zero orders and save them off
-    orders_compressed = orders.dropna()
     
     # Save this off to a csv file
-    write_csv_file(orders_compressed)
+    write_csv_file(orders)
 
-    # Add the order to the plot
+    # Add the orders to the plot
+    add_orders_to_plot(plot_handle, orders)
 
-
+    plt.show()
 #end generate plot
 
 def generate_orders(prices, orders, window_size=20, sym='IBM'):
@@ -112,13 +110,14 @@ def generate_orders(prices, orders, window_size=20, sym='IBM'):
             orders.iloc[i][sym] = 100.0
             short_active = False
         #end if
-        
     #end for
+    
+    # Drop all the entries that don't have values
+    orders.dropna(inplace=True)
     # orders should be pass by reference, so I shouldn't need to return anything here
-
 #end generate_orders
 
-def write_csv_file(orders, filename='orders.csv'):
+def write_csv_file(orders, filename='orders\BBorders.csv'):
     with open(filename, 'wb') as csvfile:
         orderswriter = csv.writer(csvfile, delimiter=',',
                                   quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -139,9 +138,43 @@ def write_csv_file(orders, filename='orders.csv'):
             # This is all we need to know
             orderswriter.writerow([current_dt] + ['IBM'] + [order_type] + ['100'])            
         #end for
-
+    #end with
 #end write_csv_file
 
+def add_orders_to_plot(plot_handle, orders, min=60, max=130):
+    '''
+    Since I can only have one order outstanding at a time, I am going to assume
+    the incoming data is correct. That means that every other order should be
+    an exit. 
+    '''
+    long = False
+    short = False
+    color = 'k' #black
+    for i in range(0,orders.shape[0]):
+        current_date = orders.index[i]
+        current_order = orders.iloc[i]['IBM']
+
+        # Determine what position (short, long) we are in and set the color
+        # If we are in neither a long nor a short position
+        if (not long) and (not short):
+            # If a sell order comes in, we are short
+            if current_order < 0:
+                color = 'r' #red
+                short = True
+            # If a buy order comes in, we are long
+            elif current_order > 0:
+                color = 'g' #green
+                long = True
+            #endif
+        elif long or short:
+            color = 'k'
+            long = short = False
+        #end if
+
+
+        plot_handle.plot([current_date, current_date], [min, max], color) 
+    #end for
+#end add_orders_to_plot
 
 ''' Computes the moving average of data over the specified window '''
 def moving_average(data, window_size):
