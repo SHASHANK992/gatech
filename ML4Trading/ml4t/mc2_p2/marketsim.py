@@ -6,15 +6,15 @@ import datetime as dt
 import os
 from util import get_data, plot_data
 
-def compute_portvals(orders_file = "./orders/orders.csv", start_val = 1000000):
+def compute_portvals(orders_file = "./orders/orders.csv", start_val = 1000000, sd=dt.datetime(2007,12,31), ed=dt.datetime(2009,12,31)):
     
     # 1 - Read orders file
     orders = pd.read_csv(orders_file, index_col='Date', parse_dates=True, na_values=['nan']) 
     orders.sort_index(axis=0, inplace=True)
     # Get start and end dates
     order_dates = orders.index.tolist()
-    start_date = order_dates[0]
-    end_date   = order_dates[-1]
+    start_date = sd
+    end_date   = ed
     # Get list of stock symbols
     syms = orders.values[:,0]
     sym_set = set(syms)

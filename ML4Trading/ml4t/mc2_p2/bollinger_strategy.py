@@ -70,7 +70,6 @@ def process_Bollinger_Bands(window_size=20, syms=['IBM'], sd=dt.datetime(2007,12
 #end generate plot
 
 def generate_orders(prices, orders, window_size=20, sym='IBM'):
-    print "Not implemented yet"
 
     long_active = False
     short_active = False
@@ -135,12 +134,13 @@ def write_csv_file(orders, filename='orders\BBorders.csv'):
             if orders.iloc[i]['IBM'] <= 0:
                 order_type = 'SELL'
 
-            # This is all we need to know
+            # This is all we need to know. The other data is constant
             orderswriter.writerow([current_dt] + ['IBM'] + [order_type] + ['100'])            
         #end for
     #end with
 #end write_csv_file
 
+'''Adds vertical lines to specified plot'''
 def add_orders_to_plot(plot_handle, orders, min=60, max=130):
     '''
     Since I can only have one order outstanding at a time, I am going to assume
@@ -166,11 +166,11 @@ def add_orders_to_plot(plot_handle, orders, min=60, max=130):
                 color = 'g' #green
                 long = True
             #endif
+        # Every other order will be an exit, so just set color to black
         elif long or short:
             color = 'k'
             long = short = False
         #end if
-
 
         plot_handle.plot([current_date, current_date], [min, max], color) 
     #end for
@@ -197,8 +197,9 @@ def standard_deviation(data, window_size):
     return output
 #end standard_deviation
 
+'''Plots data. Returns handle to plot'''
 def plot_data(df, title="Stock prices", xlabel="Date", ylabel="Prices"):
-    #ax = df.plot(title=title, fontsize=12)
+    
     ax = df.plot()
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)

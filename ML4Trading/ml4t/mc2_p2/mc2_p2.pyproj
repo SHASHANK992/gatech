@@ -26,6 +26,7 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="analysis.py" />
     <Compile Include="bollinger_strategy.py" />
     <Compile Include="marketsim.py" />
     <Compile Include="my_strategy.py" />
