@@ -24,19 +24,54 @@ public class BarBrawl {
     // Keeps track of possible peacemakers
     boolean[] peacemaker;
     // Keeps track of what patrons we have seen together
-    boolean[][] seenTogether;
+    boolean[] seenPatron;
     
     
     /**
      * @param args the command line arguments
      */
-    /* Don't need a main in this class
-    public static void main(String[] args) {
+
+    public static void main(String[] args) 
+    {
         // TODO code application logic here
         
-        System.out.println("Hello world");
+        
+        int numOfPatrons = 2;
+        int maxIDontKnows = 1;
+        boolean[][] atEstablishment = {
+                {true,true},
+                {true,false},
+                {false,true},
+                {true,true},
+                {false,false},
+                {true,false},
+                {true,true}
+        };
+        boolean[] fightOccurred = {
+                false,
+                true,
+                false,
+                false,
+                false,
+                true,
+                false
+        };
+        
+        BarBrawl bb = new BarBrawl(numOfPatrons);
+        
+        for(int i=0; i < 7; i++)
+        {
+            String retval = bb.predictOutcome( atEstablishment[i] );
+            
+            if(retval == "I DON'T KNOW")
+            {
+               bb.learnObservation(atEstablishment[i], fightOccurred[i]);
+            }
+            
+            System.out.println(retval);
+        }
     }
-    */
+    
     
     /**
      * Constructor for class BarBrawl
@@ -58,19 +93,14 @@ public class BarBrawl {
         // peacemaker might be
         this.instigator = new boolean[this.numPatrons];
         this.peacemaker = new boolean[this.numPatrons];
-        this.seenTogether = new boolean[this.numPatrons][this.numPatrons];
+        this.seenPatron = new boolean[this.numPatrons];
         
         // Intitially we believe that any of the patrons could be the 
         // instigator or the peacemaker. As we learn (as we get information about
         // the world) we will begin to eliminate patrons
         Arrays.fill(this.instigator, true);
         Arrays.fill(this.peacemaker, true);
-        Arrays.fill(this.seenTogether, false);
-        // Fill in diagonal of array because we will always see patron i with itself
-        for(int i = 0; i < this.numPatrons; i++)
-        {
-            this.seenTogether[i][i] = true;
-        }
+        Arrays.fill(this.seenPatron, false);
     }
     
     
@@ -112,17 +142,28 @@ public class BarBrawl {
         {
             return "NO FIGHT";
         }
-        // all other cases
+        // TODO: I CAN'T DO THIS
+        // I need a to be able to determine sooner. This fails the simple test case in 
+        // the main section above, at least as far as the number of 'don't knows'
+        // if there is at least one patron we have not seen before, we return
+        // "I DON'T KNOW"
+        else if( firstVisit(atEstablishment) )
+        {
+            return "I DON'T KNOW";
+        }
+        // So we know at this point that all the patrons present
+        // have been seen at least once, so we know whether they are a 
+        // potential peacemaker or not
+        // If none of the patrons present are potential peacemakers, we 
+        // know a fight should break out
+        else if( noPeacemakers(atEstablishment) )
+        {
+            return "FIGHT";
+        }
         else
         {
-             
+            return "NO FIGHT";           
         }
-        
-        
-        
-        
-        
-        return "I DON'T KNOW";
     }
     
     
@@ -137,16 +178,10 @@ public class BarBrawl {
      */
     public void learnObservation(boolean[] atEstablishment, boolean fightOccurred)
     {
-        // Update array keeping track of who we have seen with who
+        // Update array keeping track of who we have seen
         for(int i=0; i < this.numPatrons; i++)
         {
-            for(int j=0; j < this.numPatrons; j++)
-            {
-                if(atEstablishment[i] && atEstablishment[j])
-                {
-                    this.seenTogether[i][j] = true;
-                }
-            }
+            this.seenPatron[i] = this.seenPatron[i] || atEstablishment[i];
         }
         
         // Case 1: Fight breaks out
@@ -192,6 +227,7 @@ public class BarBrawl {
         
     }
     
+    // return true if all patrons are present
     private boolean allPresent( boolean[] atEstablishment )
     {
         boolean retVal = true;
@@ -202,6 +238,7 @@ public class BarBrawl {
         return retVal;
     }
     
+    // returns true of no patrons are present
     private boolean nonePresent( boolean[] atEstablishment )
     {
         boolean retVal = false;
@@ -210,5 +247,43 @@ public class BarBrawl {
             retVal = (retVal || atEstablishment[i]);
         }
         return !retVal;
+    }
+    
+    // Returns true if at least one patron has never been seen before
+    private boolean firstVisit( boolean[] atEstablishment )
+    {
+        boolean retVal = true;
+        
+        for(int i = 0; i < this.numPatrons; i++)
+        {
+            // if patron is present
+            if(atEstablishment[i])
+            {
+                // check if this patron has been seen before
+                // if patron has not been seen before, retVal will be false
+                retVal = retVal && this.seenPatron[i];
+            }
+        }
+        
+        return !retVal;
+    }
+    
+    // Returns true of none of the patrons at the establishment have the
+    // potential to be peacemakers
+    private boolean noPeacemakers(boolean[] atEstablishment)
+    {
+        boolean peacemakerPresent = false;
+        
+        for(int i = 0; i < this.numPatrons; i++)
+        {
+            if(atEstablishment[i])
+            {
+                // Will be true if at least one patron is a peacemaker
+                peacemakerPresent = peacemakerPresent || this.peacemaker[i];
+            }
+        }
+        
+        // if there are no peacemakers, this will remain false. Negate it
+        return !peacemakerPresent;
     }
 }
