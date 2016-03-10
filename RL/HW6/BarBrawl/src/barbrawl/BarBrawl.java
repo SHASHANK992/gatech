@@ -19,8 +19,12 @@ public class BarBrawl {
 
     // Must be between 2 and 1000 inclusive
     int numPatrons;
+    // Keeps track of possible instigators
     boolean[] instigator;
+    // Keeps track of possible peacemakers
     boolean[] peacemaker;
+    // Keeps track of what patrons we have seen together
+    boolean[][] seenTogether;
     
     
     /**
@@ -54,12 +58,19 @@ public class BarBrawl {
         // peacemaker might be
         this.instigator = new boolean[this.numPatrons];
         this.peacemaker = new boolean[this.numPatrons];
+        this.seenTogether = new boolean[this.numPatrons][this.numPatrons];
         
         // Intitially we believe that any of the patrons could be the 
         // instigator or the peacemaker. As we learn (as we get information about
         // the world) we will begin to eliminate patrons
-        Arrays.fill(instigator, true);
-        Arrays.fill(peacemaker, true);
+        Arrays.fill(this.instigator, true);
+        Arrays.fill(this.peacemaker, true);
+        Arrays.fill(this.seenTogether, false);
+        // Fill in diagonal of array because we will always see patron i with itself
+        for(int i = 0; i < this.numPatrons; i++)
+        {
+            this.seenTogether[i][i] = true;
+        }
     }
     
     
@@ -89,6 +100,28 @@ public class BarBrawl {
         // seen before (if any entry is false), we report 'I DON'T KNOW'
         // If we have seen all these patrons together in some combination before,
         // I think we can determine whether a fight breaks out or not
+        
+        // Special cases
+        // 1) Every patron is at establishment
+        if( allPresent(atEstablishment) )
+        {
+            return "NO FIGHT";
+        }
+        // 2) No patron is at establishment
+        else if( nonePresent(atEstablishment) )
+        {
+            return "NO FIGHT";
+        }
+        // all other cases
+        else
+        {
+             
+        }
+        
+        
+        
+        
+        
         return "I DON'T KNOW";
     }
     
@@ -104,6 +137,18 @@ public class BarBrawl {
      */
     public void learnObservation(boolean[] atEstablishment, boolean fightOccurred)
     {
+        // Update array keeping track of who we have seen with who
+        for(int i=0; i < this.numPatrons; i++)
+        {
+            for(int j=0; j < this.numPatrons; j++)
+            {
+                if(atEstablishment[i] && atEstablishment[j])
+                {
+                    this.seenTogether[i][j] = true;
+                }
+            }
+        }
+        
         // Case 1: Fight breaks out
         // We know two things: 1) The instigator has to be present and 2) The
         // peacemaker cannot be present
@@ -145,5 +190,25 @@ public class BarBrawl {
         // in the first case to satisfy these constraints.
         
         
+    }
+    
+    private boolean allPresent( boolean[] atEstablishment )
+    {
+        boolean retVal = true;
+        for(int i=0; i < this.numPatrons; i++ )
+        {
+            retVal = (retVal && atEstablishment[i]);
+        }
+        return retVal;
+    }
+    
+    private boolean nonePresent( boolean[] atEstablishment )
+    {
+        boolean retVal = false;
+        for(int i = 0; i < this.numPatrons; i++)
+        {
+            retVal = (retVal || atEstablishment[i]);
+        }
+        return !retVal;
     }
 }
