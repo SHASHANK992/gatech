@@ -80,6 +80,15 @@ public class BarBrawl {
      */
     public String predictOutcome(boolean[] atEstablishment)
     {
+        // This is a tricky method to implement. We have arrays of 
+        // potential instigators and peacemakers, but we need some way of keeping
+        // track of pairwise combinations of patrons so we can know what patrons
+        // we have observed together. I am thinking of a numPatrons x numPatrons
+        // boolean array to keep track of which patrons we have seen with which patrons.
+        // Using this information, if we come across any combination we have not 
+        // seen before (if any entry is false), we report 'I DON'T KNOW'
+        // If we have seen all these patrons together in some combination before,
+        // I think we can determine whether a fight breaks out or not
         return "I DON'T KNOW";
     }
     
