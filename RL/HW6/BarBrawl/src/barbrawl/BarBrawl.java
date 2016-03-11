@@ -5,6 +5,10 @@
  */
 package barbrawl;
 
+import java.util.Hashtable;
+import java.util.List;
+import java.util.ArrayList;
+
 import java.util.Arrays;
 /**
  *
@@ -26,6 +30,7 @@ public class BarBrawl {
     // Keeps track of what patrons we have seen together
     boolean[] seenPatron;
     
+    Hashtable ht;
     
     /**
      * @param args the command line arguments
@@ -34,8 +39,9 @@ public class BarBrawl {
     public static void main(String[] args) 
     {
         // TODO code application logic here
+        testFourPatrons();
         
-        
+        /*
         int numOfPatrons = 2;
         int maxIDontKnows = 1;
         boolean[][] atEstablishment = {
@@ -63,15 +69,65 @@ public class BarBrawl {
         {
             String retval = bb.predictOutcome( atEstablishment[i] );
             
-            if(retval == "I DON'T KNOW")
+            if("I DON'T KNOW".equals(retval))
             {
                bb.learnObservation(atEstablishment[i], fightOccurred[i]);
             }
             
             System.out.println(retval);
         }
+        */
     }
     
+    private static void testFourPatrons()
+    {
+        int numOfPatrons = 4;
+        int maxIDKs = 11;
+        
+        boolean[][] atEst = {
+            {true, true, false, true},
+            {true, false, true, true},
+            {true, false, false, true},
+            {false, true, true, true},
+            {false, true, true, false},
+            {false, true, false, true},
+            {false, true, false, false},
+            {false, false, true, true},
+            {false, false, true, false},
+            {false, false, false, true},
+            {true, true, true, false},
+            {true, true, false, false}
+        };
+        
+        boolean[] fightOccurred = {
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            true
+        };
+        
+        BarBrawl bb = new BarBrawl(numOfPatrons);
+        
+        for(int i=0; i < 12; i++)
+        {
+            String retval = bb.predictOutcome( atEst[i] );
+            
+            if("I DON'T KNOW".equals(retval))
+            {
+               bb.learnObservation(atEst[i], fightOccurred[i]);
+            }
+            
+            System.out.println(retval);
+        }
+    }
     
     /**
      * Constructor for class BarBrawl
@@ -84,23 +140,22 @@ public class BarBrawl {
     {
         this.numPatrons = numPatrons;
         
-        // Initialize the version space
-        // Version space initially is the same as the hypothesis class
-        // I think the hypothesis class is the set of all possible 2 combinations of 
-        // patrons
-        
         // Initialize arrays containing our guess of who the instigator and 
         // peacemaker might be
         this.instigator = new boolean[this.numPatrons];
         this.peacemaker = new boolean[this.numPatrons];
-        this.seenPatron = new boolean[this.numPatrons];
         
         // Intitially we believe that any of the patrons could be the 
         // instigator or the peacemaker. As we learn (as we get information about
         // the world) we will begin to eliminate patrons
         Arrays.fill(this.instigator, true);
         Arrays.fill(this.peacemaker, true);
-        Arrays.fill(this.seenPatron, false);
+        
+        // This keeps track of what combinations we have seen. If we have seen a
+        // certain combination of already, we can report its value. Using this in
+        // combination with the guesses of instigators and peacemakers, we can
+        // beat a simple memorization algorithm
+        this.ht = new Hashtable(this.numPatrons);
     }
     
     
@@ -120,16 +175,9 @@ public class BarBrawl {
      * learner cannot say with certain whether a fight broke out or not
      */
     public String predictOutcome(boolean[] atEstablishment)
-    {
-        // This is a tricky method to implement. We have arrays of 
-        // potential instigators and peacemakers, but we need some way of keeping
-        // track of pairwise combinations of patrons so we can know what patrons
-        // we have observed together. I am thinking of a numPatrons x numPatrons
-        // boolean array to keep track of which patrons we have seen with which patrons.
-        // Using this information, if we come across any combination we have not 
-        // seen before (if any entry is false), we report 'I DON'T KNOW'
-        // If we have seen all these patrons together in some combination before,
-        // I think we can determine whether a fight breaks out or not
+    {          
+        // Convert input into a list
+        List<Boolean> atEst = convertToList(atEstablishment);
         
         // Special cases
         // 1) Every patron is at establishment
@@ -142,28 +190,38 @@ public class BarBrawl {
         {
             return "NO FIGHT";
         }
-        // TODO: I CAN'T DO THIS
-        // I need a to be able to determine sooner. This fails the simple test case in 
-        // the main section above, at least as far as the number of 'don't knows'
-        // if there is at least one patron we have not seen before, we return
-        // "I DON'T KNOW"
-        else if( firstVisit(atEstablishment) )
+        // If there is only one peacemaker left and that peacemaker is present,
+        // we know a fight does not break out.
+        else if( isSinglePeacemakerPresent(atEstablishment) )
         {
-            return "I DON'T KNOW";
+            return "NO FIGHT";
         }
-        // So we know at this point that all the patrons present
-        // have been seen at least once, so we know whether they are a 
-        // potential peacemaker or not
-        // If none of the patrons present are potential peacemakers, we 
-        // know a fight should break out
-        else if( noPeacemakers(atEstablishment) )
+        // If we have seen this case before, we can simply retrieve its value
+        // from the hashtable
+        else if( this.ht.containsKey(atEst) )
+        {
+            boolean val = (boolean)this.ht.get(atEst);
+            if( val )
+            {
+                return "FIGHT";
+            }
+            else 
+            {
+                return "NO FIGHT";
+            }
+        }
+        // Beyond here we have to start taking guesses
+        // This isn't a simple case, nor have we seen this combo before, nor
+        // have we determined who the peacemaker is.
+        
+        // If there are no potential peacemakers and all the potential
+        // instigators are present, we know a fight breaks out
+        else if( this.noPotentialPeacemakersPresent(atEstablishment) && this.allPotentialInstigatorsPresent(atEstablishment) )
         {
             return "FIGHT";
         }
-        else
-        {
-            return "NO FIGHT";           
-        }
+        
+        return "I DON'T KNOW";
     }
     
     
@@ -177,12 +235,12 @@ public class BarBrawl {
      *       specified by atEstablishment are present
      */
     public void learnObservation(boolean[] atEstablishment, boolean fightOccurred)
-    {
-        // Update array keeping track of who we have seen
-        for(int i=0; i < this.numPatrons; i++)
-        {
-            this.seenPatron[i] = this.seenPatron[i] || atEstablishment[i];
-        }
+    {     
+        // Convert input to list
+        List<Boolean> atEst = convertToList(atEstablishment);
+        
+        // Add this case to the hashtable
+        this.ht.put(atEst, fightOccurred);
         
         // Case 1: Fight breaks out
         // We know two things: 1) The instigator has to be present and 2) The
@@ -207,24 +265,40 @@ public class BarBrawl {
                     this.peacemaker[i] = false;
                 }
             }
-        }        
-        // I am not sure if there is a second case when a fight doesn't break out.
-        // We don't know if this is because the peacemaker is present or if this is
-        // because the instigator is not present. 
-        // If we go through the patrons and find that a single potential instigator
-        // is present, we know that the peacemaker must be present
-        // If we find that some but not all of the potential instigators are present
-        // I don't think we can make any determination. The peacemaker doesn't have to
-        // be present for a fight not to break out.
-        // This doesn't help us determine who might be a peacemaker or instigator.
-        // Similarly for the peackemaker. If we find that all the potential peacemakers
-        // are present, we can't really tell who, if anyone, is an instigator.
-        // 
-        // In order to acheive the bounds specified above, I really don't think I
-        // need to handle this else case. I think enough information can be supplied
-        // in the first case to satisfy these constraints.
+        }  
+        else
+        {
+            // If no fight occurred, we can't really tell much unless only one 
+            // patron is present. In that case we know that the patron is not
+            // the instigator
+            if( singlePatron(atEstablishment) )
+            {
+                int index = indexOfLonePatron(atEstablishment);
+                
+                instigator[index] = false;
+            }
+            
+            // For all other combinations, if a fight does not break out there is
+            // no other information we can determine.
+        }
+    }
+    
+    /******************************************
+     * 
+     * Helper functions
+     * 
+     ****************************************/
+    private List<Boolean> convertToList(boolean[] atEstablishment)
+    {
+        List<Boolean> retval = new ArrayList<Boolean>();
         
+        for(int i=0; i<this.numPatrons; i++)
+        {
+            Boolean temp = atEstablishment[i];
+            retval.add(temp);
+        }
         
+        return retval;
     }
     
     // return true if all patrons are present
@@ -249,28 +323,9 @@ public class BarBrawl {
         return !retVal;
     }
     
-    // Returns true if at least one patron has never been seen before
-    private boolean firstVisit( boolean[] atEstablishment )
-    {
-        boolean retVal = true;
-        
-        for(int i = 0; i < this.numPatrons; i++)
-        {
-            // if patron is present
-            if(atEstablishment[i])
-            {
-                // check if this patron has been seen before
-                // if patron has not been seen before, retVal will be false
-                retVal = retVal && this.seenPatron[i];
-            }
-        }
-        
-        return !retVal;
-    }
-    
     // Returns true of none of the patrons at the establishment have the
     // potential to be peacemakers
-    private boolean noPeacemakers(boolean[] atEstablishment)
+    private boolean noPotentialPeacemakersPresent(boolean[] atEstablishment)
     {
         boolean peacemakerPresent = false;
         
@@ -285,5 +340,112 @@ public class BarBrawl {
         
         // if there are no peacemakers, this will remain false. Negate it
         return !peacemakerPresent;
+    }
+    
+    // Returns true if all the instigators left are present
+    private boolean allPotentialInstigatorsPresent(boolean[] atEstablishment)
+    {
+        boolean retval = true;
+        
+        for(int i = 0; i< this.numPatrons; i++)
+        {
+            // If the patron is present at the establishment
+            if(atEstablishment[i])
+            {
+                retval = retval && this.instigator[i];
+            }
+        }
+        
+        return retval;
+    }
+    
+    // Returns true if there is only one patron present at the establishment
+    private boolean singlePatron(boolean[] atEstablishment)
+    {
+        int numPresent = 0;
+        
+        for(int i=0; i < this.numPatrons; i++)
+        {
+            if(atEstablishment[i])
+            {
+                numPresent += 1;
+            }
+        }
+        
+        return (numPresent == 1);
+    }
+    
+    // Only to be used when there is only a single patron present.
+    // Returns the index of that patron in the array
+    private int indexOfLonePatron(boolean[] atEstablishment)
+    {
+        int i = 0;
+        while(i < this.numPatrons)
+        {
+            if(atEstablishment[i])
+            {
+                break;
+            }
+            
+            i++;
+        }
+        
+        return i;
+    }
+    
+    // Returns true if there is a single peacemaker and that peacemaker is present
+    // at the establishment
+    // If there is more than one peacemaker or if the lone peacemaker is not present
+    // at the establishment, returns false
+    private boolean isSinglePeacemakerPresent(boolean[] atEstablishment)
+    {
+        // First make sure that there is only one peacemaker
+        int numPeacemakers = 0;
+        int idx=0;
+        for(int i=0; i<this.numPatrons; i++)
+        {
+            if(this.peacemaker[i])
+            {
+                numPeacemakers++;
+                idx=i;
+            }
+        }
+        // If there is more than 1 peacemaker, return false
+        if(numPeacemakers != 1)
+        {
+            return false;
+        }
+        else
+        {
+            return (this.peacemaker[idx] && atEstablishment[idx]);
+        }     
+    }
+    
+    // Returns true if there is a single instigator and that instigator is present
+    // at the establishment
+    // If there is more than one instigator or if the lone instigator is not present
+    // at the establishment, returns false
+    private boolean isSingleInstigatorPresent(boolean[] atEstablishment)
+    {
+        // First make sure that there is only one instigator
+        int numInstigators = 0;
+        int idx=0;
+        for(int i=0; i<this.numPatrons; i++)
+        {
+            if(this.peacemaker[i])
+            {
+                numInstigators++;
+                idx=i;
+            }
+        }
+        // If there is more than 1 peacemaker, return false
+        if(numInstigators != 1)
+        {
+            return false;
+        }
+        else
+        {
+            return (this.instigator[idx] && atEstablishment[idx]);
+        } 
     }
 }
