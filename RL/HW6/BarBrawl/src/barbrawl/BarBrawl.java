@@ -5,6 +5,9 @@
  */
 package barbrawl;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.ArrayList;
@@ -39,7 +42,9 @@ public class BarBrawl {
     public static void main(String[] args) 
     {
         // TODO code application logic here
-        testFourPatrons();
+        //testFourPatrons();
+        
+        homework();
         
         /*
         int numOfPatrons = 2;
@@ -277,6 +282,14 @@ public class BarBrawl {
                 
                 instigator[index] = false;
             }
+            // If all but one patron is at establishment and a fight does not
+            // occur, we know that person cannot be the peacemaker
+            else if( allButOnePresent(atEstablishment) )
+            {
+                int index = indexOfMissingPatron(atEstablishment);
+                
+                peacemaker[index] = false;
+            }
             
             // For all other combinations, if a fight does not break out there is
             // no other information we can determine.
@@ -447,5 +460,103 @@ public class BarBrawl {
         {
             return (this.instigator[idx] && atEstablishment[idx]);
         } 
+    }
+    
+    // Returns true if there is only one patron not at establishment
+    private boolean allButOnePresent(boolean[] atEstablishment)
+    {
+        int numPresent = 0;
+        
+        for(int i=0; i<this.numPatrons; i++)
+        {
+            if(atEstablishment[i])
+            {
+                numPresent++;
+            }
+        }
+        
+        if(numPresent == this.numPatrons-1)
+        {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    // Returns index of patron missing when all but one patron is present
+    private int indexOfMissingPatron(boolean[] atEstablishment)
+    {
+        int index=0;
+        
+        for(int i=0; i<this.numPatrons; i++)
+        {
+            if( !atEstablishment[i] )
+            {
+                index = i;
+                break;
+            }
+        }
+        
+        return index;
+    }
+    
+    private boolean[] convertLine(String line)
+    {
+        String[] parts = line.split(",");
+        boolean[] retval = new boolean[this.numPatrons];
+        
+        for(int i=0; i < this.numPatrons; i++)
+        {
+            if( parts[i].equals("true") )
+            {
+                retval[i] = true;
+            }
+            else
+            {
+                retval[i] = false;
+            }
+        }
+        
+        return retval;
+    }
+    
+    public static void homework()
+    {
+        int numOfPatrons = 36;
+        
+        // Open files for reading
+        
+        BarBrawl bb = new BarBrawl(numOfPatrons);
+        String file_atEstab = ".\\atEstab.txt";
+        String file_fights  = ".\\fightOccurred.txt";
+        
+        // Read each line from file
+        try (BufferedReader br = new BufferedReader(new FileReader(file_atEstab))) 
+        {
+            try (BufferedReader br2 = new BufferedReader(new FileReader(file_fights)))
+            {
+                String line_atEstab;
+                while ((line_atEstab = br.readLine()) != null) 
+                {
+                    // Get the corresponding line from fights
+                    String line_fights = br2.readLine();
+                    
+                    boolean[] atEstablishment = bb.convertLine(line_atEstab);
+                    
+                    String retval = bb.predictOutcome(atEstablishment);
+                    
+                    if("I DON'T KNOW".equals(retval))
+                    {
+                        bb.learnObservation(atEstablishment, line_fights.equals("true") );
+                    }
+                    
+                    System.out.println(retval);
+                }
+            }
+        }
+        catch(Exception ex)
+        {
+            System.out.println("Error");
+        }
     }
 }
