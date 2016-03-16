@@ -1,0 +1,41 @@
+Same for all problems:
+
+int numActions = 2;
+double[] terrainStartPoint = {0.0,0.2,0.4,0.6,0.8};
+int[] terrainType = {0,1,0,1,0};
+
+It looks like for whatever sample locations we are given, we are
+to give what the best action is
+
+
+Problem 1:
+Given:
+movementMean={{-0.069,0.096},{0.058,0.104}}
+movementSD={{0.054,0.018},{0.013,0.025}}
+sampleLocations={0.12,0.35,0.82,0.05}
+Notes: that is
+Terrain 0 movement 0 = -0.069
+Terrain 0 movement 1 = 0.096
+Terrain 1 movement 0 = 0.058
+Terrain 1 movement 1 = 0.104
+
+Solution:
+bestActions={1,1,1,1}
+
+Problem 2:
+Given:
+movementMean={{0.168,0.093},{0.052,-0.160}}
+movementSD={{0.055,0.041},{0.028,0.032}}
+sampleLocations={0.12,0.35,0.82,0.05}
+
+Solution:
+bestActions={0,0,0,0}
+
+Problem 3:
+Given:
+movementMean={{0.15,0.3},{-0.5,-0.5}}
+movementSD={{0.01,0.01},{0.01,0.01}}
+sampleLocations={0.15, 0.37, 0.82, 0.05, 0.63}
+
+Solution:
+bestActions={1,0,1,0,0}
