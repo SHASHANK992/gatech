@@ -40,11 +40,15 @@ if __name__ == "__main__":
 
     # Generate plot of strategy showing entry and exit points 
     # Generate order file
+    process_my_strategy()
 
     # Run order file through market simulate
     # Get daily value of portfolio
+    portvals = compute_portvals("./orders/MyOrders.csv", start_val=10000)
+    pv_array = portvals.values
 
     # Compare strategy to SPY
+    my_cr, my_adr, my_stddr, my_sr = assess_portfolio(pv_array[:,0], start_date, end_date, gen_plot=True)
 
     print
     print 'Testing of Personal strategy complete'

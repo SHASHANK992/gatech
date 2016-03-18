@@ -26,7 +26,7 @@ we must wait until we exit (sell 100 shares) before we can take any other positi
 def process_Bollinger_Bands(window_size=20, syms=['IBM'], sd=dt.datetime(2007,12, 31), ed = dt.datetime(2009, 12, 31)):
     
     prices_dates = pd.date_range(sd, ed)
-    prices_all = get_data(syms, prices_dates)
+    prices_all = get_data(syms, prices_dates) # Includes SPY
     prices_SPY = prices_all['SPY']
     prices = prices_all[syms] 
     prices_orig = prices.copy()
