@@ -9,9 +9,7 @@ import csv
 # Modified stop loss
 # Look for where stock has fallen x% 2 days in a row. Sell
 # Look for where stock has risen x% 2 days in a row. Buy
-def process_my_strategy(syms=['IBM'], sd=dt.datetime(2007,12, 31), ed = dt.datetime(2009, 12, 31)):
-    # Threshold for indicators
-    percent_change = 0.025
+def process_my_strategy(syms=['IBM'], sd=dt.datetime(2007,12, 31), ed = dt.datetime(2009, 12, 31), percent_change=0.025):
     
     # Get the price data
     prices_dates = pd.date_range(sd, ed)
@@ -27,6 +25,8 @@ def process_my_strategy(syms=['IBM'], sd=dt.datetime(2007,12, 31), ed = dt.datet
     # Generate orders
     #****************************
     pvals = prices.values
+    price_max = pvals.max()
+    price_min = pvals.min()
     orders = prices.copy()
     orders[syms] = np.NaN
     # Parse data
@@ -38,6 +38,8 @@ def process_my_strategy(syms=['IBM'], sd=dt.datetime(2007,12, 31), ed = dt.datet
         price_today = pvals[i]
 
         # If we don't have any trades active right now, determine if we should make another one
+        # I might want to keep track of the value when the position is entered and exit when
+        # there is a certain percentage change from that value
         if not long_active and not short_active:
             # Sell
             if price_1DayAgo <= ((1-percent_change)*price_2DaysAgo):
@@ -70,7 +72,7 @@ def process_my_strategy(syms=['IBM'], sd=dt.datetime(2007,12, 31), ed = dt.datet
     write_csv_file(orders)
 
     # Add the orders to the plot
-    add_orders_to_plot(plot_handle, orders)
+    add_orders_to_plot(plot_handle, orders, min=price_min, max=price_max)
 
     plt.show()
 #end process_my_strategy
