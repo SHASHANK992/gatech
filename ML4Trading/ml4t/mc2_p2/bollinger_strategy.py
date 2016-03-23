@@ -116,7 +116,7 @@ def generate_orders(prices, orders, window_size=20, sym='IBM'):
     # orders should be pass by reference, so I shouldn't need to return anything here
 #end generate_orders
 
-def write_csv_file(orders, filename='orders\BBorders.csv'):
+def write_csv_file(orders, filename='orders/BBorders.csv'):
     with open(filename, 'wb') as csvfile:
         orderswriter = csv.writer(csvfile, delimiter=',',
                                   quotechar='|', quoting=csv.QUOTE_MINIMAL)

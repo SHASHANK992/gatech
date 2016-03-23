@@ -13,7 +13,7 @@ if __name__ == "__main__":
     
     start_date = dt.datetime(2007, 12, 31)
     end_date   = dt.datetime(2009, 12, 31)
-    '''
+    
     print
     print 'Testing Bollinger Bands'
     print
@@ -32,8 +32,8 @@ if __name__ == "__main__":
     print
     print 'Testing of Bollinger Bands complete'
     print 
-    '''
-    '''
+    
+    
     print
     print 'Testing Personal strategy over same time period as Bollinger Band'
     print
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     print
     print 'Testing of Personal strategy complete'
     print
-    '''
+    
 
     
     print

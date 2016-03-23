@@ -78,7 +78,7 @@ def process_my_strategy(syms=['IBM'], sd=dt.datetime(2007,12, 31), ed = dt.datet
 #end process_my_strategy
 
 
-def write_csv_file(orders, filename='orders\MyOrders.csv'):
+def write_csv_file(orders, filename='orders/MyOrders.csv'):
     with open(filename, 'wb') as csvfile:
         orderswriter = csv.writer(csvfile, delimiter=',',
                                   quotechar='|', quoting=csv.QUOTE_MINIMAL)
