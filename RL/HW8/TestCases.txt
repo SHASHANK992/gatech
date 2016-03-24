@@ -1,0 +1,46 @@
+gamma=0.73428037
+rewardA1=-781.67614568
+rewardA2=568.70051314
+rewardB=-513.42370277
+p=0.29942233
+value=618.57526461
+
+
+gamma=0.43628179
+rewardA1=-506.20310580
+rewardA2=918.92511615
+rewardB=760.72160152
+p=0.29383080
+value=1349.47140877
+
+
+gamma=0.05005892
+rewardA1=259.33182580
+rewardA2=70.77435017
+rewardB=400.81423125
+p=0.80219240
+value=421.93588816
+
+*************************
+Pen and paper
+*************************
+gamma = 0.5;
+rewardA1 = 0.5;
+rewardA2 = 0.5;
+rewardB = 0.5;
+p = 0.5;
+expected = 1.0;
+
+gamma = 0.5;
+rewardA1 = 1.0;
+rewardA2 = 2.0;
+rewardB = 0.0;
+p = .75;
+expected = 2.5;
+
+gamma = 0.9;
+rewardA1 = 0.0;
+rewardA2 = 0.8;
+rewardB = 0.6;
+p = .8;
+expected = 6.0;
