@@ -2,10 +2,10 @@ import numpy as np
 
 class KNNLearner(object):
 
-    def __init__(self, k):
+    def __init__(self, k=3, verbose=False):
         self.k = k
         
-    def addEvidence(self,dataX,dataY):
+    def addEvidence(self,Xtrain,Ytrain):
         """ 
         From the example provided by the instructor, I don't think
         that this function accumulates data. It is called once and the
@@ -16,21 +16,21 @@ class KNNLearner(object):
         """
         # Training is as easy as saving the data points for 
         # querying later
-        self.Xdata = dataX
-        self.Ydata = dataY
+        self.Xdata = Xtrain
+        self.Ydata = Ytrain
         
-    def query(self,points):
+    def query(self,Xtest):
         """ TO DO """
         # Array to store output
-        Yout = np.zeros(points.shape[0])
+        Yout = np.zeros(Xtest.shape[0])
         # For each query point
-        for i in range(0,points.shape[0]):
+        for i in range(0,Xtest.shape[0]):
             # Store distance with index distance corresponds to
             dtype = [('idx', int), ('dist', float)]
             distance = np.zeros((self.Xdata.shape[0]), dtype=dtype)
             
             for j in range(0,self.Xdata.shape[0]):
-                distance[j] = ( j, np.linalg.norm(points[i,:] - self.Xdata[j,:]) )
+                distance[j] = ( j, np.linalg.norm(Xtest[i,:] - self.Xdata[j,:]) )
             #end for
             
             # Sort distance data
