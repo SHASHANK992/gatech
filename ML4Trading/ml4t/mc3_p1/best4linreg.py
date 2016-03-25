@@ -6,6 +6,7 @@ import numpy as np
 import LinRegLearner as lrl
 import KNNLearner as knn
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import math
 
 def generateData(N=1000):
@@ -78,3 +79,10 @@ if __name__ == "__main__":
     print "corr: ", c[0,1]
     
     # Plot results
+    fig = plt.figure()
+    ax = fig.add_subplot(111,projection='3d')
+    
+    ax.scatter(testX[:,0], testX[:,1], testY, c='r')
+    #ax.scatter(testX[:,0], testX[:,1], LR_testY, c='b')
+    ax.scatter(testX[:,0], testX[:,1], KNN_testY, c='g')
+    plt.show()
