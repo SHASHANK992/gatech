@@ -49,7 +49,7 @@ if __name__=="__main__":
     print "corr: ", c[0,1]
     '''
 	
-    
+    '''
     #*******************************
     # Test of KNN learner (no bagging)
     #*******************************
@@ -102,8 +102,9 @@ if __name__=="__main__":
     #end for
     
     np.savetxt("KNN.txt", output)
-    
     '''
+    
+    
     #************************************
     # Test of KNN with bagging
     #************************************
@@ -120,42 +121,52 @@ if __name__=="__main__":
     testX = data[train_rows:,0:-1]
     testY = data[train_rows:,-1]
     
-    maxBags = 5
-    output = np.zeros((maxBags, 4))
-
-    for bags in range(1,maxBags+1):
-        print
-        print "***************************"
-        print "  bags = ", bags
-        print "***************************"
-        # create a learner and train it
-        kwargs = {"k":3}
-        learner = bl.BagLearner(knnl.KNNLearner, kwargs, bags, boost = False ) # create a Bag of KNNLearners
-        
-        learner.addEvidence(trainX, trainY) # train it
-        
-        # evaluate in sample
-        predY = learner.query(trainX) # get the predictions
-        
-        rmse = math.sqrt(((trainY - predY) ** 2).sum()/trainY.shape[0])
-        print "In sample results"
-        print "RMSE: ", rmse
-        c = np.corrcoef(predY, y=trainY)
-        print "corr: ", c[0,1]
-        output[bags-1,0] = rmse
-        output[bags-1,1] = c[0,1]
-        
-        # evaluate out of sample
-        predY = learner.query(testX) # get the predictions
-        rmse = math.sqrt(((testY - predY) ** 2).sum()/testY.shape[0])
-        print
-        print "Out of sample results"
-        print "RMSE: ", rmse
-        c = np.corrcoef(predY, y=testY)
-        print "corr: ", c[0,1]
-        output[bags-1,2] = rmse
-        output[bags-1,3] = c[0,1]
+    maxBags = 20
+    maxK = 10
+    output = np.zeros((maxBags*maxK, 6))
+    
+    idx = 0
+    for k in range(1,maxK+1):
+        for bags in range(1,maxBags+1):
+            print
+            print "***************************"
+            print "  bags = ", bags
+            print "  k    = ", k
+            print "***************************"
+            output[idx, 0] = k
+            output[idx, 1] = bags
+            
+            # create a learner and train it
+            kwargs = {"k":k}
+            learner = bl.BagLearner(knnl.KNNLearner, kwargs, bags, boost = False ) # create a Bag of KNNLearners
+            
+            learner.addEvidence(trainX, trainY) # train it
+            
+            # evaluate in sample
+            predY = learner.query(trainX) # get the predictions
+            
+            rmse = math.sqrt(((trainY - predY) ** 2).sum()/trainY.shape[0])
+            print "In sample results"
+            print "RMSE: ", rmse
+            c = np.corrcoef(predY, y=trainY)
+            print "corr: ", c[0,1]
+            output[idx,2] = rmse
+            output[idx,3] = c[0,1]
+            
+            # evaluate out of sample
+            predY = learner.query(testX) # get the predictions
+            rmse = math.sqrt(((testY - predY) ** 2).sum()/testY.shape[0])
+            print
+            print "Out of sample results"
+            print "RMSE: ", rmse
+            c = np.corrcoef(predY, y=testY)
+            print "corr: ", c[0,1]
+            output[idx,4] = rmse
+            output[idx,5] = c[0,1]
+            
+            idx += 1
+        #end for
     #end for
     
     np.savetxt("KNNBagging.txt", output)
-    '''
+    
