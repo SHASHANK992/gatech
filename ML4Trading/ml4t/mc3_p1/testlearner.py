@@ -66,7 +66,7 @@ if __name__=="__main__":
     testX = data[train_rows:,0:-1]
     testY = data[train_rows:,-1]
     
-    maxK = 3
+    maxK = 20
     output = np.zeros((maxK, 4))
     
     for k in range(1,maxK+1):
@@ -122,7 +122,7 @@ if __name__=="__main__":
     testY = data[train_rows:,-1]
     
     maxBags = 20
-    maxK = 10
+    maxK = 20
     output = np.zeros((maxBags*maxK, 6))
     
     idx = 0

@@ -83,6 +83,6 @@ if __name__ == "__main__":
     ax = fig.add_subplot(111,projection='3d')
     
     ax.scatter(testX[:,0], testX[:,1], testY, c='r')
-    #ax.scatter(testX[:,0], testX[:,1], LR_testY, c='b')
-    ax.scatter(testX[:,0], testX[:,1], KNN_testY, c='g')
+    ax.scatter(testX[:,0], testX[:,1], LR_testY, c='b')
+    #ax.scatter(testX[:,0], testX[:,1], KNN_testY, c='g')
     plt.show()
