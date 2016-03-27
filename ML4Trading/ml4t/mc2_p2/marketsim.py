@@ -5,6 +5,7 @@ import numpy as np
 import datetime as dt
 import os
 from util import get_data, plot_data
+from analysis import assess_portfolio
 
 def compute_portvals(orders_file = "./orders/orders.csv", start_val = 1000000, sd=dt.datetime(2007,12,31), ed=dt.datetime(2009,12,31)):
     
@@ -86,5 +87,8 @@ def compute_portvals(orders_file = "./orders/orders.csv", start_val = 1000000, s
     daily_value_sum = daily_values.sum(axis=1)   
     
     df_daily_value_sum = pd.DataFrame(daily_value_sum, columns=['Daily Value'])
-
-    return df_daily_value_sum
+    
+    dv_array = df_daily_value_sum.values
+    
+    # Compare portfolio to $SPX
+    cum_ret, avg_daily_ret, std_daily_ret, sharpe_ratio = assess_portfolio(dv_array[:,0], sd, ed, gen_plot=True)

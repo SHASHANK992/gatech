@@ -22,12 +22,8 @@ if __name__ == "__main__":
     # and generates order file
     process_Bollinger_Bands()
     # Simulate orders
-    # Get daily value of portfolio
-    portvals = compute_portvals("./orders/BBorders.csv", start_val=10000)
-    pv_array = portvals.values
-
-    # Compare portfolio to SPY
-    bb_cum_ret, bb_avg_daily_ret, bb_std_daily_ret, bb_sharpe_ratio = assess_portfolio(pv_array[:,0], start_date, end_date, gen_plot=True)
+    # Get daily value of portfolio and compare to market
+    compute_portvals("./orders/BBorders.csv", start_val=10000)
     
     print
     print 'Testing of Bollinger Bands complete'
@@ -43,12 +39,8 @@ if __name__ == "__main__":
     process_my_strategy()
 
     # Run order file through market simulate
-    # Get daily value of portfolio
-    portvals = compute_portvals("./orders/MyOrders.csv", start_val=10000)
-    pv_array = portvals.values
-
-    # Compare strategy to SPY
-    my_cr, my_adr, my_stddr, my_sr = assess_portfolio(pv_array[:,0], start_date, end_date, gen_plot=True)
+    # Get daily value of portfolio and compare to market
+    compute_portvals("./orders/MyOrders.csv", start_val=10000)
 
     print
     print 'Testing of Personal strategy complete'
@@ -69,12 +61,8 @@ if __name__ == "__main__":
 
     # Run order file through market simulate
     # Get daily value of portfolio
-    portvals = compute_portvals("./orders/MyOrders.csv", start_val=10000, sd=start_date, ed=end_date)
-    pv_array = portvals.values
-
-    # Compare strategy to SPY
-    my_cr, my_adr, my_stddr, my_sr = assess_portfolio(pv_array[:,0], start_date, end_date, gen_plot=True)
-
+    compute_portvals("./orders/MyOrders.csv", start_val=10000, sd=start_date, ed=end_date)
+    
     print
     print 'Testing of Personal strategy complete'
     print

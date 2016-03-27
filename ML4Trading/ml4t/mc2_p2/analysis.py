@@ -13,24 +13,25 @@ def assess_portfolio( daily_value, sd = dt.datetime(2008,1,1), ed = dt.datetime(
 
     # Read in adjusted closing prices for given symbols, date range
     dates = pd.date_range(sd, ed)
-    syms = ['SPY']
+    syms = ['$SPX']
     prices = get_data(syms, dates, False)
-    prices_SPY = prices['SPY']  # only SPY, for comparison later
-    prices_SPY_norm = prices_SPY/prices_SPY[0] # Normalized SPY data
-    SPY_array = prices_SPY.values
+    prices.dropna(inplace=True)
+    prices_SPX = prices['$SPX']  # only SPX, for comparison later
+    prices_SPX_norm = prices_SPX/prices_SPX[0] # Normalized SPX data
+    SPX_array = prices_SPX.values
 
     # Get portfolio stats
     cr, adr, sddr, sr = get_portfolio_stats(daily_value)
-    SPY_cr, SPY_adr, SPY_sdr, SPY_sr = get_portfolio_stats(SPY_array)
+    SPX_cr, SPX_adr, SPX_sdr, SPX_sr = get_portfolio_stats(SPX_array)
     
     # Put daily values into a data frame
     # Add to existing data frame as new column
     prices['Daily Value'] = daily_value/daily_value[0]
 
-    # Compare daily portfolio value with SPY using a normalized plot
+    # Compare daily portfolio value with SPX using a normalized plot
     if gen_plot:
         # add code to plot here
-        df_temp = pd.concat([ prices['Daily Value'], prices_SPY_norm], keys=['Portfolio', 'SPY'], axis=1)
+        df_temp = pd.concat([ prices['Daily Value'], prices_SPX_norm], keys=['Portfolio', '$SPX'], axis=1)
         plot_data(df_temp)
         pass
     
@@ -38,15 +39,15 @@ def assess_portfolio( daily_value, sd = dt.datetime(2008,1,1), ed = dt.datetime(
     print "Date Range: ", sd, " to ", ed
     print
     print "Sharpe ratio of Fund: ", sr
-    print "Sharpe ratio of SPY:  ", SPY_sr
+    print "Sharpe ratio of $SPX:  ", SPX_sr
     print
     print "Cumulative return of Fund: ", cr
-    print "Cumulative return of SPY:  ", SPY_cr
+    print "Cumulative return of $SPX:  ", SPX_cr
     print
     print "Std dev of Fund: ", sddr
-    print "Std dev of SPY:  ", SPY_sdr
+    print "Std dev of $SPX:  ", SPX_sdr
     print
     print "Avg. Daily return of Fund: ", adr
-    print "Avg. Daily return of SPY:  ", SPY_adr
+    print "Avg. Daily return of $SPX:  ", SPX_adr
     
     return cr, adr, sddr, sr
