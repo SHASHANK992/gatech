@@ -32,6 +32,7 @@ def generateData(N=1000):
     return dataX, dataY
 #end def
 
+'''
 if __name__ == "__main__":
     # Generate the data set
     print "Generating data..."
@@ -86,3 +87,4 @@ if __name__ == "__main__":
     ax.scatter(testX[:,0], testX[:,1], LR_testY, c='b')
     #ax.scatter(testX[:,0], testX[:,1], KNN_testY, c='g')
     plt.show()
+ '''
