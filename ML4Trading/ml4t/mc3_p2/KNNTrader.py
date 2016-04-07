@@ -95,6 +95,68 @@ def compute_Nday_return(prices, N):
 #end def
 
 
+'''
+Runs strategy using KNN learner
+'''
+def process_KNN_strategy(syms, sd, ed, learner, percent_changed):
+    # Get the price data
+    prices_dates = pd.date_range(sd, ed)
+    prices_all = get_data(syms, prices_dates) # Includes SPY
+    prices_SPY = prices_all['SPY']
+    prices = prices_all[syms] 
+    prices_orig = prices.copy()
+    
+    #****************************
+    # Generate orders
+    #****************************
+    pvals = prices.values
+    
+    # parse data
+    long_active = False
+    short_active = False
+    # Compute technical indicators iteratively
+    for i in range(20, pvals.shape[0]):
+        # Compute BB over last 20 days
+        
+        # Compute momentum over the last 5 days
+        
+        # Compute volatility over the last 5 days
+        
+        # Use these indicators to query the learner
+        
+        
+        # If the Y value (5 day future return) is greater than percent_changed, go long
+        
+        # If less than percent_changed, go short
+    
+
+#end def
+
+def write_csv_file(orders, filename='orders/MyOrders.csv'):
+    with open(filename, 'wb') as csvfile:
+        orderswriter = csv.writer(csvfile, delimiter=',',
+                                  quotechar='|', quoting=csv.QUOTE_MINIMAL)
+
+        # Write header
+        orderswriter.writerow(['Date'] + ['Symbol'] + ['Order'] + ['Shares'])
+        
+        # For each order, write to file
+        for i in range(0,orders.shape[0]):
+            # Get the date
+            current_dt = str(orders.index[i])[0:10]
+            
+            # Get the order type
+            order_type = 'BUY'
+            if orders.iloc[i]['IBM'] <= 0:
+                order_type = 'SELL'
+
+            # This is all we need to know. The other data is constant
+            orderswriter.writerow([current_dt] + ['IBM'] + [order_type] + ['100'])            
+        #end for
+    #end with
+#end write_csv_file
+
+
 if __name__ == "__main__":
     start_date = dt.datetime(2007, 12, 31)
     end_date   = dt.datetime(2009, 12, 31)
