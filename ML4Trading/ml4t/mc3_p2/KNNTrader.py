@@ -37,7 +37,7 @@ def compute_momentum(prices, N=5):
     #end for
     
     # Fill data in backwards
-    momentum[0:N] = prices[N]
+    momentum[0:N] = momentum[N]
     
     return momentum
 #end compute_momentum
@@ -104,7 +104,7 @@ def plot_data(df, title="Stock prices", xlabel="Date", ylabel="Prices"):
 
 
 '''Adds vertical lines to specified plot'''
-def add_orders_to_plot(plot_handle, orders, min=60, max=130):
+def add_orders_to_plot(plot_handle, orders, syms, min=60, max=130):
     '''
     Since I can only have one order outstanding at a time, I am going to assume
     the incoming data is correct. That means that every other order should be
@@ -115,7 +115,7 @@ def add_orders_to_plot(plot_handle, orders, min=60, max=130):
     color = 'k' #black
     for i in range(0,orders.shape[0]):
         current_date = orders.index[i]
-        current_order = orders.iloc[i]['IBM']
+        current_order = orders.iloc[i][syms[0]]
 
         # Determine what position (short, long) we are in and set the color
         # If we are in neither a long nor a short position
@@ -158,6 +158,8 @@ def process_KNN_strategy(syms, sd, ed, learner, percent_changed=0.01):
     # Generate orders
     #****************************
     pvals = prices.values
+    price_min = pvals.min()
+    price_max = pvals.max()
     orders = prices.copy()
     orders[syms] = np.NaN
     
@@ -210,16 +212,16 @@ def process_KNN_strategy(syms, sd, ed, learner, percent_changed=0.01):
     orders.dropna(inplace=True)
     
     # Save orders to CSV file
-    write_csv_file(orders)
+    write_csv_file(orders, syms)
     
     # Add the orders to the plot
-    add_orders_to_plot(plot_handle, orders)
+    add_orders_to_plot(plot_handle, orders, syms, min=price_min-10, max=price_max+10)
     
     plt.show()
 
 #end def
 
-def write_csv_file(orders, filename='orders/MyOrders.csv'):
+def write_csv_file(orders, syms, filename='orders/MyOrders.csv'):
     with open(filename, 'wb') as csvfile:
         orderswriter = csv.writer(csvfile, delimiter=',',
                                   quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -234,11 +236,11 @@ def write_csv_file(orders, filename='orders/MyOrders.csv'):
             
             # Get the order type
             order_type = 'BUY'
-            if orders.iloc[i]['IBM'] <= 0:
+            if orders.iloc[i][syms[0]] <= 0:
                 order_type = 'SELL'
 
             # This is all we need to know. The other data is constant
-            orderswriter.writerow([current_dt] + ['IBM'] + [order_type] + ['100'])            
+            orderswriter.writerow([current_dt] + [syms[0]] + [order_type] + ['100'])            
         #end for
     #end with
 #end write_csv_file
@@ -251,6 +253,7 @@ if __name__ == "__main__":
     dates = pd.date_range(start_date, end_date)
     
     # Get price data
+    #syms = ["ML4T-399"]
     syms = ["IBM"]
     prices = get_data(syms, dates, True)
     price_val = prices[syms].values
@@ -264,11 +267,13 @@ if __name__ == "__main__":
     # Note, I may need to trim some data off here with
     # how I filled in gaps. 
     Xtrain = np.array([ bb_val[20:], momentum[20:], volatility[20:] ])
+    #Xtrain = np.array([ bb_val, momentum, volatility ])
     Xtrain = np.transpose(Xtrain)
     Xtrain = Xtrain[:-5, :]
     
     # Get the training outputs
     Ytrain = compute_Nday_return(price_val[:,0], 5)
+    Ytrain = Ytrain[20:]
     
     # Train the KNN Learner
     learner = knn.KNNLearner(k=3, verbose=False)
@@ -280,8 +285,10 @@ if __name__ == "__main__":
     compute_portvals("./orders/Myorders.csv", start_val=10000)
     
     # Test on out of sample
+    
     start_date = dt.datetime(2009, 12, 31)
     end_date   = dt.datetime(2011, 12, 31)
     
     process_KNN_strategy(syms, start_date, end_date, learner)
     compute_portvals("./orders/Myorders.csv", start_val=10000, sd=start_date, ed=end_date)
+    
