@@ -4,6 +4,7 @@ class KNNLearner(object):
 
     def __init__(self, k=3, verbose=False):
         self.k = k
+        self.verbose = verbose
         
     def addEvidence(self,Xtrain,Ytrain):
         """ 
@@ -30,6 +31,8 @@ class KNNLearner(object):
             distance = np.zeros((self.Xdata.shape[0]), dtype=dtype)
             
             for j in range(0,self.Xdata.shape[0]):
+                if self.verbose:
+                    print np.linalg.norm(Xtest[i,:] - self.Xdata[j,:])
                 distance[j] = ( j, np.linalg.norm(Xtest[i,:] - self.Xdata[j,:]) )
             #end for
             

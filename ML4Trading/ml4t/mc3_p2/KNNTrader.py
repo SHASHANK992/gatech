@@ -5,6 +5,9 @@ import datetime as dt
 from marketsim import compute_portvals
 from util import get_portfolio_stats, get_data
 from analysis import assess_portfolio
+import matplotlib.pyplot as plt
+import os
+import csv
 
 '''
 Compute upper and lower Bollinger Bands
@@ -80,25 +83,67 @@ prices is a row vector
 N is an integer for how many days in the future to look
 
 '''
-def compute_Nday_return(prices, N):
-    '''output = np.zeros(prices.shape[0]-N)
+def compute_Nday_return(prices, N): 
+    prices_Nday = np.copy(prices)
     
-    for i in range(0, output.shape[0]):
-        output[i] = (prices[i+N-1]/prices[i])-1
-     '''   
-    
-    prices_Nday = np.roll(prices, N)
+    np.roll(prices_Nday, N)
     prices_Nday = prices_Nday[N:]
-    p_copy = np.copy(prices)[:prices.shape[0] - N ]
     
-    return ((prices_Nday/p_copy) - 1.0)
+    return ((prices_Nday/prices[:-N]) - 1.0)
 #end def
+
+'''Plots data. Returns handle to plot'''
+def plot_data(df, title="Stock prices", xlabel="Date", ylabel="Prices"):
+    
+    ax = df.plot()
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    
+    return ax
+#end plot_data
+
+
+'''Adds vertical lines to specified plot'''
+def add_orders_to_plot(plot_handle, orders, min=60, max=130):
+    '''
+    Since I can only have one order outstanding at a time, I am going to assume
+    the incoming data is correct. That means that every other order should be
+    an exit. 
+    '''
+    long = False
+    short = False
+    color = 'k' #black
+    for i in range(0,orders.shape[0]):
+        current_date = orders.index[i]
+        current_order = orders.iloc[i]['IBM']
+
+        # Determine what position (short, long) we are in and set the color
+        # If we are in neither a long nor a short position
+        if (not long) and (not short):
+            # If a sell order comes in, we are short
+            if current_order < 0:
+                color = 'r' #red
+                short = True
+            # If a buy order comes in, we are long
+            elif current_order > 0:
+                color = 'g' #green
+                long = True
+            #endif
+        # Every other order will be an exit, so just set color to black
+        elif long or short:
+            color = 'k'
+            long = short = False
+        #end if
+
+        plot_handle.plot([current_date, current_date], [min, max], color) 
+    #end for
+#end add_orders_to_plot
 
 
 '''
 Runs strategy using KNN learner
 '''
-def process_KNN_strategy(syms, sd, ed, learner, percent_changed):
+def process_KNN_strategy(syms, sd, ed, learner, percent_changed=0.01):
     # Get the price data
     prices_dates = pd.date_range(sd, ed)
     prices_all = get_data(syms, prices_dates) # Includes SPY
@@ -106,29 +151,71 @@ def process_KNN_strategy(syms, sd, ed, learner, percent_changed):
     prices = prices_all[syms] 
     prices_orig = prices.copy()
     
+    # Plot data frame
+    plot_handle = plot_data(prices)
+    
     #****************************
     # Generate orders
     #****************************
     pvals = prices.values
+    orders = prices.copy()
+    orders[syms] = np.NaN
     
     # parse data
     long_active = False
     short_active = False
+    entry_idx = 0
     # Compute technical indicators iteratively
     for i in range(20, pvals.shape[0]):
         # Compute BB over last 20 days
+        avg_20days = pvals[i-20:i].mean()
+        std_dev_20days = np.std(pvals[i-20:i], ddof=1)
+        bb_val = (pvals[i]-avg_20days)/(2*std_dev_20days)
         
         # Compute momentum over the last 5 days
+        momentum_5day = (pvals[i]/pvals[i-5])-1
         
         # Compute volatility over the last 5 days
+        volatility_5day = np.std(pvals[i-5:i], ddof=1)
         
         # Use these indicators to query the learner
+        Xquery = np.array([ [bb_val[0], momentum_5day[0], volatility_5day] ])
+        Yquery = learner.query(Xquery)
         
-        
-        # If the Y value (5 day future return) is greater than percent_changed, go long
-        
-        # If less than percent_changed, go short
+        if not long_active and not short_active:
+            # If Y value (5 day future return) is greater than percent changed, go long
+            if Yquery >= percent_changed:
+                orders.iloc[i][syms[0]] = 100
+                long_active = True
+                entry_idx = i
+            # If Y value is less than percent changed, go short
+            elif Yquery <= -1*percent_changed:
+                orders.iloc[i][syms[0]] = -100
+                short_active = True
+                entry_idx = i
+        elif long_active:
+            # Sell 5 days later
+            if i == entry_idx + 5:
+                orders.iloc[i][syms[0]] = -100
+                long_active = False        
+        elif short_active:
+            # Buy 5 days later
+            if i == entry_idx + 5:
+                orders.iloc[i][syms[0]] = 100
+                short_active = False
+        #end if
+    # end for
     
+    # Drop all the entries that don't have values
+    orders.dropna(inplace=True)
+    
+    # Save orders to CSV file
+    write_csv_file(orders)
+    
+    # Add the orders to the plot
+    add_orders_to_plot(plot_handle, orders)
+    
+    plt.show()
 
 #end def
 
@@ -176,7 +263,7 @@ if __name__ == "__main__":
     # Combine to create training inputs
     # Note, I may need to trim some data off here with
     # how I filled in gaps. 
-    Xtrain = np.array([ bb_val, momentum, volatility ])
+    Xtrain = np.array([ bb_val[20:], momentum[20:], volatility[20:] ])
     Xtrain = np.transpose(Xtrain)
     Xtrain = Xtrain[:-5, :]
     
@@ -184,13 +271,17 @@ if __name__ == "__main__":
     Ytrain = compute_Nday_return(price_val[:,0], 5)
     
     # Train the KNN Learner
-    learner = knn.KNNLearner(k=3)
+    learner = knn.KNNLearner(k=3, verbose=False)
     learner.addEvidence(Xtrain, Ytrain)
     
     # Test on in sample
+    process_KNN_strategy(syms, start_date, end_date, learner)
     
-    
+    compute_portvals("./orders/Myorders.csv", start_val=10000)
     
     # Test on out of sample
     start_date = dt.datetime(2009, 12, 31)
     end_date   = dt.datetime(2011, 12, 31)
+    
+    process_KNN_strategy(syms, start_date, end_date, learner)
+    compute_portvals("./orders/Myorders.csv", start_val=10000, sd=start_date, ed=end_date)

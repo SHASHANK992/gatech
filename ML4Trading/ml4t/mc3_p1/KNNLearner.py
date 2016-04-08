@@ -30,6 +30,8 @@ class KNNLearner(object):
             distance = np.zeros((self.Xdata.shape[0]), dtype=dtype)
             
             for j in range(0,self.Xdata.shape[0]):
+                if verbose:
+                    print np.linalg.norm(Xtest[i,:] - self.Xdata[j,:])
                 distance[j] = ( j, np.linalg.norm(Xtest[i,:] - self.Xdata[j,:]) )
             #end for
             
