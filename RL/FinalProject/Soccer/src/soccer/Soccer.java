@@ -94,8 +94,6 @@ public class Soccer
         GridGame.setGoal(s, 2, 4, 0, 1);
         GridGame.setGoal(s, 3, 4, 1, 1);
         
-        // Set up boundary walls    
-        GridGame.setBoundaryWalls(s, 4, 2);
         
         // I think everything up until now is good
         
