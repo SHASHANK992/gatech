@@ -253,7 +253,7 @@ if __name__ == "__main__":
     dates = pd.date_range(start_date, end_date)
     
     # Get price data
-    #syms = ["ML4T-399"]
+    #syms = ["ML4T-220"]
     syms = ["IBM"]
     prices = get_data(syms, dates, True)
     price_val = prices[syms].values
