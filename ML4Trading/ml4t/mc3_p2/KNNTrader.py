@@ -245,6 +245,10 @@ def write_csv_file(orders, syms, filename='orders/MyOrders.csv'):
     #end with
 #end write_csv_file
 
+def plot_price_and_samples(price, Ytrain, Ysample):
+
+# end def
+
 
 if __name__ == "__main__":
     start_date = dt.datetime(2007, 12, 31)
@@ -253,8 +257,8 @@ if __name__ == "__main__":
     dates = pd.date_range(start_date, end_date)
     
     # Get price data
-    #syms = ["ML4T-220"]
-    syms = ["IBM"]
+    syms = ["ML4T-220"]
+    #syms = ["IBM"]
     prices = get_data(syms, dates, True)
     price_val = prices[syms].values
     
@@ -275,9 +279,15 @@ if __name__ == "__main__":
     Ytrain = compute_Nday_return(price_val[:,0], 5)
     Ytrain = Ytrain[20:]
     
+    # I would expect to see 3 sine waves.  One of them is the original price data.  Another is your Y training data, which should be shifted back 5 days.  The last one should be your predicted Y data which should lie almost on top of the training data.          
+    
     # Train the KNN Learner
     learner = knn.KNNLearner(k=3, verbose=False)
     learner.addEvidence(Xtrain, Ytrain)
+    
+    # For the sine wave, I need to construct an extra plot
+    if ("ML4T-220" in syms):
+        Ysample = learner.query(Xtrain)
     
     # Test on in sample
     process_KNN_strategy(syms, start_date, end_date, learner)
