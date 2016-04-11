@@ -32,6 +32,7 @@ import burlap.behavior.stochasticgames.PolicyFromJointPolicy;
 import burlap.oomdp.stochasticgames.SGAgentType;
 import burlap.behavior.stochasticgames.GameAnalysis;
 import burlap.behavior.stochasticgames.madynamicprogramming.*;
+import burlap.oomdp.core.objects.ObjectInstance;
 import burlap.debugtools.DPrint;
 
 /**
@@ -55,7 +56,8 @@ public class SoccerGame {
     
     MultiAgentQLearning a0;
     MultiAgentQLearning a1;
-    
+    ObjectInstance agent0;
+    ObjectInstance agent1;
     
     public SoccerGame(String learner)
     {
@@ -93,7 +95,7 @@ public class SoccerGame {
         
         w = new World(d, rf, tf, s);
         
-        double defaultQ = 0;
+        double defaultQ = 100;
                 
         if(learner.equals("CorrQ"))
         {
@@ -153,21 +155,27 @@ public class SoccerGame {
             
         }
         
+        agent0 = s.getObject(A);
+        agent1 = s.getObject(B);
+        
         DPrint.toggleCode(w.getDebugId(), false);
     }
     
     private void playSoccer()
     {
         // Take world and run game
-        int ngames = 1000;
+        int ngames = 100000;
         for(int i = 0; i < ngames; i++)
         {
-            System.out.println("Running game");
-            GameAnalysis ga = w.runGame(100);
+            GameAnalysis ga = w.runGame();
+            Map<String, Double> lastRewards = new HashMap<String, Double>();
+            lastRewards = w.getLastRewards();
+            System.out.println("Agent 0 reward: " + lastRewards.get("agent0") + " Agent 1 Reward: " + lastRewards.get("agent1"));
+            //System.out.println("a0X: " + agent0.getIntValForAttribute(SoccerGridGame.ATTX) + " a1X: " + agent1.getIntValForAttribute(SoccerGridGame.ATTX));
             JointAction ja = w.getLastJointAction();
             QSourceForSingleAgent q_a0 = a0.getMyQSource();
             JAQValue jaq_a0 = q_a0.getQValueFor(s, ja);
-            System.out.println(jaq_a0.q);
+            //System.out.println(jaq_a0.q);
             //System.out.println(ga.maxTimeStep());
         }
         

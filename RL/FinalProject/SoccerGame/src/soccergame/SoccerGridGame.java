@@ -5,6 +5,7 @@
  */
 package soccergame;
 
+import java.io.*;
 import burlap.oomdp.auxiliary.DomainGenerator;
 import burlap.oomdp.core.*;
 import burlap.oomdp.core.objects.MutableObjectInstance;
@@ -412,14 +413,14 @@ public class SoccerGridGame implements DomainGenerator {
             int ay = agent.getIntValForAttribute(ATTY);
             int apn = agent.getIntValForAttribute(ATTPN);
             boolean aob = agent.getBooleanValForAttribute(ATTOB);
-
+            
             //find all personal goals
             // TODO - DONE?
             // THIS NEEDS TO BE MODIFIED TO BE A GOAL ONLY WHEN THE AGENT
-            // HAS THE SOCCER BALL AND IS IN THE GOAL.
+            // HAS THE SOCCER BALL AND IS A GOAL.
             List<ObjectInstance> goals = s.getObjectsOfClass(CLASSGOAL);
             for (ObjectInstance goal : goals) {
-
+                /*
                 int gt = goal.getIntValForAttribute(ATTGT);
                 if (gt == apn + 1) {
                     int gx = goal.getIntValForAttribute(ATTX);
@@ -427,6 +428,14 @@ public class SoccerGridGame implements DomainGenerator {
                     if (gx == ax && gy == ay && aob) {
                         return true;
                     }
+                }
+                */
+                
+                int gx = goal.getIntValForAttribute(ATTX);
+                int gy = goal.getIntValForAttribute(ATTY);
+                if( gx == ax && gy == ay && aob )
+                {
+                    return true;
                 }
             }
 
@@ -514,8 +523,6 @@ public class SoccerGridGame implements DomainGenerator {
          * @param ggDomain the domain
          * @param stepCost the reward returned for all transitions except
          * transtions to goal locations
-         * @param universalGoalReward the reward returned for transitions to a
-         * universal goal
          * @param noopIncursStepCost if true, then noop actions also incur the
          * stepCost reward; if false, then noops always return 0 reward.
          * @param personalGoalRewards a map from player numbers to their
@@ -548,7 +555,40 @@ public class SoccerGridGame implements DomainGenerator {
             List<GroundedProp> ipgps = agentInPersonalGoal.getAllGroundedPropsForState(sp);
             for (GroundedProp gp : ipgps) {
                 String agentName = gp.params[0];
+                // This returns true if an agent is in a goal with a ball
+                // The reward function needs to determine what the reward should be
                 if (gp.isTrue(sp)) {
+                    ObjectInstance a0 = sp.getObject("agent0");
+                    ObjectInstance a1 = sp.getObject("agent1");
+                    int a0x = a0.getIntValForAttribute(ATTX);
+                    int a1x = a1.getIntValForAttribute(ATTX);
+                    boolean a0HasBall = a0.getBooleanValForAttribute(ATTOB);
+                    boolean a1HasBall = a1.getBooleanValForAttribute(ATTOB);                   
+                    
+                    // Positive rewards for agent with ball
+                    if(a0HasBall && a0x == 0)
+                    {
+                        rewards.put("agent0", 100.0);
+                        rewards.put("agent1", -100.0);
+                    }
+                    else if(a1HasBall && a1x == 3)
+                    {
+                        rewards.put("agent1", 100.0);
+                        rewards.put("agent0", -100.0);
+                    }
+                    // Negative rewards for agent with ball
+                    else if(a0HasBall && a0x == 3)
+                    {
+                        rewards.put("agent0", -100.0);
+                        rewards.put("agent1", 100.0);
+                    }
+                    else if(a1HasBall && a1x == 0)
+                    {
+                        rewards.put("agent1", -100.0);
+                        rewards.put("agent0", 100.0);
+                    }
+                    
+                    /*
                     rewards.put(agentName, this.getPersonalGoalReward(sp, agentName));
                     
                     // Give negative reward to other agent
@@ -558,6 +598,7 @@ public class SoccerGridGame implements DomainGenerator {
                     else if("agent1".equals(agentName)) {
                         rewards.put("agent0", -1*this.getPersonalGoalReward(sp, agentName));
                     }
+                    */
                 }
             }
 

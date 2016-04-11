@@ -5,6 +5,7 @@
  */
 package soccergame;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -473,7 +474,7 @@ public class SoccerGameMechanics extends JointActionModel {
                 // Second, set the opposite agent's ball ownership to true
                 ObjectInstance otherAgent;
                 if("agent0".equals(actingAgent))
-                {
+                {                    
                     otherAgent = s.getObject("agent1");
                 }
                 else
