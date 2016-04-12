@@ -92,6 +92,21 @@ def compute_Nday_return(prices, N):
     return ((prices_Nday/prices[:-N]) - 1.0)
 #end def
 
+''' Plots price, training, and predicted output '''
+def plot_price_and_samples(price, Ytrain, Ysample):
+    
+    plot_handle = price.plot()
+    
+    dates = price.index[20:-5]
+
+    plot_handle.plot(dates, Ytrain, 'r', label="Training" )
+    plot_handle.plot(dates, Ysample, 'g--', label="Sample" )
+    
+    plt.legend()
+    plt.show()
+    
+# end def
+
 '''Plots data. Returns handle to plot'''
 def plot_data(df, title="Stock prices", xlabel="Date", ylabel="Prices"):
     
@@ -245,10 +260,6 @@ def write_csv_file(orders, syms, filename='orders/MyOrders.csv'):
     #end with
 #end write_csv_file
 
-def plot_price_and_samples(price, Ytrain, Ysample):
-
-# end def
-
 
 if __name__ == "__main__":
     start_date = dt.datetime(2007, 12, 31)
@@ -277,17 +288,25 @@ if __name__ == "__main__":
     
     # Get the training outputs
     Ytrain = compute_Nday_return(price_val[:,0], 5)
-    Ytrain = Ytrain[20:]
-    
-    # I would expect to see 3 sine waves.  One of them is the original price data.  Another is your Y training data, which should be shifted back 5 days.  The last one should be your predicted Y data which should lie almost on top of the training data.          
+    Ytrain = Ytrain[20:]          
     
     # Train the KNN Learner
     learner = knn.KNNLearner(k=3, verbose=False)
     learner.addEvidence(Xtrain, Ytrain)
     
+    # I would expect to see 3 sine waves.  
+    # One of them is the original price data.  
+    # Another is your Y training data, which should be shifted back 5 days.  
+    # The last one should be your predicted Y data which should lie almost on top of the training data.
     # For the sine wave, I need to construct an extra plot
     if ("ML4T-220" in syms):
+        # Add normalized price to data frame
+        prices["Normalized"] = (price_val/330.0) - 1.0
+        #prices["Normalized"] = price_val/price_val[0]
         Ysample = learner.query(Xtrain)
+        # Plot
+        plot_price_and_samples(prices["Normalized"], Ytrain, Ysample)
+    # end if
     
     # Test on in sample
     process_KNN_strategy(syms, start_date, end_date, learner)
