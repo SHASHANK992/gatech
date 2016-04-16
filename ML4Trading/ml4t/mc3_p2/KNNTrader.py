@@ -236,7 +236,7 @@ def process_KNN_strategy(syms, sd, ed, learner, percent_changed=0.01):
 
 #end def
 
-def write_csv_file(orders, syms, filename='orders/MyOrders.csv'):
+def write_csv_file(orders, syms, filename='orders/Myorders.csv'):
     with open(filename, 'wb') as csvfile:
         orderswriter = csv.writer(csvfile, delimiter=',',
                                   quotechar='|', quoting=csv.QUOTE_MINIMAL)
