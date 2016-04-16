@@ -38,6 +38,10 @@ import burlap.oomdp.stochasticgames.agentactions.SimpleGroundedSGAgentAction;
 import burlap.oomdp.stochasticgames.agentactions.GroundedSGAgentAction;
 import burlap.behavior.learningrate.*;
 import burlap.behavior.learningrate.ExponentialDecayLR;
+import burlap.behavior.policy.GreedyQPolicy;
+import burlap.behavior.singleagent.learning.LearningAgent;
+import burlap.behavior.singleagent.learning.tdmethods.QLearning;
+import burlap.behavior.valuefunction.QValue;
 import burlap.behavior.valuefunction.ValueFunctionInitialization.ConstantValueFunctionInitialization;
 import burlap.debugtools.DPrint;
 import java.util.ArrayList;
@@ -66,6 +70,7 @@ public class SoccerGame {
 
     MultiAgentQLearning a0;
     MultiAgentQLearning a1;
+    QLearning agent;
     ObjectInstance agent0;
     ObjectInstance agent1;
 
@@ -148,11 +153,11 @@ public class SoccerGame {
         } else if (learner.equals("FoeQ")) {
             MinMaxQ mmq = new MinMaxQ();
 
-            a0 = new MultiAgentQLearning(d, discount, learningRate, hashingFactory, defaultQ, mmq, false);
-            a1 = new MultiAgentQLearning(d, discount, learningRate, hashingFactory, defaultQ, mmq, false);
+            //a0 = new MultiAgentQLearning(d, discount, learningRate, hashingFactory, defaultQ, mmq, false);
+            //a1 = new MultiAgentQLearning(d, discount, learningRate, hashingFactory, defaultQ, mmq, false);
             
-            //a0 = new MultiAgentQLearning(d, discount, LR, hashingFactory, vInit, mmq, false);
-            //a1 = new MultiAgentQLearning(d, discount, LR, hashingFactory, vInit, mmq, false);
+            a0 = new MultiAgentQLearning(d, discount, LR, hashingFactory, vInit, mmq, false);
+            a1 = new MultiAgentQLearning(d, discount, LR, hashingFactory, vInit, mmq, false);
 
             a0.joinWorld(w, at);
             a1.joinWorld(w, at);
@@ -165,7 +170,16 @@ public class SoccerGame {
             a1.setLearningPolicy(new PolicyFromJointPolicy(a1.getAgentName(), ja1));
         } else // This should be regular Q learning. I am not sure how to implement this
         {
-
+            agent = new QLearning((Domain) d, discount, hashingFactory, defaultQ, learningRate);
+            
+            /*
+            From Greenwald: Q-learners compute Q-values for each of their own possible actions, ignoring their opponents’ actions.
+            To me this sounds a lot like MaxQ, but I also thought of this variation
+            To ignore teh other players action would be to completely take it out of the equation
+            In other words, since everything you do is a joint action, you would need to find all actions for the acting agent
+              and average the Q values over all the actions the other agent could take
+            This would require a new BackupOperator with a couple for loops and a couple 
+            */
         }
 
         agent0 = s.getObject(A);
@@ -184,9 +198,7 @@ public class SoccerGame {
         SimpleGroundedSGAgentAction gaB = new SimpleGroundedSGAgentAction("agent1", actionB);
         actions.add(gaB);
         JointAction ja = new JointAction(actions);
-        //System.out.println(ja.toString());
-        //System.out.println(ja.action("agent0"));
-        //System.out.println(ja.action("agent1"));
+
         // Take world and run game
         int ngames = 5000;
         double prevQ = 0.0;
@@ -194,28 +206,12 @@ public class SoccerGame {
             for (int i = 0; i < ngames; i++) {
                 // Run game
                 GameAnalysis ga = w.runGame();
-                JointAction lastJA = w.getLastJointAction();
-                List<JointAction> jaList = ga.getJointActions();
-                
-                /*
-                for(JointAction jointAction : jaList)
-                {
-                    System.out.println(jointAction.toString());
-                }
-                */
-                
-                
+                                
                 // Get Q value
                 QSourceForSingleAgent q_a0 = a0.getMyQSource();
                 JAQValue jaq_a0 = q_a0.getQValueFor(s, ja);
                 double qVal = jaq_a0.q;
-                //System.out.println(qVal);
-                
-                // Get rewards
-                Map<String, Double> lastRewards = new HashMap<String, Double>();
-                lastRewards = w.getLastRewards();
-                //System.out.println("Agent 0 reward: " + lastRewards.get("agent0") + " Agent 1 Reward: " + lastRewards.get("agent1"));
-                
+                                
                 // Write to file if difference is not zero
                 double diff = qVal - prevQ;
                 if(i > 5000)
@@ -242,6 +238,47 @@ public class SoccerGame {
             System.out.println("File Exception");
         }
     }
+    
+    private void singlePlayerSoccer()
+    {
+        int ngames = 5000;
+        double prevQ = 0.0;
+        try (PrintWriter out = new PrintWriter("Qlearner.txt")) {
+            for( int i = 0; i < ngames; i++)
+            {
+                GreedyQPolicy policy = agent.planFromState(s);
+                AbstractGroundedAction actionA = (AbstractGroundedAction) new SimpleSGAgentAction(this.d, SoccerGridGame.ACTIONSOUTH);
+                //SimpleGroundedSGAgentAction gaA = new SimpleGroundedSGAgentAction("agent0", actionA);
+                QValue qVal = agent.getQ(s, actionA);
+
+                double q = qVal.q;
+                double diff = q - prevQ;
+                
+                System.out.println(q);
+                
+                if(i > 5000)
+                {
+                    out.println(i + "," + diff);
+                }
+                else if(diff != 0.0)
+                {
+                    out.println(i + "," + diff);
+                }
+
+                if( (i % 100)==0 )
+                {
+                    System.out.println(diff);
+                }
+                    
+                prevQ = q;
+            }
+        
+        }
+        catch(Exception ex)
+        {
+            System.out.println("File Exception");
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -256,12 +293,17 @@ public class SoccerGame {
         System.out.println("Playing Friend Q soccer");
         SoccerGame soccerFriendQ = new SoccerGame("FriendQ");
         soccerFriendQ.playSoccer("friendQ.txt");
-*/
+
     
         System.out.println("Playing FoeQ soccer");
         SoccerGame soccerFoeQ = new SoccerGame("FoeQ");
         soccerFoeQ.playSoccer("foeQ.txt");
-
+*/
+    
+        System.out.println("Playing Q soccer");
+        SoccerGame soccerQ = new SoccerGame("Q");
+        soccerQ.singlePlayerSoccer();
+    
     }
 
 }
