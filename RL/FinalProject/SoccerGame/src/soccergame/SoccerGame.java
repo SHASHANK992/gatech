@@ -35,7 +35,13 @@ import burlap.behavior.stochasticgames.madynamicprogramming.*;
 import burlap.oomdp.core.objects.ObjectInstance;
 import burlap.oomdp.stochasticgames.agentactions.SimpleSGAgentAction;
 import burlap.oomdp.stochasticgames.agentactions.SimpleGroundedSGAgentAction;
+import burlap.oomdp.stochasticgames.agentactions.GroundedSGAgentAction;
+import burlap.behavior.learningrate.*;
+import burlap.behavior.learningrate.ExponentialDecayLR;
+import burlap.behavior.valuefunction.ValueFunctionInitialization.ConstantValueFunctionInitialization;
 import burlap.debugtools.DPrint;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -53,8 +59,10 @@ public class SoccerGame {
     World w;
     HashableStateFactory hashingFactory;
     double discount = 0.9;
-    double learningRate = 0.001;
-    double epsilon = 0.1;
+    double learningRate = 0.05;
+    LearningRate LR;
+    double epsilon = 0.5;
+    ConstantValueFunctionInitialization vInit;
 
     MultiAgentQLearning a0;
     MultiAgentQLearning a1;
@@ -62,6 +70,8 @@ public class SoccerGame {
     ObjectInstance agent1;
 
     public SoccerGame(String learner) {
+        LR = new ExponentialDecayLR(learningRate, 0.99); 
+        
         soccerGridGame = new SoccerGridGame();
 
         d = (SGDomain) soccerGridGame.generateDomain();
@@ -70,7 +80,6 @@ public class SoccerGame {
         hashingFactory = new SimpleHashableStateFactory();
 
         // Generate a clean state
-        // The walls must include the boundary walls
         s = SoccerGridGame.getCleanState(d, 2, 4, 2, 2, 4, 2);
 
         // Init agents
@@ -82,8 +91,8 @@ public class SoccerGame {
         // Init goals
         SoccerGridGame.setGoal(s, 0, 0, 0, 0);
         SoccerGridGame.setGoal(s, 1, 0, 1, 0);
-        SoccerGridGame.setGoal(s, 2, 4, 0, 1);
-        SoccerGridGame.setGoal(s, 3, 4, 1, 1);
+        SoccerGridGame.setGoal(s, 2, 3, 0, 1);
+        SoccerGridGame.setGoal(s, 3, 3, 1, 1);
 
         HashMap goals = new HashMap<Integer, Double>();
         goals.put(0, 100.0);
@@ -95,16 +104,20 @@ public class SoccerGame {
 
         w = new World(d, rf, tf, s);
 
-        double defaultQ = 0.0;
+        double defaultQ = -100.0;
+        vInit = new ConstantValueFunctionInitialization(defaultQ);
 
         if (learner.equals("CorrQ")) {
             // Correlated Q learner
             CorrelatedQ cq = new CorrelatedQ(CorrelatedEquilibriumSolver.CorrelatedEquilibriumObjective.UTILITARIAN);
 
             // Agents
-            a0 = new MultiAgentQLearning(d, discount, learningRate, hashingFactory, defaultQ, cq, false);
-            a1 = new MultiAgentQLearning(d, discount, learningRate, hashingFactory, defaultQ, cq, false);
+            //a0 = new MultiAgentQLearning(d, discount, learningRate, hashingFactory, defaultQ, cq, false);
+            //a1 = new MultiAgentQLearning(d, discount, learningRate, hashingFactory, defaultQ, cq, false);
 
+            a0 = new MultiAgentQLearning(d, discount, LR, hashingFactory, vInit, cq, false);
+            a1 = new MultiAgentQLearning(d, discount, LR, hashingFactory, vInit, cq, false);
+            
             a0.joinWorld(w, at);
             a1.joinWorld(w, at);
 
@@ -117,8 +130,11 @@ public class SoccerGame {
         } else if (learner.equals("FriendQ")) {
             MaxQ mq = new MaxQ();
 
-            a0 = new MultiAgentQLearning(d, discount, learningRate, hashingFactory, defaultQ, mq, false);
-            a1 = new MultiAgentQLearning(d, discount, learningRate, hashingFactory, defaultQ, mq, false);
+            //a0 = new MultiAgentQLearning(d, discount, learningRate, hashingFactory, defaultQ, mq, false);
+            //a1 = new MultiAgentQLearning(d, discount, learningRate, hashingFactory, defaultQ, mq, false);
+            
+            a0 = new MultiAgentQLearning(d, discount, LR, hashingFactory, vInit, mq, false);
+            a1 = new MultiAgentQLearning(d, discount, LR, hashingFactory, vInit, mq, false);
 
             a0.joinWorld(w, at);
             a1.joinWorld(w, at);
@@ -134,6 +150,9 @@ public class SoccerGame {
 
             a0 = new MultiAgentQLearning(d, discount, learningRate, hashingFactory, defaultQ, mmq, false);
             a1 = new MultiAgentQLearning(d, discount, learningRate, hashingFactory, defaultQ, mmq, false);
+            
+            //a0 = new MultiAgentQLearning(d, discount, LR, hashingFactory, vInit, mmq, false);
+            //a1 = new MultiAgentQLearning(d, discount, LR, hashingFactory, vInit, mmq, false);
 
             a0.joinWorld(w, at);
             a1.joinWorld(w, at);
@@ -156,38 +175,63 @@ public class SoccerGame {
     }
 
     private void playSoccer(String filename) {
-        JointAction ja = new JointAction();
+        
+        List<GroundedSGAgentAction> actions = new ArrayList<GroundedSGAgentAction>();
         SimpleSGAgentAction actionA = new SimpleSGAgentAction(this.d, SoccerGridGame.ACTIONSOUTH);
         SimpleGroundedSGAgentAction gaA = new SimpleGroundedSGAgentAction("agent0", actionA);
-        ja.addAction(gaA);
+        actions.add(gaA);
         SimpleSGAgentAction actionB = new SimpleSGAgentAction(this.d, SoccerGridGame.ACTIONNOOP);
-        SimpleGroundedSGAgentAction gaB = new SimpleGroundedSGAgentAction("agent0", actionB);
-        ja.addAction(gaB);
+        SimpleGroundedSGAgentAction gaB = new SimpleGroundedSGAgentAction("agent1", actionB);
+        actions.add(gaB);
+        JointAction ja = new JointAction(actions);
+        //System.out.println(ja.toString());
+        //System.out.println(ja.action("agent0"));
+        //System.out.println(ja.action("agent1"));
         // Take world and run game
-        int ngames = 100000;
+        int ngames = 5000;
         double prevQ = 0.0;
         try (PrintWriter out = new PrintWriter(filename)) {
             for (int i = 0; i < ngames; i++) {
                 // Run game
                 GameAnalysis ga = w.runGame();
-
+                JointAction lastJA = w.getLastJointAction();
+                List<JointAction> jaList = ga.getJointActions();
+                
+                /*
+                for(JointAction jointAction : jaList)
+                {
+                    System.out.println(jointAction.toString());
+                }
+                */
+                
+                
                 // Get Q value
                 QSourceForSingleAgent q_a0 = a0.getMyQSource();
                 JAQValue jaq_a0 = q_a0.getQValueFor(s, ja);
                 double qVal = jaq_a0.q;
-                System.out.println(qVal);
+                //System.out.println(qVal);
                 
                 // Get rewards
                 Map<String, Double> lastRewards = new HashMap<String, Double>();
                 lastRewards = w.getLastRewards();
-                System.out.println("Agent 0 reward: " + lastRewards.get("agent0") + " Agent 1 Reward: " + lastRewards.get("agent1"));
+                //System.out.println("Agent 0 reward: " + lastRewards.get("agent0") + " Agent 1 Reward: " + lastRewards.get("agent1"));
                 
-                // Write to file
-                out.println(qVal - prevQ);
+                // Write to file if difference is not zero
+                double diff = qVal - prevQ;
+                if(i > 5000)
+                {
+                    out.println(i + "," + diff);
+                }
+                else if(diff != 0.0)
+                {
+                    out.println(i + "," + diff);
+                }
+
                 if( (i % 100)==0 )
                 {
-                    //System.out.println(qVal - prevQ);
+                    System.out.println(diff);
                 }
+                //System.out.println(diff);
                 
                 // Update previous Q value
                 prevQ = qVal;
@@ -204,14 +248,16 @@ public class SoccerGame {
      */
     public static void main(String[] args) {
 
+    /*
         System.out.println("Playing corrQ soccer");
         SoccerGame soccerCorrQ = new SoccerGame("CorrQ");
         soccerCorrQ.playSoccer("corrQ.txt");
-
+        
         System.out.println("Playing Friend Q soccer");
         SoccerGame soccerFriendQ = new SoccerGame("FriendQ");
         soccerFriendQ.playSoccer("friendQ.txt");
-
+*/
+    
         System.out.println("Playing FoeQ soccer");
         SoccerGame soccerFoeQ = new SoccerGame("FoeQ");
         soccerFoeQ.playSoccer("foeQ.txt");

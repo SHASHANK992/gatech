@@ -413,30 +413,23 @@ public class SoccerGridGame implements DomainGenerator {
             int ay = agent.getIntValForAttribute(ATTY);
             int apn = agent.getIntValForAttribute(ATTPN);
             boolean aob = agent.getBooleanValForAttribute(ATTOB);
-            
+
             //find all personal goals
             // TODO - DONE?
             // THIS NEEDS TO BE MODIFIED TO BE A GOAL ONLY WHEN THE AGENT
-            // HAS THE SOCCER BALL AND IS A GOAL.
+            // HAS THE SOCCER BALL AND IS IN A GOAL.
             List<ObjectInstance> goals = s.getObjectsOfClass(CLASSGOAL);
             for (ObjectInstance goal : goals) {
-                /*
-                int gt = goal.getIntValForAttribute(ATTGT);
-                if (gt == apn + 1) {
-                    int gx = goal.getIntValForAttribute(ATTX);
-                    int gy = goal.getIntValForAttribute(ATTY);
-                    if (gx == ax && gy == ay && aob) {
-                        return true;
-                    }
-                }
-                */
-                
+                                
                 int gx = goal.getIntValForAttribute(ATTX);
                 int gy = goal.getIntValForAttribute(ATTY);
-                if( gx == ax && gy == ay && aob )
+                //System.out.println("Goal x: " + gx + " Goal y: " + gy);
+                if( gx == ax && aob )
                 {
+                    //System.out.println("true");
                     return true;
                 }
+                
             }
 
             return false;

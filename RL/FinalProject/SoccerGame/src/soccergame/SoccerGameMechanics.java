@@ -121,6 +121,7 @@ public class SoccerGameMechanics extends JointActionModel {
             Location2 loc = previousLocations.get(i);
             GroundedSGAgentAction gsa = gsas.get(i);
             String actingAgent = gsa.actingAgent;
+            // JRK EDIT
             // This is where the ball change of ownership happens
             basicMoveResults.add(this.sampleBasicMovement(s, loc, this.attemptedDelta(gsa.action.actionName), noopLocations, actingAgent));
         }
@@ -136,6 +137,8 @@ public class SoccerGameMechanics extends JointActionModel {
             ObjectInstance agent = s.getObject(gsa.actingAgent);
             agent.setValue(SoccerGridGame.ATTX, loc.x);
             agent.setValue(SoccerGridGame.ATTY, loc.y);
+            
+            //System.out.println(gsa.actingAgent + " - X: " + loc.x + "  Y: " + loc.y + " Ball: " + agent.getBooleanValForAttribute(SoccerGridGame.ATTOB));
 
         }
 
@@ -453,6 +456,8 @@ public class SoccerGameMechanics extends JointActionModel {
      * location where there is another agent who is not moving, then no change
      * occurs.
      *
+     * JRK EDIT
+     * 
      * @param s the state containing the agent
      * @param p0 the initial position of the agent
      * @param delta the desired change of position.
