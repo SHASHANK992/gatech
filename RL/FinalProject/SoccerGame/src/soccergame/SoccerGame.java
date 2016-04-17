@@ -43,7 +43,9 @@ import burlap.behavior.singleagent.learning.LearningAgent;
 import burlap.behavior.singleagent.learning.tdmethods.QLearning;
 import burlap.behavior.valuefunction.QValue;
 import burlap.behavior.valuefunction.ValueFunctionInitialization.ConstantValueFunctionInitialization;
+import burlap.behavior.stochasticgames.agents.naiveq.SGNaiveQLAgent;
 import burlap.debugtools.DPrint;
+import burlap.oomdp.stochasticgames.agentactions.SGAgentAction;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,19 +65,21 @@ public class SoccerGame {
     World w;
     HashableStateFactory hashingFactory;
     double discount = 0.9;
-    double learningRate = 0.05;
+    double learningRate = 0.5;
     LearningRate LR;
     double epsilon = 0.5;
     ConstantValueFunctionInitialization vInit;
 
     MultiAgentQLearning a0;
     MultiAgentQLearning a1;
+    SGNaiveQLAgent naive_a0;
+    SGNaiveQLAgent naive_a1;
     QLearning agent;
     ObjectInstance agent0;
     ObjectInstance agent1;
 
     public SoccerGame(String learner) {
-        LR = new ExponentialDecayLR(learningRate, 0.99); 
+        LR = new ExponentialDecayLR(learningRate, 0.9999); 
         
         soccerGridGame = new SoccerGridGame();
 
@@ -109,7 +113,7 @@ public class SoccerGame {
 
         w = new World(d, rf, tf, s);
 
-        double defaultQ = -100.0;
+        double defaultQ = 0.0;
         vInit = new ConstantValueFunctionInitialization(defaultQ);
 
         if (learner.equals("CorrQ")) {
@@ -170,16 +174,14 @@ public class SoccerGame {
             a1.setLearningPolicy(new PolicyFromJointPolicy(a1.getAgentName(), ja1));
         } else // This should be regular Q learning. I am not sure how to implement this
         {
-            agent = new QLearning((Domain) d, discount, hashingFactory, defaultQ, learningRate);
+            naive_a0 = new SGNaiveQLAgent(d, discount, learningRate, defaultQ, hashingFactory);
+            naive_a1 = new SGNaiveQLAgent(d, discount, learningRate, defaultQ, hashingFactory);
             
-            /*
-            From Greenwald: Q-learners compute Q-values for each of their own possible actions, ignoring their opponents’ actions.
-            To me this sounds a lot like MaxQ, but I also thought of this variation
-            To ignore teh other players action would be to completely take it out of the equation
-            In other words, since everything you do is a joint action, you would need to find all actions for the acting agent
-              and average the Q values over all the actions the other agent could take
-            This would require a new BackupOperator with a couple for loops and a couple 
-            */
+            naive_a0.setLearningRate(LR);
+            naive_a1.setLearningRate(LR);
+            
+            naive_a0.joinWorld(w, at);
+            naive_a1.joinWorld(w, at);
         }
 
         agent0 = s.getObject(A);
@@ -241,20 +243,22 @@ public class SoccerGame {
     
     private void singlePlayerSoccer()
     {
+        SGAgentAction actionA = new SimpleSGAgentAction(this.d, SoccerGridGame.ACTIONSOUTH);
+        SimpleGroundedSGAgentAction gaA = new SimpleGroundedSGAgentAction("agent0", actionA);
         int ngames = 5000;
         double prevQ = 0.0;
         try (PrintWriter out = new PrintWriter("Qlearner.txt")) {
             for( int i = 0; i < ngames; i++)
             {
-                GreedyQPolicy policy = agent.planFromState(s);
-                AbstractGroundedAction actionA = (AbstractGroundedAction) new SimpleSGAgentAction(this.d, SoccerGridGame.ACTIONSOUTH);
-                //SimpleGroundedSGAgentAction gaA = new SimpleGroundedSGAgentAction("agent0", actionA);
-                QValue qVal = agent.getQ(s, actionA);
+                GameAnalysis ga = w.runGame();
+                
+
+                QValue qVal = naive_a0.getQ(s, gaA);
 
                 double q = qVal.q;
                 double diff = q - prevQ;
                 
-                System.out.println(q);
+                //System.out.println(q);
                 
                 if(i > 5000)
                 {
