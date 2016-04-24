@@ -19,7 +19,7 @@ Actions
 States
   States are a combination of the discretized features and the current position
   of the agent (long, short, no holdings). These will be computed by multiplying the 
-  respective actions by 1000
+  respective states by 1000
     LONG:  0-999
     SHORT: 1000-1999
     NO:    2000-2999
@@ -39,8 +39,7 @@ class StrategyLearner(object):
                                     num_actions=3, \
                                     verbose=verbose)
         # All the other values I will keep as the default
-        self.pos_long = False
-        self.pos_short = False   
+        self.position = 2  
     #end def
 
     def addEvidence(self, \
@@ -63,21 +62,20 @@ class StrategyLearner(object):
         
         # With states computed, we need to fill in the Q table
         # For 1000 iterations (TODO: There is probably a better way to do this)
-        current_portfolio_value = sv
-        previous_portfolio_value = sv
+        self.portfolio_val = sv
+        self.cash_value = sv
         for i in range(0,1000):
             # Set the initial state
-            # We have no holdings
+            # We have no holdings, so state is 2
             state = 2000+states[0]
             action = self.qLearner.querysetstate(states[0])
             
             # For each day (except the first)
             for j in range(1, states.shape[0]): 
-                # Take action
-                # Question - are we constrained to only take one position at time?
+                # Take action, get reward
+                # Question - are we constrained to only take one position at time? - yes
+                reward, action_taken = self.take_action(price_array, j-1, action)
                 
-                # Compute reward for action
-                reward = 1
                 # Update Q table
                 action = self.qLearner.query(states[j], reward)
         
@@ -93,6 +91,97 @@ class StrategyLearner(object):
                     sv = 10000):
        
        return 0             
+    #end def
+    
+    
+    
+    
+    '''
+    Input
+       prices: numpy array of prices
+       index:  index into prices array
+       action: Which action to take (buy, sell, hold)
+       
+    Output
+      reward: change in portfolio value
+    '''
+    def take_action(self, prices, index, action):
+        reward = 0
+        action_taken = action
+        
+        # If we are currently in a short or long position and we are told to 
+        # take an action we cannot take, put negative reward there and
+        # update the actual action taken
+        if self.position == 0 and action == 0: # long and BUY
+            reward = -1
+            action_taken = 2 # hold
+        elif self.position == 1 and action == 1: # short and SELL
+            reward = -1
+            action_taken = 2 # hold
+            
+        # Compute portfolio value based on the actual action taken
+        new_portfolio_value, new_cash_value = self.compute_portfolio_value(prices, index, action_taken)
+              
+        # Determine the new position 
+        if self.position == 0 and action == 1: # long and SELL
+            self.position = 2
+        elif self.position == 1 and action == 0: # short and BUY
+            self.position = 2
+        elif self.position == 2 and action == 0: # hold and BUY
+            self.position = 0
+        elif self.position == 2 and action == 1: # hold and SELL
+            self.position = 1
+        elif action == 2:                        # action is HOLD
+            self.position = 2
+                 
+        # If we are in a position where we can execute the specified action
+        # compute the reward based on portfolio value
+        if reward != -1:
+            reward = new_portfolio_value - self.portfolio_val
+        
+        self.portfolio_val = new_portfolio_value
+        self.cash_value = new_cash_value
+        
+        return reward, action_taken
+    #end def
+    
+    '''
+    Input
+       prices: numpy array of prices
+       index:  index into prices array
+       action: Which action to take (buy, sell, hold)
+       
+    Output
+       New value of portfolio
+       
+    Note: This should only be called after validating that the action can be taken
+          given the current position (long, short, etc.) of the trader
+    '''
+    def compute_portfolio_value(self, prices, index, action):
+        port_val = self.portfolio_val
+        cash_val = self.cash_value
+        stock_price = prices[index]
+        
+        if action == 0:
+            # Buy 100 shares
+            cash_val = self.cash_value - 100*stock_price
+            port_val = self.cash_value + 100*stock_price
+        elif action == 1:
+            # Sell 100 shares
+            cash_val = self.cash_value + 100*stock_price
+            port_val = self.cash_value - 100*stock_price
+        elif action == 2:
+            # Compute portfolio value based on change in stock price
+            # This will depend on whether we are short or long
+            # The cash value won't change, just the stock value
+            if self.position == 0: # Long
+               port_val = self.cash_value + 100*stock_price
+            elif self.position == 1:
+                port_val = self.cash_value - 100*stock_price
+            #endif
+        #endif
+        
+        return port_val, cash_val
     #end def
     
     
