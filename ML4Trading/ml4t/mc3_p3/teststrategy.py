@@ -6,6 +6,7 @@ import pandas as pd
 import datetime as dt
 import util as ut
 import StrategyLearner as sl
+from marketsim import compute_portvals
 
 def test_code(verb = True):
 
@@ -22,7 +23,7 @@ def test_code(verb = True):
         ed = enddate, sv = 10000) 
 
     # set parameters for testing
-    sym = "ML4T-200"
+    sym = "IBM"
     stdate =dt.datetime(2007,12,31)
     enddate =dt.datetime(2009,12,31)
 
@@ -52,6 +53,14 @@ def test_code(verb = True):
 
     if verb: print df_trades
     # we will add code here to evaluate your trades
+    
+    print df_trades
+    
+    # Write trades to CSV file
+    ut.write_csv_file(df_trades, syms)
+    
+    # Run analysis
+    compute_portvals("./orders/Myorders.csv", start_val=10000)
 
 if __name__=="__main__":
     test_code(verb = False)

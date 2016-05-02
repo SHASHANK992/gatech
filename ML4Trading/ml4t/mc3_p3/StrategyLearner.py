@@ -71,6 +71,7 @@ class StrategyLearner(object):
                 # Question - are we constrained to only take one position at time? - yes
                 reward, action_taken = self.take_action(price_array, j-1, action)
                 
+                # The position is now updated                
                 # Update state
                 state = self.position*1000 + states[j]
                 
