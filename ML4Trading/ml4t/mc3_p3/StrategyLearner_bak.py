@@ -1,53 +1,58 @@
-"""
-Template for implementing StrategyLearner  (c) 2016 Tucker Balch
-"""
-
+import numpy as np
+import pandas as pd
 import datetime as dt
 import QLearner as ql
-import pandas as pd
-import numpy as np
-import util as ut
+#from marketsim import compute_portvals
+from util import get_portfolio_stats, get_data
+#from analysis import assess_portfolio
+#import matplotlib.pyplot as plt
+#import os
+#import csv
+
+
+'''
+Actions
+  0 - Buy
+  1 - Sell
+  2 - Hold
+  
+States
+  States are a combination of the discretized features and the current position
+  of the agent (long, short, no holdings). These will be computed by multiplying the 
+  respective states by 1000
+    LONG:  0-999
+    SHORT: 1000-1999
+    NO:    2000-2999
+  
+'''
+
 
 class StrategyLearner(object):
 
-    # constructor
-    def __init__(self, verbose = False):
-        self.verbose = verbose
-
-    # this method should create a QLearner, and train it for trading
-    def addEvidence(self, symbol = "IBM", \
-        sd=dt.datetime(2008,1,1), \
-        ed=dt.datetime(2009,1,1), \
-        sv = 10000): 
-
+    def __init__(self, verbose=False):
         self.nstates = 3000
         # Create new instance of Q learner 
         # I am hard coding the number of states to 3000
         # It seems like this should be configurable, but it is not 
         # allowed in the API for this assignment
-        # All the other values I will keep as the default
         self.qLearner = ql.QLearner(num_states=self.nstates, \
                                     num_actions=3, \
-                                    verbose=self.verbose)
-        self.learner = ql.QLearner()
-        
+                                    verbose=verbose)
+        # All the other values I will keep as the default
         self.position = 2  
+    #end def
 
+    def addEvidence(self, \
+                    symbol="IBM", \
+                    sd = dt.datetime(2008,1,1), \
+                    ed = dt.datetime(2009, 1, 1), \
+                    sv = 10000):
+                    
         # Get stock data
-        # example usage of the old backward compatible util function
-        syms=[symbol]
+        syms = [symbol]
         dates = pd.date_range(sd, ed)
-        prices_all = ut.get_data(syms, dates)  # automatically adds SPY
-        prices = prices_all[syms]  # only portfolio symbols
-        prices_SPY = prices_all['SPY']  # only SPY, for comparison later
-        price_array = prices.values
-        if self.verbose: print prices
-  
-        # example use with new colname 
-        volume_all = ut.get_data(syms, dates, colname = "Volume")  # automatically adds SPY
-        volume = volume_all[syms]  # only portfolio symbols
-        volume_SPY = volume_all['SPY']  # only SPY, for comparison later
-        if self.verbose: print volume
+        df_prices = get_data(syms, dates, True)
+        price_array = df_prices[syms].values        
         
         # Create features from stock data
         features = self.compute_features(price_array)
@@ -63,7 +68,7 @@ class StrategyLearner(object):
             # Set the initial state
             # We have no holdings, so state is 2
             state = 2000+states[0]
-            action = self.qLearner.querysetstate(state)
+            action = self.qLearner.querysetstate(states[0])
             
             # For each day (except the first)
             for j in range(1, states.shape[0]): 
@@ -71,80 +76,64 @@ class StrategyLearner(object):
                 # Question - are we constrained to only take one position at time? - yes
                 reward, action_taken = self.take_action(price_array, j-1, action)
                 
-                # Update state
-                state = self.position*1000 + states[j]
-                
                 # Update Q table
-                action = self.qLearner.query(state, reward)
+                action = self.qLearner.query(states[j], reward)
         
             #end for
         #end for               
     #end def
-        
-   
-    # this method should use the existing policy and test it against new data
-    def testPolicy(self, symbol = "IBM", \
-        sd=dt.datetime(2009,1,1), \
-        ed=dt.datetime(2010,1,1), \
-        sv = 10000):
-
-        # here we build a fake set of trades
-        # your code should return the same sort of data
-        dates = pd.date_range(sd, ed)
-        prices_all = ut.get_data([symbol], dates)  # automatically adds SPY
+    
+    
+    '''
+    Input
+        symbol: Stock symbol to run learner with
+        start date: Date to start analysis
+        End date: Date to end analysis
+        sv: Starting portfolio value (cash)
+    Output
+        data frame specifying trades to make
+    '''
+    def testPolicy(self, \
+                    symbol = "IBM", \
+                    sd = dt.datetime(2009,1,1), \
+                    ed = dt.datetime(2010,1,1), \
+                    sv = 10000):
+       
+        # Get stock data
         syms = [symbol]
-        prices = prices_all[syms]  # only portfolio symbols
-        price_array = prices.values
-        trades = prices_all[[symbol,]]  # only portfolio symbols
-        trades_SPY = prices_all['SPY']  # only SPY, for comparison later
-        trades.values[:,:] = 0 # set them all to nothing
-
+        dates = pd.date_range(sd, ed)
+        df_prices = get_data(syms, dates, True)
+        price_array = df_prices[syms].values 
+        
+        # Create data frame for trades
+        df_trades = df_prices[syms].copy() 
+        # Fill with zeros 
+        df_trades[syms] = 0  
+        
         # Create features from stock data
         features = self.compute_features(price_array)
         
         # Discretize features into distinct states
         states = self.discretize_features(features)
         
-        # set the starting positions
-        self.position = 2
-        
-        state = self.position*1000 + states[0]
-        
-        # Get the first action
-        action = self.qLearner.querysetstate(state)
-        
         # For each day in the trading period
-        for i in range(1, price_array.shape[0]):
-            # Take action, get reward
-            reward, action_taken = self.take_action(price_array, i-1, action)
-        
-            # Update state
-            state = self.position*1000 + states[i]
-                
-            # Update Q table
-            action = self.qLearner.query(state, reward)
+        for i in range(0, price_array.shape[0]):
+            # Compute the current state
             
-            # Update trading data frame
-            if action_taken == 0: # Buy
-                trades.values[i,:] = 100.0
-            elif action_taken == 1: # sell
-                trades.values[i,:] = -100.0
-            # elif action_taken == 2: # hold - do nothing
+            
+            print ""
+        
         #end for
         
-        # It looks like you need to cash out on the last day of trading
-        if self.position == 0: # Buy
-            trades.values[price_array.shape[0]-1,:] = -100.0
-        elif self.position == 1: # Sell
-            trades.values[price_array.shape[0]-1,:] = 100.0
+        # Remove NaNs
+        df_trades.dropna(inplace=True)
         
-        if self.verbose: print type(trades) # it better be a DataFrame!
-        if self.verbose: print trades
-        if self.verbose: print prices_all
-        
-        return trades
+        return df_trades            
     #end def
-
+    
+    
+    
+    
     '''
     Input
        prices: numpy array of prices
@@ -172,15 +161,15 @@ class StrategyLearner(object):
         new_portfolio_value, new_cash_value = self.compute_portfolio_value(prices, index, action_taken)
               
         # Determine the new position 
-        if self.position == 0 and action_taken == 1: # long and SELL
+        if self.position == 0 and action == 1: # long and SELL
             self.position = 2
-        elif self.position == 1 and action_taken == 0: # short and BUY
+        elif self.position == 1 and action == 0: # short and BUY
             self.position = 2
-        elif self.position == 2 and action_taken == 0: # hold and BUY
+        elif self.position == 2 and action == 0: # hold and BUY
             self.position = 0
-        elif self.position == 2 and action_taken == 1: # hold and SELL
+        elif self.position == 2 and action == 1: # hold and SELL
             self.position = 1
-        elif action_taken == 2:                        # action is HOLD
+        elif action == 2:                        # action is HOLD
             self.position = 2
                  
         # If we are in a position where we can execute the specified action
@@ -232,7 +221,8 @@ class StrategyLearner(object):
         
         return port_val, cash_val
     #end def
-
+    
+    
     '''
     Input: numpy array of adjusted close prices
     Output: numpy array with num rows = length(prices) x 3 columns
@@ -257,7 +247,7 @@ class StrategyLearner(object):
 
     Returns a value that is (usually) between -1.0 and 1.0
     '''
-    def compute_BB(self, prices, window_size = 5):
+    def compute_BB(self, prices, window_size = 20):
         sma = self.moving_average(prices, window_size)
             
         # Calculate standard deviation of SMA
@@ -375,8 +365,3 @@ class StrategyLearner(object):
             
         return discrete_val
     #end def
-
-
-
-if __name__=="__main__":
-    print "One does not simply think up a strategy"

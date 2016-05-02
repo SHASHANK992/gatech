@@ -9,3 +9,5 @@ if __name__ == "__main__":
     learner = sl.StrategyLearner()
     
     learner.addEvidence()
+    
+    print learner.testPolicy()
