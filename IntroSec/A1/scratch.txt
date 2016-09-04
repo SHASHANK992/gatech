@@ -1,0 +1,13 @@
+System: 0xB7E56190  or 0x080482f0
+Exit:   0xB7E491E0
+
+B7E37000
+
+/bin/sh: 0xB7F76A24
+
+
+bubble_sort: 0x08048613
+
+Where is array stored? I have to set the return address to
+around where the array is stored, but after the location
+where the return address is stored
