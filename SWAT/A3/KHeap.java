@@ -36,10 +36,10 @@ public class KHeap {
             
             // Ensure that the ordering is correct
             // The parent is greater than the child
-            if (i < 0)
+            if (i > 0)
             {
                 int elem_parent = array[ (i-1)/k ];
-                if(elem_i < elem_parent)
+                if(elem_i > elem_parent)
                 {
                     return false;
                 }
@@ -47,7 +47,7 @@ public class KHeap {
         }
         
         // Check that the elements at the end of the array
-        // are empty
+        // are null
         for (int i = size; i < array.length; i++)
         {
             if (array[i] != -1)
