@@ -8,6 +8,9 @@ public class AcyclicGraph {
         Vertex[] outgoingEdges;
     }
 
+    //************************
+    // 
+    //************************
     public boolean repOK() {
         // returns true if and if only the graph reachable from "root" is a directed acyclic graph
         // complete this method
@@ -33,49 +36,53 @@ public class AcyclicGraph {
         Hashtable<Vertex, Boolean> visiting =  new Hashtable<Vertex, Boolean>();
         boolean result = HasCycles(root, visiting);       
         
-        if( result == true )
+        return !result;               
+    }
+    
+    // Returns true if the subgraph of node has a cycle
+    private boolean HasCycles(Vertex node, Hashtable<Vertex, Boolean> visiting)
+    {
+        System.out.println("In HasCycles");
+        // If the node is null, it can't have any children
+        // Can't be added to the dictionary, though. 
+        if(node == null)
         {
+            //System.out.println("Root is null");
             return false;
         }
         else
-        {        
-            return true;        
-        }               
-    }
-    
-    private boolean HasCycles(Vertex node, Hashtable<Vertex, Boolean> visiting)
-    {
-        //System.out.println(node.outgoingEdges.length);
-        // If the current node isn't even in the dictionary,
-        // we know we haven't been here before
-        if (!visiting.containsKey(node))
         {
-            // We are now in the process of traversing the subtree
-            // for this node
-            visiting.put(node, true);
-            
-            // Go through all the children of this node
-            for(int i = 0; i < node.outgoingEdges.length; i++)
+            // If the current node isn't even in the dictionary,
+            // we know we haven't been here before
+            if (!visiting.containsKey(node))
             {
-                Vertex child = node.outgoingEdges[i];
+                // We are now in the process of traversing the subtree
+                // for this node
+                visiting.put(node, true);
                 
-                // When we check the cycles of this subtree, if it
-                // returns true, we have found a cycle
-                // This needs to be reflected globally
-                //System.out.println("Recursively calling HasCycles");
-                if(HasCycles(child, visiting))
+                // Go through all the children of this node
+                for(int i = 0; i < node.outgoingEdges.length; i++)
                 {
-                    return true;
+                    Vertex child = node.outgoingEdges[i];
+                    
+                    // When we check the cycles of this subtree, if it
+                    // returns true, we have found a cycle
+                    // This needs to be reflected globally
+                    //System.out.println("Recursively calling HasCycles");
+                    if(HasCycles(child, visiting))
+                    {
+                        return true;
+                    }
                 }
             }
-        }
-        else if(visiting.get(node))
-        {
-            // If in the process of traversing the subtrees we
-            // encounter a node we are still in the process
-            // of visiting, we have found a cycle
-            //System.out.println("Found cycle!!!");
-            return true;
+            else if(visiting.get(node))
+            {
+                // If in the process of traversing the subtrees we
+                // encounter a node we are still in the process
+                // of visiting, we have found a cycle
+                System.out.println("Found cycle!!!");
+                return true;
+            }
         }
         
         // Otherwise we have fully traversed the subtree
@@ -85,7 +92,9 @@ public class AcyclicGraph {
         return false;
     }
     
-    
+    /*
+    Finitization method
+    */
     public static IFinitization finAcyclicGraph(int nodesNum) {
         // complete this method
         
@@ -93,18 +102,24 @@ public class AcyclicGraph {
         IFinitization f = FinitizationFactory.create(AcyclicGraph.class);
         
         // Finitize root
-        IObjSet vertices = f.createObjSet(Vertex.class, nodesNum, false);
+        // Null should be included in the set of finitized nodes (last argument)
+        IObjSet vertices = f.createObjSet(Vertex.class, nodesNum, true);
         f.set("root", vertices);
         
         
         // Finitize the Vertex class
-        // For the length of the array, the number of nodes does not seem to
-        // include the root
-        IIntSet arrayLength = f.createIntSet(0, nodesNum);
+        // For the length of the array, remember to exclude the root
+        // I need to break this into cases because otherwise I get a 
+        // negative array length exception
+        int num = 0;
+        if(nodesNum != 0)
+        {
+            num = nodesNum-1;
+        }
+        IIntSet arrayLength = f.createIntSet(0, num);
         
-        // I am not sure that there are any restrictions on the contents (max value) of the
-        // array. The only restriction is on the size       
-        IArraySet arrays = f.createArraySet(Vertex[].class, arrayLength, vertices, nodesNum);
+        // The values the array can take is the set of vertices     
+        IArraySet arrays = f.createArraySet(Vertex[].class, arrayLength, vertices, 1);
         
         f.set("Vertex.outgoingEdges", arrays);
         
