@@ -34,7 +34,11 @@ public class AcyclicGraph {
         // - False means we are done traversing the subtree
         // - If the node is not present at all, that means it has never been visited
         Hashtable<Vertex, Boolean> visiting =  new Hashtable<Vertex, Boolean>();
-        boolean result = HasCycles(root, visiting);       
+        boolean result = HasCycles(root, visiting); 
+        if(!result)
+        {
+            PrintGraph(root);
+        }     
         
         return !result;               
     }
@@ -42,12 +46,10 @@ public class AcyclicGraph {
     // Returns true if the subgraph of node has a cycle
     private boolean HasCycles(Vertex node, Hashtable<Vertex, Boolean> visiting)
     {
-        System.out.println("In HasCycles");
         // If the node is null, it can't have any children
         // Can't be added to the dictionary, though. 
         if(node == null)
         {
-            //System.out.println("Root is null");
             return false;
         }
         else
@@ -80,7 +82,7 @@ public class AcyclicGraph {
                 // If in the process of traversing the subtrees we
                 // encounter a node we are still in the process
                 // of visiting, we have found a cycle
-                System.out.println("Found cycle!!!");
+                //System.out.println("Found cycle!!!");
                 return true;
             }
         }
@@ -90,6 +92,27 @@ public class AcyclicGraph {
         // no cycles found
         visiting.put(node, false);
         return false;
+    }
+    
+    private void PrintGraph(Vertex root)
+    {
+        System.out.println("Root: " + root);
+        for(int i = 0; i < root.outgoingEdges.length; i++)
+        {
+            Vertex child = root.outgoingEdges[i];
+            System.out.println("Child: " + child);
+            
+            if(child != null)
+            {
+                for(int j = 0; j < child.outgoingEdges.length; j++)
+                {
+                    Vertex grandchild = child.outgoingEdges[j];
+                    System.out.println("Grandchild: " + grandchild);
+                } 
+            }           
+        }
+        
+        
     }
     
     /*
@@ -106,20 +129,24 @@ public class AcyclicGraph {
         IObjSet vertices = f.createObjSet(Vertex.class, nodesNum, true);
         f.set("root", vertices);
         
-        
         // Finitize the Vertex class
         // For the length of the array, remember to exclude the root
         // I need to break this into cases because otherwise I get a 
         // negative array length exception
         int num = 0;
-        if(nodesNum != 0)
+        if(nodesNum > 0)
         {
             num = nodesNum-1;
         }
         IIntSet arrayLength = f.createIntSet(0, num);
         
-        // The values the array can take is the set of vertices     
-        IArraySet arrays = f.createArraySet(Vertex[].class, arrayLength, vertices, 1);
+        // I need to exclude null from the remainder of the vertices
+        // It causes duplication problems if I leave null there
+        vertices = f.createObjSet(Vertex.class, num, false);
+        
+        // The values the array can take is the set of vertices
+        // I need to create nodesNum arrays because there needs to be one array for each node/vertex     
+        IArraySet arrays = f.createArraySet(Vertex[].class, arrayLength, vertices, nodesNum);
         
         f.set("Vertex.outgoingEdges", arrays);
         
