@@ -40,6 +40,7 @@ public class Line implements Comparable<Line>{
   public boolean equals(Object o) {
       if (o == null) return false;
       Line that = (Line) o;
+      if((this.a == null && this.b == null) && (that.a == null && that.b == null)) return true;
       if(this.a.equals(that.b) && this.b.equals(that.a)) return true;
       return false;
   }

@@ -1,0 +1,5 @@
+java -classpath $CLASSPATH randoop.main.Main gentests --classlist=myclasses.txt --timelimit=60
+
+cs6340@cs6340ProjectVM:~/Documents/OMSCS/SWAT/A4/geometry$ env | grep CLASSPATH
+CLASSPATH=:/usr/share/myjava/*:/home/cs6340/randoop-3.0.4/randoop-all-3.0.4.jar:/usr/share/myjava/*:/home/cs6340/randoop-3.0.4/randoop-all-3.0.4.jar:/usr/share/myjava/*:/home/cs6340/randoop-3.0.4/randoop-all-3.0.4.jar
+

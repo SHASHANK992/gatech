@@ -15,7 +15,15 @@ public class Node {
     }
 
     public int getDegree() {
-        return owner.getDegree(this);
+        if( owner != null)
+        {
+            return owner.getDegree(this);
+        }
+        else
+        {
+            // If there is no graph, we have no edges
+            return 0;
+        }
     }
 
     public void thisIsNotCalled() {
@@ -31,6 +39,10 @@ public class Node {
     // tests the fact that mutating a field is like mutating its own
     // state (for simple analysis)
     public void setOwnerNameDirectly(String name) {
-        owner.name = name;
+        // owner can be null
+        if(owner != null)
+        {
+            owner.name = name;
+        }
     }
 }

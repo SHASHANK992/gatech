@@ -19,6 +19,12 @@ public class Point {
 
   @Override
   public boolean equals(Object obj) {
+      // By virtue of this object existing, we
+      // can't be equal to null
+      if(obj == null) return false;
+      
+      // Since we know the object isn't null
+      // we can cast it to the appropriate type
       Point that = (Point) obj;
       if (this.x == that.x && this.y == that.y) 
           return true;
