@@ -7,3 +7,5 @@
 /RL/FinalProject/SoccerGame/nbproject/private/
 /RL/FinalProject/SoccerGame/build/
 /RL/FinalProject/SoccerGame/dist/
+*.class
+*.*~

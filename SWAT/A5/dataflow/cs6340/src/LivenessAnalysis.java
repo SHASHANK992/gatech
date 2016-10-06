@@ -3,8 +3,11 @@ import joeq.Compiler.Quad.RegisterFactory.Register;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
+import java.util.Iterator;
 
 import chord.project.analyses.JavaAnalysis;
 import chord.project.Chord;
@@ -50,30 +53,25 @@ public class LivenessAnalysis extends DataflowAnalysis<Register> {
 		
 		// Live variable analysis is a backwards, MAY analysis
 		// Begins with both the IN and OUT sets being empty
+		
 		ControlFlowGraph liveCFG = main.getCFG();
 		
-		// Work backwards, so reverse iterator
-		liveCFG.reversePostOrderIterator();
+		// Get the last Basic Block
+		// This block has no quads
+		BasicBlock exitBlock = liveCFG.exit();
 		
-		// Get the last Basic Block, which is just an IN
-		EntryOrExitBasicBlock exitBlock = liveCFG.exit();
-		
-		// Get the quad of this block and add it to the 
-		// IN map
-		Quad q = exitBlock.getQuad(0);
-		// TODO: How do I find the registers associated with this quad?
-		// I think I need to use the RegisterFactory somehow
-		// At least for this first one I know it is the empty set
-		Set<Register> temp = new HashSet<Register>();
-		inMap.put(q, temp);
-		
+		// Parse the control flow graph according to the rules for
+		// live variable analysis
 		boolean somethingChanged = false;
 		
+		somethingChanged = ParseCFG(exitBlock, inMap, outMap);
+		
+		/*	
 		do
 		{
 		    somethingChanged = ParseCFG(exitBlock, inMap, outMap);
 		} while(somethingChanged);
-		
+		*/
 	}
 	
 	
@@ -81,9 +79,43 @@ public class LivenessAnalysis extends DataflowAnalysis<Register> {
 	// out sets. The in and out sets are passed by reference so they are updated by
 	// default. This will return true if either set was updated during processing. 
 	// Otherwise it returns false.
-	private boolean ParseCFG(BasicBlock b, Map<Quad, Set<T>> in, Map<Quad, Set<T>> out)
+	private boolean ParseCFG(BasicBlock b, Map<Quad, Set<Register>> in, Map<Quad, Set<Register>> out)
 	{
+	    // Live analysis works in reverse
 	    
+	    boolean somethingChanged = false;
+	    
+	    // Work backwards through the quads in this block
+	    int numQuads = b.size();
+	    for(int index = numQuads-1; index >= 0; index--)
+	    {
+	        Quad q = b.getQuad(index);
+	        somethingChanged = somethingChanged || InUpdate(q, in);
+	        somethingChanged = somethingChanged || OutUpdate(q, out);
+	    }
+	    
+	    // Once all the quads have been checked, find the 
+	    // preceding blocks
+	    List<BasicBlock> preds = b.getPredecessors();
+	    
+	    // Parse these blocks just like you parsed the current block
+	    for(Iterator i = preds.iterator(); i.hasNext(); )
+	    {
+            BasicBlock block = (BasicBlock) i.next();
+   	        somethingChanged = somethingChanged || ParseCFG(block, in, out);
+	    }
+	    
+	    return somethingChanged;
+	}
+	
+	private boolean InUpdate(Quad q, Map<Quad, Set<Register>> in)
+	{
+	    return false;
+	}
+	
+	private boolean OutUpdate(Quad q, Map<Quad, Set<Register>> out)
+	{
+	    return false;
 	}
 }
 
