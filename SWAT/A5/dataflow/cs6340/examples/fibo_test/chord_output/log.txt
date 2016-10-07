@@ -1,0 +1,458 @@
+Chord run initiated at: Oct 7, 2016 7:47:05 PM
+OPT config = data.config
+ENTER: liveness at Fri Oct 07 19:47:08 EDT 2016
+********** liveness analysis *********
+ENTER: RTA
+Iteration: 0
+LEAVE: RTA
+Time: 00:00:00:213 hh:mm:ss:ms
+Parsing CFG
+Entering loop
+Deep copying
+Num quads in this block: 0
+Num quads in this block: 19
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Last quad in block
+Got successors
+Going through successors
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Num quads in this block: 0
+Are sets equal: false
+Deep copying
+Num quads in this block: 0
+Num quads in this block: 19
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Last quad in block
+Got successors
+Going through successors
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Updating In set
+Within In update method
+Deep copy out set
+Remove defined variables
+Adding used variables
+Assigning...
+Updating out set
+Not last quad in block
+In OutUpdate method
+Num quads in this block: 0
+Are sets equal: true
+Control flow graph for main:([Ljava/lang/String;)V@FiboTest:
+BB0 (ENTRY)	(in: <none>, out: BB2)
+
+BB2	(in: BB0 (ENTRY), out: BB1 (EXIT))
+1: MOVE_I R5, IConst: 0
+2: MOVE_I R6, IConst: 1
+3: MOVE_I R7, IConst: 1
+4: ADD_I T8, IConst: 0, IConst: 1
+5: MOVE_I R9, T8
+6: MOVE_I R10, IConst: 1
+7: MOVE_I R11, R9
+8: ADD_I T12, IConst: 1, R9
+9: MOVE_I R13, T12
+10: MOVE_I R14, R11
+11: MOVE_I R15, R13
+12: ADD_I T16, R14, R13
+13: MOVE_I R17, T16
+14: MOVE_I R18, R15
+15: MOVE_I R19, R17
+16: ADD_I T20, R18, R17
+17: MOVE_I R21, T20
+18: MOVE_I R22, R19
+19: RETURN_V
+
+BB1 (EXIT)	(in: BB2, out: <none>)
+
+Exception handlers: []
+Register factory: Registers: 23
+********** ENTER Analysis Results **********
+25!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:14) [13: MOVE_I R17, T16]
+	IN :T16 
+	OUT:T16 
+24!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:14) [12: ADD_I T16, R14, R13]
+	IN :R13 R14 
+	OUT:R13 R14 
+19!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:11) [10: MOVE_I R14, R11]
+	IN :R11 
+	OUT:R11 
+16!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:10) [8: ADD_I T12, IConst: 1, R9]
+	IN :R9 
+	OUT:R9 
+29!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:17) [15: MOVE_I R19, R17]
+	IN :R17 
+	OUT:R17 
+5!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:5) [3: MOVE_I R7, IConst: 1]
+	IN :
+	OUT:
+13!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:9) [7: MOVE_I R11, R9]
+	IN :R9 
+	OUT:R9 
+35!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:19) [18: MOVE_I R22, R19]
+	IN :R19 
+	OUT:R19 
+3!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:3) [2: MOVE_I R6, IConst: 1]
+	IN :
+	OUT:
+8!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:6) [4: ADD_I T8, IConst: 0, IConst: 1]
+	IN :
+	OUT:
+9!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:6) [5: MOVE_I R9, T8]
+	IN :T8 
+	OUT:T8 
+1!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:3) [1: MOVE_I R5, IConst: 0]
+	IN :
+	OUT:
+11!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:7) [6: MOVE_I R10, IConst: 1]
+	IN :
+	OUT:
+17!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:10) [9: MOVE_I R13, T12]
+	IN :T12 
+	OUT:T12 
+27!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:15) [14: MOVE_I R18, R15]
+	IN :R15 
+	OUT:R15 
+36!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:21) [19: RETURN_V]
+	IN :
+	OUT:
+21!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:13) [11: MOVE_I R15, R13]
+	IN :R13 
+	OUT:R13 
+33!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:18) [17: MOVE_I R21, T20]
+	IN :T20 
+	OUT:T20 
+32!main:([Ljava/lang/String;)V@FiboTest (FiboTest.java:18) [16: ADD_I T20, R18, R17]
+	IN :R17 R18 
+	OUT:R17 R18 
+********** LEAVE Analysis Results **********
+LEAVE: liveness
+Exclusive time: 00:00:00:231 hh:mm:ss:ms
+Inclusive time: 00:00:00:231 hh:mm:ss:ms
+Chord run completed at: Oct 7, 2016 7:47:08 PM
+Total time: 00:00:02:566 hh:mm:ss:ms
