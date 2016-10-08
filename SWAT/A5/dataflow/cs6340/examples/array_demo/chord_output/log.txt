@@ -1,848 +1,19 @@
-Chord run initiated at: Oct 7, 2016 6:44:19 PM
+Chord run initiated at: Oct 8, 2016 8:42:31 AM
 OPT config = data.config
-ENTER: liveness at Fri Oct 07 18:44:21 EDT 2016
+ENTER: liveness at Sat Oct 08 08:42:34 EDT 2016
 ********** liveness analysis *********
 ENTER: RTA
 Iteration: 0
-Infinite loop discovered in run:()V@java.lang.ref.Reference$ReferenceHandler, linking BB18 to exit.
-Infinite loop discovered in decodeBuffer:(Ljava/io/InputStream;Ljava/io/OutputStream;)V@sun.misc.CharacterDecoder, linking BB9 to exit.
+Infinite loop discovered in run:()V@java.lang.ref.Reference$ReferenceHandler, linking BB0 (ENTRY) to exit.
+Infinite loop discovered in run:()V@java.lang.ref.Reference$ReferenceHandler, linking BB6 to exit.
+Infinite loop discovered in decodeBuffer:(Ljava/io/InputStream;Ljava/io/OutputStream;)V@sun.misc.CharacterDecoder, linking BB4 to exit.
 Iteration: 1
-Infinite loop discovered in run:()V@sun.security.provider.SeedGenerator$ThreadedSeedGenerator, linking BB26 to exit.
+Infinite loop discovered in run:()V@sun.security.provider.SeedGenerator$ThreadedSeedGenerator, linking BB10 to exit.
 Iteration: 2
 Iteration: 3
 Iteration: 4
 LEAVE: RTA
-Time: 00:00:12:957 hh:mm:ss:ms
-Parsing CFG
-Entering loop
-Deep copying
-Num quads in this block: 0
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 1
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 0
-Num quads in this block: 12
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Deep copying
-Num quads in this block: 0
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 1
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 0
-Num quads in this block: 12
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Deep copying
-Num quads in this block: 0
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 1
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 0
-Num quads in this block: 12
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Deep copying
-Num quads in this block: 0
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 1
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 0
-Num quads in this block: 12
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Deep copying
-Num quads in this block: 0
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 1
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 0
-Num quads in this block: 12
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Deep copying
-Num quads in this block: 0
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 1
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 0
-Num quads in this block: 12
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Num quads in this block: 3
-Updating In set
-Updating out set
-Last quad in block
-Got successors
-Going through successors
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
-Updating In set
-Updating out set
-Not last quad in block
-In OutUpdate method
+Time: 00:00:12:826 hh:mm:ss:ms
 Control flow graph for main:([Ljava/lang/String;)V@ArrayDemo:
 BB0 (ENTRY)	(in: <none>, out: BB2)
 
@@ -893,93 +64,93 @@ BB4	(in: BB3, out: BB3)
 Exception handlers: []
 Register factory: Registers: 26
 ********** ENTER Analysis Results **********
-64!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:14) [43: GETSTATIC_A T25, .out]
-	IN :
-	OUT:
-52!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [39: INVOKEVIRTUAL_A T23, toString:()Ljava/lang/String;@java.lang.StringBuilder, (T22)]
-	IN :T22 
-	OUT:T22 
 9!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:6) [29: ARRAYLENGTH T12, R2]
-	IN :R2 
-	OUT:R2 
-31!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [31: GETSTATIC_A T17, .out]
-	IN :
-	OUT:
-37!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [33: MOVE_A T19, T18]
-	IN :T18 
-	OUT:T18 
-6!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:6) [3: MOVE_I R10, IConst: 0]
-	IN :R13 
-	OUT:R10 R13 
-17!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:6) [47: ADD_I R13, R11, IConst: 1]
-	IN :R11 
-	OUT:R11 
-2!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:3) [1: NEWARRAY T9, IConst: 10, int[]]
-	IN :
-	OUT:
-61!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:11) [42: GOTO BB6]
-	IN :R14 R24 
-	OUT:R14 R24 
-55!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [40: INVOKEVIRTUAL_V print:(Ljava/lang/String;)V@java.io.PrintStream, (T17, T23)]
-	IN :T17 T23 
-	OUT:T17 T23 
-16!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:7) [46: ASTORE_I R11, R2, R11]
-	IN :R2 R11 
-	OUT:R2 R11 
-49!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [37: INVOKEVIRTUAL_A T22, append:(Ljava/lang/String;)Ljava/lang/StringBuilder;@java.lang.StringBuilder, (T20, T21)]
-	IN :T21 T20 
-	OUT:T21 T20 
-27!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:11) [27: ARRAYLENGTH T16, R2]
-	IN :R2 
-	OUT:R2 
-20!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:6) [48: GOTO BB3]
-	IN :R10 R13 
-	OUT:R10 R13 
-4!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:3) [2: MOVE_A R2, T9]
-	IN :T9 
-	OUT:T9 
+	IN :R10 R2 R24 R11 
+	OUT:R2 R10 R24 T12 R11 
 58!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:11) [41: ADD_I R24, R15, IConst: 1]
-	IN :R15 
-	OUT:R15 
--51!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:0) [51: PHI R15, (R14, R24), { BB5, BB7 }]
-	IN :R14 R24 
-	OUT:R14 R24 
-44!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [36: INVOKEVIRTUAL_A T20, append:(I)Ljava/lang/StringBuilder;@java.lang.StringBuilder, (T18, T8)]
-	IN :T8 T18 
-	OUT:T8 T18 
+	IN :R2 R15 R14 
+	OUT:R2 R24 R14 
+37!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [33: MOVE_A T19, T18]
+	IN :R2 R15 R14 T17 T18 
+	OUT:R2 T19 R15 R14 T17 T18 
 70!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:15) [45: RETURN_V]
 	IN :
 	OUT:
-49!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [38: MOVE_A T21, AConst: " "]
+27!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:11) [27: ARRAYLENGTH T16, R2]
+	IN :R2 R15 R14 
+	OUT:R2 R15 T16 R14 
+64!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:14) [43: GETSTATIC_A T25, .out]
 	IN :
-	OUT:
+	OUT:T25 
+6!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:6) [3: MOVE_I R10, IConst: 0]
+	IN :R13 R2 R24 
+	OUT:R13 R2 R10 R24 
+38!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [34: INVOKESTATIC_V <init>:()V@java.lang.StringBuilder, (T19)]
+	IN :R2 T19 R15 R14 T17 T18 
+	OUT:R2 R15 R14 T17 T18 
+-51!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:0) [51: PHI R15, (R14, R24), { BB5, BB7 }]
+	IN :R2 R24 R14 
+	OUT:R2 R15 R14 
+10!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:6) [30: IFCMP_I R11, T12, GE, BB5]
+	IN :R10 R2 R24 T12 R11 
+	OUT:R2 R10 R24 R11 
+44!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [36: INVOKEVIRTUAL_A T20, append:(I)Ljava/lang/StringBuilder;@java.lang.StringBuilder, (T18, T8)]
+	IN :R2 R15 T8 R14 T17 T18 
+	OUT:T20 R2 R15 R14 T17 
 43!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [35: ALOAD_I T8, R2, R15]
-	IN :R2 R15 
-	OUT:R2 R15 
--50!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:0) [50: PHI R11, (R10, R13), { BB2, BB4 }]
-	IN :R10 R13 
-	OUT:R10 R13 
+	IN :R2 R15 R14 T17 T18 
+	OUT:R2 R15 T8 R14 T17 T18 
+52!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [39: INVOKEVIRTUAL_A T23, toString:()Ljava/lang/String;@java.lang.StringBuilder, (T22)]
+	IN :R2 T22 R15 R14 T17 
+	OUT:R2 R15 R14 T23 T17 
+49!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [38: MOVE_A T21, AConst: " "]
+	IN :T20 R2 R15 R14 T17 
+	OUT:T20 T21 R2 R15 R14 T17 
 34!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [32: NEW T18, java.lang.StringBuilder]
-	IN :
-	OUT:
+	IN :R2 R15 R14 T17 
+	OUT:R2 R15 R14 T17 T18 
+31!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [31: GETSTATIC_A T17, .out]
+	IN :R2 R15 R14 
+	OUT:R2 R15 R14 T17 
+20!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:6) [48: GOTO BB3]
+	IN :R13 R10 R2 R24 
+	OUT:R13 R2 R10 R24 
+49!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [37: INVOKEVIRTUAL_A T22, append:(Ljava/lang/String;)Ljava/lang/StringBuilder;@java.lang.StringBuilder, (T20, T21)]
+	IN :T20 T21 R2 R15 R14 T17 
+	OUT:R2 T22 R15 R14 T17 
+17!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:6) [47: ADD_I R13, R11, IConst: 1]
+	IN :R2 R10 R24 R11 
+	OUT:R13 R2 R10 R24 
+24!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:11) [49: MOVE_I R14, IConst: 0]
+	IN :R2 R24 
+	OUT:R2 R24 R14 
+4!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:3) [2: MOVE_A R2, T9]
+	IN :R13 R24 T9 
+	OUT:R13 R2 R24 
 67!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:14) [44: INVOKEVIRTUAL_V println:()V@java.io.PrintStream, (T25)]
 	IN :T25 
-	OUT:T25 
-24!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:11) [49: MOVE_I R14, IConst: 0]
-	IN :R24 
-	OUT:R14 R24 
-28!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:11) [28: IFCMP_I R15, T16, GE, BB8]
-	IN :R15 T16 
 	OUT:
-10!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:6) [30: IFCMP_I R11, T12, GE, BB5]
-	IN :R2 T12 R11 R24 
-	OUT:R2 R11 R24 
-38!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [34: INVOKESTATIC_V <init>:()V@java.lang.StringBuilder, (T19)]
-	IN :T19 
-	OUT:T19 
+2!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:3) [1: NEWARRAY T9, IConst: 10, int[]]
+	IN :R13 R24 
+	OUT:R13 R24 T9 
+-50!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:0) [50: PHI R11, (R10, R13), { BB2, BB4 }]
+	IN :R13 R10 R2 R24 
+	OUT:R2 R10 R24 R11 
+28!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:11) [28: IFCMP_I R15, T16, GE, BB8]
+	IN :R2 R15 T16 R14 
+	OUT:R2 R15 R14 
+16!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:7) [46: ASTORE_I R11, R2, R11]
+	IN :R10 R2 R24 R11 
+	OUT:R10 R2 R24 R11 
+61!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:11) [42: GOTO BB6]
+	IN :R2 R24 R14 
+	OUT:R2 R24 R14 
+55!main:([Ljava/lang/String;)V@ArrayDemo (ArrayDemo.java:12) [40: INVOKEVIRTUAL_V print:(Ljava/lang/String;)V@java.io.PrintStream, (T17, T23)]
+	IN :R2 R15 T23 R14 T17 
+	OUT:R2 R15 R14 
 ********** LEAVE Analysis Results **********
 LEAVE: liveness
-Exclusive time: 00:00:13:040 hh:mm:ss:ms
-Inclusive time: 00:00:13:040 hh:mm:ss:ms
-Chord run completed at: Oct 7, 2016 6:44:34 PM
-Total time: 00:00:15:426 hh:mm:ss:ms
+Exclusive time: 00:00:12:920 hh:mm:ss:ms
+Inclusive time: 00:00:12:920 hh:mm:ss:ms
+Chord run completed at: Oct 8, 2016 8:42:47 AM
+Total time: 00:00:15:291 hh:mm:ss:ms
