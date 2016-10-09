@@ -92,10 +92,10 @@ public class ReachDefAnalysis extends DataflowAnalysis<Pair<Quad, Register>> {
 	            int numQuads = block.size();
 	        
 	            for(int index=0; index < numQuads; index++)
-	            {	     
+	            {		                    
 	                Quad q = block.getQuad(index);
 	                           
-	                //********************************
+	                //*********************************
 	                // Update the IN set
 	                //*********************************
 	                // The union of all the predecessor quads OUT sets
@@ -131,18 +131,17 @@ public class ReachDefAnalysis extends DataflowAnalysis<Pair<Quad, Register>> {
 	                    
 	                    if(out.get(predecessor) != null)
 	                    {
-	                        predOutSet = out.get(predecessor);
-	                        /*
-	                        for(Register r : out.get(predecessor))
+	                        //predOutSet = out.get(predecessor);
+	                        
+	                        for(Pair<Quad, Register> p : out.get(predecessor))
 	                        {
-	                            predOutSet.add(r);
-	                        }
-	                        */
+	                            predOutSet.add(p);
+	                        }	                        
 	                    }
 	                }
-	                
+	                	                	                
 	                InUpdate(q, in, out, predOutSet);
-	               
+	                	               
 	                //***************************************
 	                // Update the OUT set 
 	                //***************************************
@@ -164,12 +163,13 @@ public class ReachDefAnalysis extends DataflowAnalysis<Pair<Quad, Register>> {
 	                    defRegisters.add(ro.getRegister());
 	                }
 	                
-	                OutUpdate(q, in, out, usedRegisters, defRegisters);            
+	                // Update according to the rules
+	                OutUpdate(q, in, out, usedRegisters, defRegisters);           
 	            }
 	        }	        
 	        
 	        // Compare sets from before to after
-	        setsEqual = (in.equals(inPrime) && out.equals(outPrime));	    
+	        setsEqual = (in.equals(inPrime) && out.equals(outPrime));    
 	    } while(!setsEqual);
 	
 	}
@@ -181,33 +181,37 @@ public class ReachDefAnalysis extends DataflowAnalysis<Pair<Quad, Register>> {
 	
 	private void OutUpdate(Quad q, Map<Quad, Set<Pair<Quad, Register>>> in, Map<Quad, Set<Pair<Quad, Register>>> out, List<Register> use, List<Register> def)
 	{
-	    // My update seems a little weird. I am not sure if it is just the
-	    // way we have the problem set up (registers) instead of (register, quad) pairs
-	
-	    // Remove from the IN set all the <Quad, Register> Pairs that use registers defined by the DEF set
-	    Set<Pair<Quad, Register>> temp = in.get(q);
-	    if(temp == null)
+	    // Deep copy IN[q]
+	    Set<Pair<Quad, Register>> temp = new HashSet<Pair<Quad, Register>>();
+	    if(in.get(q) != null)
 	    {
-	        temp = new HashSet<Pair<Quad, Register>>();
+	        for(Pair<Quad, Register> p : in.get(q))
+	        {
+	            temp.add(p);
+	        }
 	    }
 	    
+  	    // Remove from the temp IN set all the <Quad, Register> Pairs that use registers defined by the DEF set
 	    for(Register r : def)
 	    {
-	        for(Pair<Quad, Register> p : temp)
+	        if(in.get(q) != null)
 	        {
-	            if(p.val1.equals(r))
-	            {
-	                temp.remove(p);
-	            }
+                for(Pair<Quad, Register> p : in.get(q))
+                {
+                    if(p.val1.equals(r))
+                    {
+                        temp.remove(p);
+                    }
+                }
 	        }	        
 	    }
-	    
+	    	    
 	    // Add in all the <Quad, Register> pairs for the registers defined
 	    for(Register r : def)
 	    {
 	        temp.add(new Pair<Quad, Register>(q,r));
 	    }
-	    
+	    	    
 	    out.put(q, temp);
 	}
 	

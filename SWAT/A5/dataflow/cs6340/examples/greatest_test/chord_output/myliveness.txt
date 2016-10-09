@@ -1,0 +1,198 @@
+Chord run initiated at: Oct 8, 2016 8:23:06 PM
+OPT config = data.config
+ENTER: liveness at Sat Oct 08 20:23:08 EDT 2016
+********** liveness analysis *********
+ENTER: RTA
+Iteration: 0
+LEAVE: RTA
+Time: 00:00:00:218 hh:mm:ss:ms
+Control flow graph for main:([Ljava/lang/String;)V@GreatestTest:
+BB0 (ENTRY)	(in: <none>, out: BB2)
+
+BB2	(in: BB0 (ENTRY), out: BB3, BB6)
+1: MOVE_I R8, IConst: 2754
+2: MOVE_I R9, IConst: 7823
+3: MOVE_I R10, IConst: 5656
+4: MOVE_I R11, IConst: 0
+5: MOVE_I R12, IConst: 0
+6: MOVE_I R13, IConst: 0
+7: IFCMP_I IConst: 2754, IConst: 7823, LE, BB6
+
+BB6	(in: BB2, out: BB7, BB8)
+8: IFCMP_I IConst: 7823, IConst: 5656, LE, BB8
+
+BB8	(in: BB6, out: BB9)
+9: MOVE_I R23, IConst: 0
+10: MOVE_I R24, IConst: 0
+11: MOVE_I R25, IConst: 1
+
+BB7	(in: BB6, out: BB9)
+12: MOVE_I R20, IConst: 0
+13: MOVE_I R21, IConst: 1
+14: MOVE_I R22, IConst: 0
+15: GOTO BB9
+
+BB3	(in: BB2, out: BB4, BB5)
+16: IFCMP_I IConst: 2754, IConst: 5656, LE, BB5
+
+BB5	(in: BB3, out: BB9)
+17: MOVE_I R17, IConst: 0
+18: MOVE_I R18, IConst: 0
+19: MOVE_I R19, IConst: 1
+20: GOTO BB9
+
+BB4	(in: BB3, out: BB9)
+21: MOVE_I R14, IConst: 1
+22: MOVE_I R15, IConst: 0
+23: MOVE_I R16, IConst: 0
+24: GOTO BB9
+
+BB9	(in: BB4, BB5, BB7, BB8, out: BB1 (EXIT))
+40: PHI R26, (R16, R19, R22, R25), { BB4, BB5, BB7, BB8 }
+39: PHI R27, (R15, R18, R21, R24), { BB4, BB5, BB7, BB8 }
+38: PHI R28, (R14, R17, R20, R23), { BB4, BB5, BB7, BB8 }
+25: MUL_I T29, R28, IConst: 100
+26: MOVE_I R30, T29
+27: MUL_I T31, R27, IConst: 100
+28: MOVE_I R32, T31
+29: MUL_I T33, R26, IConst: 100
+30: MOVE_I R34, T33
+31: MUL_I T35, IConst: 2754, R30
+32: MOVE_I R36, T35
+33: MUL_I T37, IConst: 7823, R32
+34: MOVE_I R38, T37
+35: MUL_I T39, IConst: 5656, R34
+36: MOVE_I R40, T39
+37: RETURN_V
+
+BB1 (EXIT)	(in: BB9, out: <none>)
+
+Exception handlers: []
+Register factory: Registers: 41
+********** ENTER Analysis Results **********
+3!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:3) [1: MOVE_I R8, IConst: 2754]
+	IN :R23 R19 R22 R16 R15 R14 R18 R25 R21 R24 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R25 R17 R20 R24 
+32!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:8) [21: MOVE_I R14, IConst: 1]
+	IN :R23 R19 R22 R18 R25 R21 R24 R20 R17 
+	OUT:R23 R19 R22 R14 R18 R21 R25 R17 R20 R24 
+47!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:13) [18: MOVE_I R18, IConst: 0]
+	IN :R23 R22 R16 R15 R14 R25 R21 R24 R20 R17 
+	OUT:R23 R22 R14 R15 R16 R18 R21 R25 R17 R20 R24 
+38!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:10) [23: MOVE_I R16, IConst: 0]
+	IN :R23 R19 R22 R15 R14 R18 R25 R21 R24 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R25 R17 R20 R24 
+100!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:31) [30: MOVE_I R34, T33]
+	IN :T33 R30 R32 
+	OUT:R30 R32 R34 
+79!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:24) [11: MOVE_I R25, IConst: 1]
+	IN :R23 R19 R22 R16 R15 R14 R18 R21 R24 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R25 R17 R20 R24 
+-38!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:0) [38: PHI R28, (R14, R17, R20, R23), { BB4, BB5, BB7, BB8 }]
+	IN :R23 R14 R27 R20 R17 R26 
+	OUT:R27 R28 R26 
+76!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:23) [10: MOVE_I R24, IConst: 0]
+	IN :R23 R19 R22 R16 R15 R14 R18 R21 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R17 R20 R24 
+16!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:4) [5: MOVE_I R12, IConst: 0]
+	IN :R23 R19 R22 R16 R15 R14 R18 R25 R21 R24 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R25 R17 R20 R24 
+52!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:14) [20: GOTO BB9]
+	IN :R23 R19 R22 R16 R15 R14 R18 R25 R21 R24 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R25 R17 R20 R24 
+93!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:30) [28: MOVE_I R32, T31]
+	IN :R30 T31 R26 
+	OUT:R30 R32 R26 
+115!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:34) [35: MUL_I T39, IConst: 5656, R34]
+	IN :R34 
+	OUT:T39 
+-39!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:0) [39: PHI R27, (R15, R18, R21, R24), { BB4, BB5, BB7, BB8 }]
+	IN :R23 R15 R14 R18 R21 R24 R20 R17 R26 
+	OUT:R23 R27 R14 R26 R17 R20 
+106!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:32) [32: MOVE_I R36, T35]
+	IN :T35 R32 R34 
+	OUT:R32 R34 
+35!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:9) [22: MOVE_I R15, IConst: 0]
+	IN :R23 R19 R22 R14 R18 R25 R21 R24 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R18 R21 R25 R17 R20 R24 
+116!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:34) [36: MOVE_I R40, T39]
+	IN :T39 
+	OUT:
+85!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:29) [25: MUL_I T29, R28, IConst: 100]
+	IN :R27 R28 R26 
+	OUT:R27 T29 R26 
+92!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:30) [27: MUL_I T31, R27, IConst: 100]
+	IN :R27 R30 R26 
+	OUT:R30 T31 R26 
+69!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:20) [15: GOTO BB9]
+	IN :R23 R19 R22 R16 R15 R14 R18 R25 R21 R24 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R25 R17 R20 R24 
+23!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:6) [7: IFCMP_I IConst: 2754, IConst: 7823, LE, BB6]
+	IN :R23 R19 R22 R16 R15 R14 R18 R25 R21 R24 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R25 R17 R20 R24 
+44!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:12) [17: MOVE_I R17, IConst: 0]
+	IN :R23 R22 R16 R15 R14 R25 R21 R24 R20 
+	OUT:R23 R22 R14 R15 R16 R21 R25 R17 R20 R24 
+86!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:29) [26: MOVE_I R30, T29]
+	IN :R27 T29 R26 
+	OUT:R27 R30 R26 
+117!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:35) [37: RETURN_V]
+	IN :
+	OUT:
+111!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:33) [34: MOVE_I R38, T37]
+	IN :T37 R34 
+	OUT:R34 
+19!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:4) [6: MOVE_I R13, IConst: 0]
+	IN :R23 R19 R22 R16 R15 R14 R18 R25 R21 R24 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R25 R17 R20 R24 
+67!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:20) [14: MOVE_I R22, IConst: 0]
+	IN :R23 R19 R16 R15 R14 R18 R25 R21 R24 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R25 R17 R20 R24 
+11!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:3) [3: MOVE_I R10, IConst: 5656]
+	IN :R23 R19 R22 R16 R15 R14 R18 R25 R21 R24 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R25 R17 R20 R24 
+110!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:33) [33: MUL_I T37, IConst: 7823, R32]
+	IN :R32 R34 
+	OUT:T37 R34 
+13!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:4) [4: MOVE_I R11, IConst: 0]
+	IN :R23 R19 R22 R16 R15 R14 R18 R25 R21 R24 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R25 R17 R20 R24 
+-40!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:0) [40: PHI R26, (R16, R19, R22, R25), { BB4, BB5, BB7, BB8 }]
+	IN :R23 R19 R22 R16 R15 R14 R18 R25 R21 R24 R20 R17 
+	OUT:R23 R14 R15 R18 R21 R26 R17 R20 R24 
+61!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:18) [12: MOVE_I R20, IConst: 0]
+	IN :R23 R19 R16 R15 R14 R18 R25 R24 R17 
+	OUT:R23 R19 R14 R15 R16 R18 R25 R17 R20 R24 
+99!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:31) [29: MUL_I T33, R26, IConst: 100]
+	IN :R30 R32 R26 
+	OUT:T33 R30 R32 
+57!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:17) [8: IFCMP_I IConst: 7823, IConst: 5656, LE, BB8]
+	IN :R23 R19 R22 R16 R15 R14 R18 R25 R21 R24 R17 R20 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R25 R20 R17 R24 
+50!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:14) [19: MOVE_I R19, IConst: 1]
+	IN :R23 R22 R16 R15 R14 R18 R25 R21 R24 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R25 R17 R20 R24 
+73!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:22) [9: MOVE_I R23, IConst: 0]
+	IN :R19 R22 R16 R15 R14 R18 R21 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R17 R20 
+105!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:32) [31: MUL_I T35, IConst: 2754, R30]
+	IN :R30 R32 R34 
+	OUT:T35 R32 R34 
+7!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:3) [2: MOVE_I R9, IConst: 7823]
+	IN :R23 R19 R22 R16 R15 R14 R18 R25 R21 R24 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R25 R17 R20 R24 
+64!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:19) [13: MOVE_I R21, IConst: 1]
+	IN :R23 R19 R16 R15 R14 R18 R25 R24 R20 R17 
+	OUT:R23 R19 R14 R15 R16 R18 R21 R25 R17 R20 R24 
+28!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:7) [16: IFCMP_I IConst: 2754, IConst: 5656, LE, BB5]
+	IN :R23 R19 R22 R16 R15 R14 R18 R25 R21 R24 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R25 R17 R20 R24 
+40!main:([Ljava/lang/String;)V@GreatestTest (GreatestTest.java:10) [24: GOTO BB9]
+	IN :R23 R19 R22 R16 R15 R14 R18 R25 R21 R24 R20 R17 
+	OUT:R23 R19 R22 R14 R15 R16 R18 R21 R25 R17 R20 R24 
+********** LEAVE Analysis Results **********
+LEAVE: liveness
+Exclusive time: 00:00:00:247 hh:mm:ss:ms
+Inclusive time: 00:00:00:247 hh:mm:ss:ms
+Chord run completed at: Oct 8, 2016 8:23:08 PM
+Total time: 00:00:02:582 hh:mm:ss:ms
