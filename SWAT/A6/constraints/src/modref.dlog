@@ -24,6 +24,10 @@ reachableM(m:M0) input
 
 # TODO: declare any intermediate relations you might need
 
+# I need to find all the methods reachable from a method
+# These are the descendents of method m
+descendants(m:M0,m1:M1)
+
 # use only these output relations
 refStatField(m:M0,f:F0) output
 modStatField(m:M0,f:F0) output
@@ -36,3 +40,15 @@ modInstField(m:M0,h:H0,f:F0) output
 
 # TODO: write constraints to compute above output relations
 
+# Find all the methods that can be called from a given method, directly or transitively
+# This is just a single level of transitivity
+descendants(m, m1) :- IM(i,m1), MI(m,i).
+# This might make it recursive so I can get all the layers
+# This is too inclusive. It seems that this is working forwards and backwards
+descendants(m, m2) :- descendants(m,m1),IM(i,m1),MI(m2,i).
+
+
+
+# This only gets the fields references directly in a method
+refStatField(m,f) :- reachableM(m), MgetStatFldInst(m,_,f).
+refStatField(m,f) :- descendants(m,m1), MgetStatFldInst(m1,_,f).
