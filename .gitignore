@@ -8,4 +8,5 @@
 /RL/FinalProject/SoccerGame/build/
 /RL/FinalProject/SoccerGame/dist/
 *.class
+*.bdd
 *.*~

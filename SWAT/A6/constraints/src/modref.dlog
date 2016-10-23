@@ -25,7 +25,7 @@ reachableM(m:M0) input
 # TODO: declare any intermediate relations you might need
 
 # I need to find all the methods reachable from a method
-# These are the descendents of method m
+# True if m1 is a descendent of m
 descendants(m:M0,m1:M1)
 
 # use only these output relations
@@ -40,15 +40,40 @@ modInstField(m:M0,h:H0,f:F0) output
 
 # TODO: write constraints to compute above output relations
 
+#*********************
+# Populate descendants relation
+#*********************
 # Find all the methods that can be called from a given method, directly or transitively
-# This is just a single level of transitivity
-descendants(m, m1) :- IM(i,m1), MI(m,i).
-# This might make it recursive so I can get all the layers
-# This is too inclusive. It seems that this is working forwards and backwards
-descendants(m, m2) :- descendants(m,m1),IM(i,m1),MI(m2,i).
+# Base case: This is just a single level of transitivity
+descendants(m, m1) :- MI(m,i),IM(i,m1).
+# Inductive case: This makes it recursive so I can get all the descendants
+descendants(m, m2) :- descendants(m,m1),MI(m1,i),IM(i,m2).
 
-
-
+#**********************
+# Referenced static fields
+#**********************
 # This only gets the fields references directly in a method
 refStatField(m,f) :- reachableM(m), MgetStatFldInst(m,_,f).
+# This gets all the referenced fields along a call graph path
 refStatField(m,f) :- descendants(m,m1), MgetStatFldInst(m1,_,f).
+
+#**********************
+# modified static fields
+#**********************
+modStatField(m,f) :- reachableM(m), MputStatFldInst(m,f,_).
+modStatField(m,f) :- descendants(m,m1), MputStatFldInst(m1,f,_).
+
+#**********************
+# Instance fields references
+#**********************
+refInstField(m,h,f) :- reachableM(m), VH(v,h),MgetInstFldInst(m,_,v,f).
+refInstField(m,h,f) :- descendants(m,m1), VH(v,h), MgetInstFldInst(m1,_,v,f).
+
+#***********************
+# Modified instance fields
+#***********************
+modInstField(m,h,f) :- reachableM(m), VH(v,h), MputInstFldInst(m,v,f,_).
+modInstField(m,h,f) :- descendants(m,m1), VH(v,h), MputInstFldInst(m1,v,f,_).
+
+
+
