@@ -22,6 +22,10 @@ HFH(h:H0,f:F0,h2:H1) input
 reachableM(m:M0) input
 
 # TODO: declare any intermediate relations you might need
+# This indicates that an object allocated at site h
+# may be reachable on the heap. I want the output to
+# exclude all of these
+reachableHeap(h:H0)
 
 # use only these output relations
 localMH(m:M0,h:H0) output
@@ -31,4 +35,25 @@ localMH(m:M0,h:H0) output
 ###
 
 # TODO: write constraints to compute above output relation
+
+#***********************
+# Set up the sites I want to exclude
+#***********************
+# This is doing pretty good
+# I think I need to set up the recusion as the last step
+reachableHeap(h) :- MH(m,h), MmethArg(m,_,v), VH(v,h).
+reachableHeap(h) :- MH(m,h), MmethRet(m,_,v), VH(v,h).
+reachableHeap(h) :- FH(_,h).
+# Not sure if this does anything
+reachableHeap(h) :- reachableHeap(h2), HFH(h,_,h2).
+
+# Somehow these two statements are equivalent
+#localMH(m,h) :- reachableM(m), MH(m,h), VH(v,h), !MmethArg(m,_,v), !MmethRet(m,_,v), !FH(_,h).
+#localMH(m,h) :- reachableM(m), MH(m,h).
+
+#
+localMH(m,h) :- reachableM(m), MH(m,h), !reachableHeap(h).
+
+
+
 
