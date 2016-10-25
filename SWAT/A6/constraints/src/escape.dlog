@@ -53,6 +53,14 @@ reachableHeap(h) :- FH(_,h).
 # This removes too much
 #reachableHeap(h) :- HFH(_,_,h).
 
+# This removes too much 
+#reachableHeap(h) :- MH(_,h2), HFH(h2,_,h).
+
+# This doesn't remove the right stuff
+#reachableHeap(h) :- MH(_,h2), HFH(h,_,h2).
+
+reachableHeap(h2) :- MH(m1,h1), MH(m2,h2), HFH(h1,_,h2), m1 != m2. 
+
 #
 localMH(m,h) :- reachableM(m), MH(m,h), !reachableHeap(h).
 #localMH(m,h) :- reachableM(m), MH(m,h).
