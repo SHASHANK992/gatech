@@ -40,30 +40,18 @@ localMH(m:M0,h:H0) output
 #***********************
 # Set up the sites I want to exclude
 #***********************
-# This is doing pretty good
-# I think I need to set up the recusion as the last step
+# Base cases
 reachableHeap(h) :- MH(m,h), MmethArg(m,_,v), VH(v,h).
 reachableHeap(h) :- MH(m,h), MmethRet(m,_,v), VH(v,h).
 reachableHeap(h) :- FH(_,h).
 
-# This removes too little (nothing actually)
-#reachableHeap(h) :- reachableHeap(h2), HFH(h,_,h2).
-#reachableHeap(h) :- reachableHeap(h2), HFH(h2,_,h).
-
-# This removes too much
-#reachableHeap(h) :- HFH(_,_,h).
-
-# This removes too much 
-#reachableHeap(h) :- MH(_,h2), HFH(h2,_,h).
-
-# This doesn't remove the right stuff
-#reachableHeap(h) :- MH(_,h2), HFH(h,_,h2).
-
+# I think this is supposed to be the recursive case
 reachableHeap(h2) :- MH(m1,h1), MH(m2,h2), HFH(h1,_,h2), m1 != m2. 
 
-#
+#************************
+# Find the local sites
+#************************
 localMH(m,h) :- reachableM(m), MH(m,h), !reachableHeap(h).
-#localMH(m,h) :- reachableM(m), MH(m,h).
 
 
 
