@@ -45,13 +45,17 @@ localMH(m:M0,h:H0) output
 reachableHeap(h) :- MH(m,h), MmethArg(m,_,v), VH(v,h).
 reachableHeap(h) :- MH(m,h), MmethRet(m,_,v), VH(v,h).
 reachableHeap(h) :- FH(_,h).
-# Not sure if this does anything
-reachableHeap(h) :- reachableHeap(h2), HFH(h,_,h2).
 
+# This removes too little (nothing actually)
+#reachableHeap(h) :- reachableHeap(h2), HFH(h,_,h2).
+#reachableHeap(h) :- reachableHeap(h2), HFH(h2,_,h).
+
+# This removes too much
+#reachableHeap(h) :- HFH(_,_,h).
 
 #
 localMH(m,h) :- reachableM(m), MH(m,h), !reachableHeap(h).
-
+#localMH(m,h) :- reachableM(m), MH(m,h).
 
 
 
