@@ -1,0 +1,11 @@
+<main:([Ljava/lang/String;)V@TestCase,0,R0!main:([Ljava/lang/String;)V@TestCase>
+<<init>:()V@Point,0,R0!<init>:()V@Point>
+<clone:(LPoint;)V@Point,0,R0!clone:(LPoint;)V@Point>
+<clone:(LPoint;)V@Point,1,R1!clone:(LPoint;)V@Point>
+<distance:(LPoint;)Ljava/lang/Float;@Point,0,R0!distance:(LPoint;)Ljava/lang/Float;@Point>
+<distance:(LPoint;)Ljava/lang/Float;@Point,1,R1!distance:(LPoint;)Ljava/lang/Float;@Point>
+<<init>:(F)V@java.lang.Float,0,R0!<init>:(F)V@java.lang.Float>
+<floatValue:()F@java.lang.Float,0,R0!floatValue:()F@java.lang.Float>
+<<init>:(I)V@java.lang.Integer,0,R0!<init>:(I)V@java.lang.Integer>
+<intValue:()I@java.lang.Integer,0,R0!intValue:()I@java.lang.Integer>
+<<init>:()V@java.lang.Object,0,R0!<init>:()V@java.lang.Object>

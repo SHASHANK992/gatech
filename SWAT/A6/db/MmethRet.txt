@@ -1,0 +1,1 @@
+<distance:(LPoint;)Ljava/lang/Float;@Point,0,R99!distance:(LPoint;)Ljava/lang/Float;@Point>

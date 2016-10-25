@@ -1,0 +1,6 @@
+<main:([Ljava/lang/String;)V@TestCase,R3!main:([Ljava/lang/String;)V@TestCase,x:Ljava/lang/Float;@Point,R5!main:([Ljava/lang/String;)V@TestCase>
+<main:([Ljava/lang/String;)V@TestCase,R3!main:([Ljava/lang/String;)V@TestCase,y:Ljava/lang/Float;@Point,R5!main:([Ljava/lang/String;)V@TestCase>
+<main:([Ljava/lang/String;)V@TestCase,R6!main:([Ljava/lang/String;)V@TestCase,x:Ljava/lang/Float;@Point,R7!main:([Ljava/lang/String;)V@TestCase>
+<main:([Ljava/lang/String;)V@TestCase,R6!main:([Ljava/lang/String;)V@TestCase,y:Ljava/lang/Float;@Point,R7!main:([Ljava/lang/String;)V@TestCase>
+<clone:(LPoint;)V@Point,R1!clone:(LPoint;)V@Point,x:Ljava/lang/Float;@Point,R6!clone:(LPoint;)V@Point>
+<clone:(LPoint;)V@Point,R1!clone:(LPoint;)V@Point,y:Ljava/lang/Float;@Point,R7!clone:(LPoint;)V@Point>

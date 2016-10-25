@@ -1,0 +1,2 @@
+<main:([Ljava/lang/String;)V@TestCase,isEuclidean:Ljava/lang/Integer;@Point,R10!main:([Ljava/lang/String;)V@TestCase>
+<<clinit>:()V@Point,isEuclidean:Ljava/lang/Integer;@Point,T0!<clinit>:()V@Point>

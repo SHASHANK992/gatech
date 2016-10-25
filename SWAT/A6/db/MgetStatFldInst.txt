@@ -1,0 +1,1 @@
+<distance:(LPoint;)Ljava/lang/Float;@Point,T16!distance:(LPoint;)Ljava/lang/Float;@Point,isEuclidean:Ljava/lang/Integer;@Point>
