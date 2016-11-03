@@ -13,7 +13,24 @@ def get_factors(n):
     q = 0
 
     # your code starts here
-
+    
+    # Use the fancy algorithm here
+    # http://www2.mae.ufl.edu/~uhk/FACTORING-LARGE-COMPOSITE-NUMBERS.pdf
+    
+    littleN = int(n**0.5)+1
+    
+    # I just set some arbitrary range to search
+    for i in range(littleN, littleN+100000):
+        p = littleN - ((littleN**2 - n)**0.5)
+        
+        if float(p).is_integer:
+            q = littleN + ((littleN**2 - n)**0.5)
+            break
+    #end for
+    
+    p = int(p)
+    q = int(q)
+    
     # your code ends here
     return (p, q)
 
@@ -22,9 +39,25 @@ def get_key(p, q, e):
     d = 0
 
     # your code starts here
-
+       
+    totient = (p-1)*(q-1)
+    
+    # Need d*e % totient = 1
+    # In other words
+    # de = totient*k + 1 for integer k
+    # Find d such that it is an integer
+    for k in range(1, e):
+        d = (totient*k + 1)/e
+        
+        # I don't know why, but fur some reason my algebra above
+        # doesn't always work. So I explicitly check it here.
+        # Finds the key fast enough
+        if ((d*e) % totient) == 1:
+            break    
+    
     # your code ends here
-    return d
+
+    return int(d)
 
 def main():
     if len(sys.argv) != 2:
