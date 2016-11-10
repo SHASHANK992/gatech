@@ -11,7 +11,13 @@ def is_waldo(n1, n2):
     result = False
 
     #your code start here
-
+    # Used the division Euclidean algorithm to find the 
+    # greatest common divisor between the 2 keys
+    # https://en.wikipedia.org/wiki/Euclidean_algorithm#Implementations
+    if gcd(n1, n2) != 1:
+        # If the GCD is not 1, then we have a shared prime
+        # This is vulnerability and also my waldo
+        result = True
     #your code ends here
 
     return result
@@ -21,10 +27,57 @@ def get_private_key(n1, n2, e):
     d = 0
 
     #your code starts here
-
+    
+    # Find the gcd again
+    # This is one prime (the common one)
+    p = gcd(n1, n2)
+    
+    # We can get the other prime values by dividing by p
+    q1 = n1/p
+    q2 = n2/p
+    
+    d =  get_key(p, q1, e)
+    
     #your code ends here
 
     return d
+    
+# Compute the private key
+def get_key(p, q, e):
+    d = 0
+
+    # your code starts here
+       
+    totient = (p-1)*(q-1)
+    
+    # Need d*e % totient = 1
+    # In other words
+    # de = totient*k + 1 for integer k
+    # Find d such that it is an integer
+    for k in range(1, e):
+        d = (totient*k + 1)/e
+        
+        # I don't know why, but fur some reason my algebra above
+        # doesn't always work. So I explicitly check it here.
+        # Finds the key fast enough
+        if ((d*e) % totient) == 1:
+            break    
+    
+    # your code ends here
+
+    return int(d)
+    
+
+# Finds the greatest common divisor between 2 numbers
+# Will return 1 if no common divisors (because 1 is always common) 
+def gcd(a, b):
+    while b != 0:
+        temp = b
+        b = a % b
+        a = temp
+        
+    return a
+    
 
 def main():
     if len(sys.argv) != 2:
