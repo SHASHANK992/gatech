@@ -1,0 +1,32 @@
+Jacob Kilver
+CS6340
+Assignment 7
+
+
+***************
+Question 1
+***************
+From the provided report, it appears there are 2 distinct bugs in this program. They happen to be in the same function, but they are due to 2 different values of the info->transform object. Indeed, when comparing these different predicates, it appears to be two different use cases. One is when the image is being flipped horizontally or vertically, and the other is when the image is being transversed or rotated 180 degrees. 
+
+I do find it odd, though, that when I zoom in on the predicates that the other predicate is the highest ranking sub-predicate. For instance, for the case where info->transform == 2, the highest ranking subpredicate is info->transform == 4.
+
+
+***************
+Question 2
+***************
+Test case 1 - flip vertical
+./jpegtran -flip vertical -outfile jrkTest1.jpg ../testimg.jpg
+
+cs6340@cs6340ProjectVM:~/Documents/OMSCS/SWAT/A7/asgn7/src$ ./jpegtran -flip vertical -outfile jrkTest1.jpg ../testimg.jpg 
+Segmentation fault (core dumped)
+
+
+Test case 2 - flip transverse
+cs6340@cs6340ProjectVM:~/Documents/OMSCS/SWAT/A7/asgn7/src$ ./jpegtran -transverse -outfile jrkTest2.jpg ../testimg.jpg 
+Bogus virtual array access
+
+
+
+***************
+Question 3
+***************
