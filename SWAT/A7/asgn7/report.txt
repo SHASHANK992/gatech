@@ -8,20 +8,20 @@ Question 1
 ***************
 From the provided report, it appears there are 2 distinct bugs in this program. They happen to be in the same function, but they are due to 2 different values of the info->transform object. Indeed, when comparing these different predicates, it appears to be two different use cases. One is when the image is being flipped horizontally or vertically, and the other is when the image is being transversed or rotated 180 degrees. 
 
-I do find it odd, though, that when I zoom in on the predicates that the other predicate is the highest ranking sub-predicate. For instance, for the case where info->transform == 2, the highest ranking subpredicate is info->transform == 4.
 
 
 ***************
 Question 2
 ***************
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Test case 1 - flip vertical
-./jpegtran -flip vertical -outfile jrkTest1.jpg ../testimg.jpg
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 cs6340@cs6340ProjectVM:~/Documents/OMSCS/SWAT/A7/asgn7/src$ ./jpegtran -flip vertical -outfile jrkTest1.jpg ../testimg.jpg 
 Segmentation fault (core dumped)
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Test case 2 - flip transverse
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 cs6340@cs6340ProjectVM:~/Documents/OMSCS/SWAT/A7/asgn7/src$ ./jpegtran -transverse -outfile jrkTest2.jpg ../testimg.jpg 
 Bogus virtual array access
 
@@ -30,3 +30,47 @@ Bogus virtual array access
 ***************
 Question 3
 ***************
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Root cause of first error - Segmentation fault for -flip vertical
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The pointer 'coef_arrays' is created, but never initialized in this case. When handling vertical transformations, the dimensions of the output array for the image are non-existant, causing a segmentation fault because the pointer to the array sizes is NULL. Contrast this with the 90 degree rotation case where the 'coef_arrays' variable is assigned a valid value. The root cause is in transupp.c at line 589, where the comment explicitly states that the workplace array is not necessary. However, this fails to account for the call later in transupp.c at line 141 in method do_flip_v where the workspace array is directly accessed. 
+
+This is validated by running the test case above in the debugger, where the following error is printed:
+
+Program received signal SIGSEGV, Segmentation fault.
+0x000000000040381d in do_flip_v (dst_coef_arrays=0x0, src_coef_arrays=0x61b090, dstinfo=0x7fffffffd740, srcinfo=0x7fffffffd950)
+    at transupp.c:141
+141	      dst_buffer = (*srcinfo->mem->access_virt_barray)
+
+The easiest solution in this case would be to initialize the workspace array here, just like for all the other cases. This would be somewhat redundant (the destination array sizes are computed elsewhere if the workspace array is NULL), but should resolve this issue.
+
+For completeness, here is a list of the steps in this error scenario, from root cause to the manifestation of this error:
+- transupp.c line 571, coeff_array assigned NULL value
+- transupp.c line 588, workspace_coef_array assigned NULL
+- jpegtran.c line 480, transformation called passing the object that still has the NULL workspace_coef_array  
+- transupp.c line 827, NULL workspace_coef_array assigned to local variable dst_coef_arrays
+- transupp.c line 836, NULL dst_coef_arrays passed to do_flip_v
+- transupp.c line 142, attempt to access element of array, which is NULL, causing segmentation fault
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Root cause of the second error - Bogus virtual array access for -transverse
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+******************
+Comment
+******************
+I do software debugging for a living, but unfortunately we don't have anything like statistical debugging in place at my work. I find it amazing that this tool as able to identify where the root of the issue was much more precisely than the debugger was able to. For example, the issue reported ot my team might be similar to the one from the debugger. Then I would need to manually find the bug by tracing back through the code or whatever logs there might be. With this statistical debugging, though, it pinpoints where the issue is much more precisely.
+
