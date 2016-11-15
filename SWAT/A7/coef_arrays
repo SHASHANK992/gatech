@@ -1,0 +1,13 @@
+(gdb) print *coef_arrays[0]
+$12 = {mem_buffer = 0x0, rows_in_array = 20, blocksperrow = 30, maxaccess = 2, rows_in_mem = 0, rowsperchunk = 0, cur_start_row = 0, 
+  first_undef_row = 0, pre_zero = 0, dirty = 0, b_s_open = 0, next = 0x0, b_s_info = {read_backing_store = 0x0, 
+    write_backing_store = 0x0, close_backing_store = 0x0, temp_file = 0x0, temp_name = '\000' <repeats 63 times>}}
+(gdb) print *coef_arrays[1]
+$13 = {mem_buffer = 0x0, rows_in_array = 10, blocksperrow = 15, maxaccess = 1, rows_in_mem = 0, rowsperchunk = 0, cur_start_row = 0, 
+  first_undef_row = 0, pre_zero = 0, dirty = 0, b_s_open = 0, next = 0x61aeb0, b_s_info = {read_backing_store = 0x0, 
+    write_backing_store = 0x0, close_backing_store = 0x0, temp_file = 0x0, temp_name = '\000' <repeats 63 times>}}
+(gdb) print *coef_arrays[2]
+$14 = {mem_buffer = 0x0, rows_in_array = 10, blocksperrow = 15, maxaccess = 1, rows_in_mem = 0, rowsperchunk = 0, cur_start_row = 0, 
+  first_undef_row = 0, pre_zero = 0, dirty = 0, b_s_open = 0, next = 0x61af48, b_s_info = {read_backing_store = 0x0, 
+    write_backing_store = 0x0, close_backing_store = 0x0, temp_file = 0x0, temp_name = '\000' <repeats 63 times>}}
+

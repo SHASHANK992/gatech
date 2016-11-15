@@ -59,6 +59,28 @@ Root cause of the second error - Bogus virtual array access for -transverse
 
 
 
+The error comes from jmemmgr.c line 854:
+
+  /* debugging check */
+  if (end_row > ptr->rows_in_array || num_rows > ptr->maxaccess ||
+      ptr->mem_buffer == NULL)
+    ERREXIT(cinfo, JERR_BAD_VIRTUAL_ACCESS);
+    
+In this case, end_row is greater than the number of rows in the array. The number of rows in the array is 20 while the computed end row is 22. 
+
+The problem here is that the number of rows is incorrect. My guess is that the rounding function is not working properly or that the arguments passed to the request_virt_barray are incorrect.
+
+The loop in transupp.c for do_transverse has dst_blk_y go from 0 to 29 (height_in_blocks) in steps of 2. When dst_blk_y is 20, we go to access the virtual byte array. The first thing that is done is to check whether the last row, which is the first row (20) plus the number of rows in this step (2) is within the bounds of the array (number of rows = 20). In this case it is not, and so the Bogus virtual array access error is thrown. 
+
+The number of rows is set way back in transupp.c in the jtransform_request_workspace method. The number of rows is set to be the rounded up integer of the height in blocks of the input image. I think the height and width should be swapped. The numbers I think would work that way, but I am am having a hard time building a logical case for this.
+
+The logical fallacy here is that in do_transverse, the loop bounds are 0 to height_in_blocks, while in access_virt_barray the bounds are effectively 0 to width_in_blocks. These 2 bounds are not compatible. This can be traced all the way back to jtransform_request_workspace where the number of rows is specified using the width_in_blocks.
+
+***********************
+CHECK
+************************
+These dimensions are getting swapped somewhere. The comments say the output image should have the same dimensions as the input image. However, this is obviously not the case
+
 
 
 
