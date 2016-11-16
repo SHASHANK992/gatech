@@ -6,7 +6,11 @@ Assignment 7
 ***************
 Question 1
 ***************
-From the provided report, it appears there are 2 distinct bugs in this program. They happen to be in the same function, but they are due to 2 different values of the info->transform object. Indeed, when comparing these different predicates, it appears to be two different use cases. One is when the image is being flipped horizontally or vertically, and the other is when the image is being transversed or rotated 180 degrees. 
+From the provided report, it appears there are 2 distinct bugs in this program. 
+They happen to be in the same function, but they are due to 2 different values 
+of the info->transform object. Indeed, when comparing these different predicates, 
+it appears to be two different use cases. One is when the image is being flipped
+horizontally or vertically, and the other is when the image is being transversed. 
 
 
 
@@ -33,16 +37,28 @@ Question 3
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Root cause of first error - Segmentation fault for -flip vertical
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-The pointer 'coef_arrays' is created, but never initialized in this case. When handling vertical transformations, the dimensions of the output array for the image are non-existant, causing a segmentation fault because the pointer to the array sizes is NULL. Contrast this with the 90 degree rotation case where the 'coef_arrays' variable is assigned a valid value. The root cause is in transupp.c at line 589, where the comment explicitly states that the workplace array is not necessary. However, this fails to account for the call later in transupp.c at line 141 in method do_flip_v where the workspace array is directly accessed. 
+The pointer 'coef_arrays' is created, but never initialized in this case. 
+When handling vertical transformations, the dimensions of the output array 
+for the image are non-existant, causing a segmentation fault because the 
+pointer to the array sizes is NULL. Contrast this with the 90 degree 
+rotation case where the 'coef_arrays' variable is assigned a valid value. 
+The root cause is in transupp.c at line 589, where the comment explicitly 
+states that the workplace array is not necessary. However, this fails to 
+account for the call later in transupp.c at line 141 in method do_flip_v 
+where the workspace array is directly accessed. 
 
-This is validated by running the test case above in the debugger, where the following error is printed:
+This is validated by running the test case above in the debugger, where the 
+following error is printed:
 
 Program received signal SIGSEGV, Segmentation fault.
 0x000000000040381d in do_flip_v (dst_coef_arrays=0x0, src_coef_arrays=0x61b090, dstinfo=0x7fffffffd740, srcinfo=0x7fffffffd950)
     at transupp.c:141
 141	      dst_buffer = (*srcinfo->mem->access_virt_barray)
 
-The easiest solution in this case would be to initialize the workspace array here, just like for all the other cases. This would be somewhat redundant (the destination array sizes are computed elsewhere if the workspace array is NULL), but should resolve this issue.
+The easiest solution in this case would be to initialize the workspace array here, 
+just like for all the other cases. This would be somewhat redundant (the destination 
+array sizes are computed elsewhere if the workspace array is NULL), but should resolve 
+this issue.
 
 For completeness, here is a list of the steps in this error scenario, from root cause to the manifestation of this error:
 - transupp.c line 571, coeff_array assigned NULL value
@@ -57,8 +73,6 @@ For completeness, here is a list of the steps in this error scenario, from root 
 Root cause of the second error - Bogus virtual array access for -transverse
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
 The error comes from jmemmgr.c line 854:
 
   /* debugging check */
@@ -66,33 +80,32 @@ The error comes from jmemmgr.c line 854:
       ptr->mem_buffer == NULL)
     ERREXIT(cinfo, JERR_BAD_VIRTUAL_ACCESS);
     
-In this case, end_row is greater than the number of rows in the array. The number of rows in the array is 20 while the computed end row is 22. 
+In this case, end_row is greater than the number of rows in the array. The 
+number of rows in the array is 20 while the computed end row is 22. However, 
+this is just how the symptom of the root cause manifested itself.
 
-The problem here is that the number of rows is incorrect. My guess is that the rounding function is not working properly or that the arguments passed to the request_virt_barray are incorrect.
+The logical error here is revealed in the comments. On line 594 of transupp.c, 
+the developer notes for the case of image transverse:
 
-The loop in transupp.c for do_transverse has dst_blk_y go from 0 to 29 (height_in_blocks) in steps of 2. When dst_blk_y is 20, we go to access the virtual byte array. The first thing that is done is to check whether the last row, which is the first row (20) plus the number of rows in this step (2) is within the bounds of the array (number of rows = 20). In this case it is not, and so the Bogus virtual array access error is thrown. 
+"Need workspace arrays having same dimensions as source image."
 
-The number of rows is set way back in transupp.c in the jtransform_request_workspace method. The number of rows is set to be the rounded up integer of the height in blocks of the input image. I think the height and width should be swapped. The numbers I think would work that way, but I am am having a hard time building a logical case for this.
-
-The logical fallacy here is that in do_transverse, the loop bounds are 0 to height_in_blocks, while in access_virt_barray the bounds are effectively 0 to width_in_blocks. These 2 bounds are not compatible. This can be traced all the way back to jtransform_request_workspace where the number of rows is specified using the width_in_blocks.
-
-***********************
-CHECK
-************************
-These dimensions are getting swapped somewhere. The comments say the output image should have the same dimensions as the input image. However, this is obviously not the case
-
-
-
-
-
-
-
-
+Elsewhere (transupp.c, line 462) the developer notes that transversal requires 
+transposition. This requires that the image dimensions be swapped. Indeed, 
+running the failing test case on a working version of jpegtran reveals that the 
+image dimensions are indeed swapped. However, the workspace arrays were not created 
+properly. The workspace arrays should instead be created with the transpose, rotate 
+90, and rotate 270 cases, all cases where the image dimensions are swapped. 
 
 
 
 ******************
 Comment
 ******************
-I do software debugging for a living, but unfortunately we don't have anything like statistical debugging in place at my work. I find it amazing that this tool as able to identify where the root of the issue was much more precisely than the debugger was able to. For example, the issue reported ot my team might be similar to the one from the debugger. Then I would need to manually find the bug by tracing back through the code or whatever logs there might be. With this statistical debugging, though, it pinpoints where the issue is much more precisely.
+I do software debugging for a living, but unfortunately we don't have anything like 
+statistical debugging in place at my work. I find it amazing that this tool as able 
+to identify where the root of the issue was much more precisely than the debugger 
+was able to. For example, the issue reported ot my team might be similar to the 
+one from the debugger. Then I would need to manually find the bug by tracing back 
+through the code or whatever logs there might be. With this statistical debugging, 
+though, it pinpoints where the issue is much more precisely.
 
