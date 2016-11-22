@@ -1,0 +1,32 @@
+Jacob Kilver
+Software Analysis and Test
+Assignment 8
+5 Dec 2016
+
+*************
+2.1
+*************
+The reason for the failure is that the program gets stuck in an infinite loop.
+Specifically it keeps trying to re-order two of the same numbers. It finds that
+one is greater than or equal to the other, so it swaps the order. However, the next
+time through the list this same condition is true, so it swaps the entries again, and
+so on.
+
+*************
+2.2
+*************
+The sort function will fail as long as there are 2 of the same number in the input. I
+validated this with my own simple test input file.
+
+mysort will fail on any input list that has 2 or more of the same integer.
+
+*************
+2.3
+*************
+Line 89 of mysort.c is the root of this problem. Here the data of 2 Links are checked.
+The current condition is whether one integer is greater than or equal to another. However
+the proper condition should be strictly greater than. Only in this scenario will the Links
+have to be swapped. I validated this by creating my own version of mysort that tested 
+only for strictly greater than and the sorting was successful.
+
+On line 89 of mysort.c, remove the '=' from the condition.

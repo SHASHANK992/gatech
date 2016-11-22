@@ -1,0 +1,9 @@
+#!/bin/bash
+
+retval="$(../../mysort $1 7)"
+
+if [ "$retval" = "Error: timeout" ]; then
+    exit 0; # Failure
+else
+    exit 1; # Success
+fi
