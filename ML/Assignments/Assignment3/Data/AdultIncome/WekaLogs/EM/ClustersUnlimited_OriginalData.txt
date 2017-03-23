@@ -1,0 +1,195 @@
+=== Run information ===
+
+Scheme:       weka.clusterers.EM -I 100 -N -1 -X 10 -max -1 -ll-cv 1.0E-6 -ll-iter 1.0E-6 -M 1.0E-6 -num-slots 1 -S 100
+Relation:     Adult-Income-weka.filters.unsupervised.instance.RemovePercentage-P10.0
+Instances:    29305
+Attributes:   15
+              age
+              workclass
+              fnlwgt
+              Education
+              education-num
+              marital status
+              occupation
+              relationship
+              race
+              sex
+              capital gain
+              capital loss
+              hours per week
+              native country
+              class
+Test mode:    evaluate on training data
+
+
+=== Clustering model (full training set) ===
+
+
+EM
+==
+
+Number of clusters selected by cross validation: 2
+Number of iterations performed: 3
+
+
+                                   Cluster
+Attribute                                0           1
+                                    (0.45)      (0.55)
+=======================================================
+age
+  mean                              43.4158     34.5748
+  std. dev.                         12.2189       13.47
+
+workclass
+  Private                         9088.9371  13013.0629
+  Self-emp-not-inc                 1489.498     796.502
+  Self-emp-inc                     733.6596    260.3404
+  Federal-gov                      442.4176    430.5824
+  Local-gov                        904.8534    972.1466
+  State-gov                        511.4409    653.5591
+  Without-pay                        5.9192      9.0808
+  Never-worked                            1           8
+  [total]                        13177.7258  16143.2742
+fnlwgt
+  mean                          186683.7273 192238.6436
+  std. dev.                     103056.1087 107507.2972
+
+Education
+  Bachelors                       2472.2243   2329.7757
+  Some-college                    2451.5721   4121.4279
+  11th                             306.0444    733.9556
+  HS-grad                         4194.5009   5263.4991
+  Prof-school                      394.6711    123.3289
+  Assoc-acdm                       399.9774    570.0226
+  Assoc-voc                        601.8705    645.1295
+  9th                               189.739     277.261
+  7th-8th                          312.3875    272.6125
+  12th                             102.8279    300.1721
+  Masters                          945.6228    600.3772
+  1st-4th                           67.6111     85.3889
+  10th                             306.7491    535.2509
+  Doctorate                        280.3846     99.6154
+  5th-6th                          142.6157    161.3843
+  Preschool                         16.9275     32.0725
+  [total]                        13185.7258  16151.2742
+education-num
+  mean                              10.3964      9.8193
+  std. dev.                          2.7284      2.4087
+
+marital status
+  Married-civ-spouse             12097.5196   1395.4804
+  Divorced                         357.9717   3643.0283
+  Never-married                    548.7683   9077.2317
+  Separated                         64.8968    862.1032
+  Widowed                           71.6803    808.3197
+  Married-spouse-absent             26.3489    344.6511
+  Married-AF-spouse                  9.5402     11.4598
+  [total]                        13176.7258  16142.2742
+occupation
+  Tech-support                     371.8039    464.1961
+  Craft-repair                    2390.4936   1314.5064
+  Other-service                    531.3888   2440.6112
+  Sales                           1468.9049   1781.0951
+  Exec-managerial                 2178.8657   1485.1343
+  Prof-specialty                  2448.8604   2929.1396
+  Handlers-cleaners                422.0215    824.9785
+  Machine-op-inspct                858.5709    937.4291
+  Adm-clerical                     714.2446   2688.7554
+  Farming-fishing                  524.6896    376.3104
+  Transport-moving                 903.7883    537.2117
+  Priv-house-serv                    6.5336    132.4664
+  Protective-serv                  360.5936    231.4064
+  Armed-Forces                       2.9663      6.0337
+  [total]                        13183.7258  16149.2742
+relationship
+  Wife                             267.1245   1134.8755
+  Own-child                        162.5714   4418.4286
+  Husband                        11813.2234     82.7766
+  Not-in-family                    692.7638   6753.2362
+  Other-relative                    48.6646    850.3354
+  Unmarried                        191.3781   2901.6219
+  [total]                        13175.7258  16141.2742
+race
+  White                          11854.8002  13191.1998
+  Asian-Pac-Islander               413.7916    527.2084
+  Amer-Indian-Eskimo               100.7226    183.2774
+  Other                             83.3536    173.6464
+  Black                            722.0579   2064.9421
+  [total]                        13174.7258  16140.2742
+sex
+  Female                           756.1063   8976.8937
+  Male                           12415.6195   7160.3805
+  [total]                        13171.7258  16137.2742
+capital gain
+  mean                            2375.6285     26.0596
+  std. dev.                      10908.7501    227.2915
+
+capital loss
+  mean                             191.5634      0.0002
+  std. dev.                        580.4675      0.1534
+
+hours per week
+  mean                              43.8448     37.6182
+  std. dev.                         11.6856     12.2214
+
+native country
+  United-States                  12116.1719  14650.8281
+  Cambodia                           12.061       6.939
+  England                           32.9933     48.0067
+  Puerto-Rico                       33.0782     71.9218
+  Canada                             53.097      53.903
+  Germany                           56.4597     69.5403
+  Outlying-US(Guam-USVI-etc)         2.9288     12.0712
+  India                             58.8767     34.1233
+  Japan                             29.2093     25.7907
+  Greece                            16.9969      9.0031
+  South                             31.9079     44.0921
+  China                             37.8592     30.1408
+  Cuba                              38.9806     48.0194
+  Iran                              22.0036     16.9964
+  Honduras                                1          11
+  Philippines                       83.4036    101.5964
+  Italy                             40.9302     25.0698
+  Poland                            22.9445     31.0555
+  Jamaica                           19.4743     57.5257
+  Vietnam                           22.6572     44.3428
+  Mexico                           241.7941    341.2059
+  Portugal                          15.9258     18.0742
+  Ireland                            8.8385     16.1615
+  France                            14.6055     15.3945
+  Dominican-Republic                15.3666     47.6334
+  Laos                               7.9502     11.0498
+  Ecuador                           11.9211     17.0789
+  Taiwan                            20.9701     26.0299
+  Haiti                              9.4069     31.5931
+  Columbia                          17.7241     40.2759
+  Hungary                            6.9934      8.0066
+  Guatemala                         16.4356     46.5644
+  Nicaragua                          12.982      19.018
+  Scotland                           4.9917      8.0083
+  Thailand                            2.945      15.055
+  Yugoslavia                        10.9827      6.0173
+  El-Salvador                       30.1132     70.8868
+  Trinadad&Tobago                    6.9571     11.0429
+  Peru                               8.8108     23.1892
+  Hong                               9.9778     11.0222
+  Holand-Netherlands                      2           1
+  [total]                        13210.7258  16176.2742
+class
+  <=50K                           7270.2031  15004.7969
+  >50K                            5901.5228   1132.4772
+  [total]                        13171.7258  16137.2742
+
+
+Time taken to build model (full training data) : 542.69 seconds
+
+=== Model and evaluation on training set ===
+
+Clustered Instances
+
+0       4458 ( 15%)
+1      24847 ( 85%)
+
+
+Log likelihood: -43.37477
+

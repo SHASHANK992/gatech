@@ -1,0 +1,51 @@
+=== Run information ===
+
+Scheme:       weka.clusterers.SimpleKMeans -init 0 -max-candidates 100 -periodic-pruning 10000 -min-density 2.0 -t1 -1.25 -t2 -1.0 -N 2 -A "weka.core.EuclideanDistance -R first-last" -I 500 -num-slots 1 -S 10
+Relation:     AT: Bank_Note_Authentication-weka.filters.unsupervised.instance.Randomize-S42-weka.filters.unsupervised.instance.RemovePercentage-P10.0-weka.filters.unsupervised.attribute.ReplaceMissingValues-weka.filters.unsupervised.attribute.NominalToBinary-Rfirst-last-weka.filters.unsupervised.attribute.Remove-R5-weka.filters.unsupervised.attribute.Standardize_principal components
+Instances:    1235
+Attributes:   4
+              -0.642skewness+0.613curtosis+0.395entropy-0.238variance
+              0.757variance+0.632entropy-0.161curtosis-0.046skewness
+              0.604variance-0.597entropy+0.52 curtosis-0.094skewness
+              class
+Test mode:    evaluate on training data
+
+
+=== Clustering model (full training set) ===
+
+
+kMeans
+======
+
+Number of iterations: 2
+Within cluster sum of squared errors: 109.26831170401488
+
+Initial staring points (random):
+
+Cluster 0: 1.022892,0.39314,-1.241669,1
+Cluster 1: -1.118082,1.27302,-0.077923,0
+
+Missing values globally replaced with mean/mode
+
+Final cluster centroids:
+                                                                       Cluster#
+Attribute                                                  Full Data          0          1
+                                                              (1235)      (552)      (683)
+==========================================================================================
+-0.642skewness+0.613curtosis+0.395entropy-0.238variance            0     0.6088     -0.492
+0.757variance+0.632entropy-0.161curtosis-0.046skewness             0    -0.6281     0.5076
+0.604variance-0.597entropy+0.52 curtosis-0.094skewness             0    -0.3339     0.2698
+class                                                              0          1          0
+
+
+
+
+Time taken to build model (full training data) : 0.03 seconds
+
+=== Model and evaluation on training set ===
+
+Clustered Instances
+
+0       552 ( 45%)
+1       683 ( 55%)
+

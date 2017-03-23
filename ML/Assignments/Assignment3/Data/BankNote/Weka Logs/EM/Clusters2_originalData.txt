@@ -1,0 +1,60 @@
+=== Run information ===
+
+Scheme:weka.clusterers.EM -I 100 -N 2 -M 1.0E-6 -S 100
+Relation:     Bank_Note_Authentication-weka.filters.unsupervised.instance.Randomize-S42-weka.filters.unsupervised.instance.RemovePercentage-P10.0
+Instances:    1235
+Attributes:   5
+              variance
+              skewness
+              curtosis
+              entropy
+              class
+Test mode:evaluate on training data
+
+=== Model and evaluation on training set ===
+
+
+EM
+==
+
+Number of clusters: 2
+
+
+           Cluster
+Attribute        0      1
+            (0.45) (0.55)
+==========================
+variance
+  mean      -1.8587 2.2578
+  std. dev.  1.8431 2.0434
+
+skewness
+  mean      -1.0418 4.2094
+  std. dev.  5.3307 5.1467
+
+curtosis
+  mean       2.1614 0.8185
+  std. dev.  5.1561  3.197
+
+entropy
+  mean      -1.2135-1.1278
+  std. dev.  2.0628 2.1412
+
+class
+  0               1    684
+  1             553      1
+  [total]       554    685
+
+
+Time taken to build model (full training data) : 0.14 seconds
+
+=== Model and evaluation on training set ===
+
+Clustered Instances
+
+0       552 ( 45%)
+1       683 ( 55%)
+
+
+Log likelihood: -10.80344
+

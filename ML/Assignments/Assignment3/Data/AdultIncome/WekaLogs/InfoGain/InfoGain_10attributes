@@ -1,0 +1,48 @@
+=== Run information ===
+
+Evaluator:    weka.attributeSelection.InfoGainAttributeEval 
+Search:       weka.attributeSelection.Ranker -T -1.7976931348623157E308 -N 10
+Relation:     Adult-Income-weka.filters.unsupervised.instance.RemovePercentage-P10.0
+Instances:    29305
+Attributes:   15
+              age
+              workclass
+              fnlwgt
+              Education
+              education-num
+              marital status
+              occupation
+              relationship
+              race
+              sex
+              capital gain
+              capital loss
+              hours per week
+              native country
+              class
+Evaluation mode:    evaluate on all training data
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (supervised, Class (nominal): 15 class):
+	Information Gain Ranking Filter
+
+Ranked attributes:
+ 0.1639   8 relationship
+ 0.1546   6 marital status
+ 0.1144  11 capital gain
+ 0.0966   1 age
+ 0.0945   4 Education
+ 0.0941   5 education-num
+ 0.0839   7 occupation
+ 0.0575  13 hours per week
+ 0.0504  12 capital loss
+ 0.0381  10 sex
+
+Selected attributes: 8,6,11,1,4,5,7,13,12,10 : 10
+

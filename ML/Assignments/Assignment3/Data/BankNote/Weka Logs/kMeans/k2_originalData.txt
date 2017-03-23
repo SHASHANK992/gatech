@@ -1,0 +1,46 @@
+=== Run information ===
+
+Scheme:weka.clusterers.SimpleKMeans -N 2 -A "weka.core.EuclideanDistance -R first-last" -I 500 -S 10
+Relation:     Bank_Note_Authentication-weka.filters.unsupervised.instance.Randomize-S42-weka.filters.unsupervised.instance.RemovePercentage-P10.0
+Instances:    1235
+Attributes:   5
+              variance
+              skewness
+              curtosis
+              entropy
+              class
+Test mode:evaluate on training data
+
+=== Model and evaluation on training set ===
+
+
+kMeans
+======
+
+Number of iterations: 2
+Within cluster sum of squared errors: 158.3351101001918
+Missing values globally replaced with mean/mode
+
+Cluster centroids:
+                         Cluster#
+Attribute    Full Data          0          1
+                (1235)      (552)      (683)
+============================================
+variance        0.4179    -1.8587     2.2578
+skewness        1.8623    -1.0418     4.2094
+curtosis        1.4187     2.1614     0.8185
+entropy        -1.1661    -1.2135    -1.1278
+class                0          1          0
+
+
+
+
+Time taken to build model (full training data) : 0.04 seconds
+
+=== Model and evaluation on training set ===
+
+Clustered Instances
+
+0       552 ( 45%)
+1       683 ( 55%)
+

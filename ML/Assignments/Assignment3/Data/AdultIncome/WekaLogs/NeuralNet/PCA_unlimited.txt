@@ -1,0 +1,325 @@
+=== Run information ===
+
+Scheme:       weka.classifiers.functions.MultilayerPerceptron -L 0.3 -M 0.2 -N 500 -V 0 -S 0 -E 20 -H 2
+Relation:     AT: Adult-Income-weka.filters.unsupervised.instance.RemovePercentage-P10.0-weka.filters.unsupervised.attribute.ReplaceMissingValues-weka.filters.unsupervised.attribute.NominalToBinary-Rfirst-last-weka.filters.unsupervised.attribute.Remove-R105-weka.filters.unsupervised.attribute.Standardize_principal components
+Instances:    29305
+Attributes:   87
+              -0.425relationship=Husband-0.425marital status=Married-civ-spouse+0.326marital status=Never-married-0.273sex-0.232age...
+              0.457education-num+0.248native country=United-States-0.228native country=Mexico+0.225Education=Bachelors+0.221occupation=Prof-specialty...
+              -0.422race=Asian-Pac-Islander+0.419native country=United-States+0.387race=White-0.231native country=Philippines-0.166race=Black...
+              0.353age+0.339relationship=Unmarried+0.339marital status=Divorced-0.333marital status=Never-married-0.318relationship=Own-child...
+              0.44 race=White-0.429race=Black+0.291native country=Mexico-0.289native country=United-States+0.233relationship=Not-in-family...
+              -0.569workclass=Private+0.331workclass=Self-emp-not-inc+0.306workclass=Local-gov+0.253occupation=Farming-fishing+0.23 occupation=Protective-serv...
+              -0.386relationship=Wife+0.361relationship=Not-in-family+0.26 hours per week+0.246race=Asian-Pac-Islander-0.243occupation=Prof-specialty...
+              0.352race=Black-0.28race=Asian-Pac-Islander-0.273relationship=Wife+0.238fnlwgt-0.231occupation=Adm-clerical...
+              0.409occupation=Prof-specialty-0.347Education=Some-college-0.262occupation=Exec-managerial-0.254occupation=Adm-clerical+0.215Education=Prof-school...
+              -0.327occupation=Sales+0.308workclass=Local-gov+0.306occupation=Protective-serv+0.291Education=HS-grad-0.27workclass=Self-emp-inc...
+              0.48 Education=HS-grad-0.445Education=Some-college+0.331relationship=Wife+0.195Education=Bachelors-0.181marital status=Divorced...
+              0.342Education=Prof-school-0.31Education=Bachelors-0.258occupation=Exec-managerial+0.224relationship=Unmarried+0.213Education=Doctorate...
+              -0.295relationship=Unmarried+0.259relationship=Not-in-family-0.242workclass=Self-emp-inc+0.242workclass=Federal-gov-0.218workclass=Local-gov...
+              0.458race=Other+0.379native country=Dominican-Republic-0.262Education=5th-6th+0.254native country=Ecuador+0.249native country=Puerto-Rico...
+              0.313Education=Assoc-voc+0.25 occupation=Craft-repair+0.247workclass=Self-emp-not-inc-0.232workclass=Self-emp-inc-0.212occupation=Adm-clerical...
+              0.281marital status=Widowed-0.235occupation=Farming-fishing-0.228Education=Assoc-voc-0.207relationship=Unmarried+0.207native country=Jamaica...
+              -0.375occupation=Sales+0.341occupation=Exec-managerial+0.265workclass=State-gov-0.244marital status=Widowed-0.205workclass=Local-gov...
+              -0.423workclass=Federal-gov+0.301occupation=Sales-0.263occupation=Armed-Forces+0.245Education=Some-college-0.233occupation=Handlers-cleaners...
+              -0.315Education=Doctorate+0.281Education=Prof-school-0.273workclass=State-gov+0.267capital gain-0.242Education=Bachelors...
+              0.324relationship=Other-relative+0.218occupation=Priv-house-serv+0.214workclass=State-gov+0.21 native country=Ecuador-0.189Education=7th-8th...
+              -0.406Education=Masters+0.251workclass=Self-emp-inc-0.218occupation=Handlers-cleaners+0.211workclass=State-gov-0.201occupation=Farming-fishing...
+              0.413native country=Guatemala+0.355occupation=Priv-house-serv-0.299occupation=Other-service+0.293native country=Portugal+0.275Education=1st-4th...
+              -0.357Education=Assoc-acdm+0.28 race=Amer-Indian-Eskimo-0.264occupation=Tech-support+0.236Education=1st-4th+0.236Education=Bachelors...
+              0.479occupation=Transport-moving+0.269marital status=Married-spouse-absent-0.261occupation=Craft-repair-0.224occupation=Machine-op-inspct+0.19 occupation=Other-service...
+              0.298occupation=Machine-op-inspct-0.275occupation=Sales-0.234occupation=Craft-repair-0.23Education=11th-0.213Education=Assoc-acdm...
+              -0.333race=Amer-Indian-Eskimo-0.295Education=Assoc-voc+0.244native country=Guatemala-0.23native country=Italy-0.202occupation=Sales...
+              0.433marital status=Married-spouse-absent-0.321occupation=Transport-moving+0.218occupation=Craft-repair-0.2occupation=Armed-Forces+0.197native country=India...
+              -0.237Education=12th+0.227race=Amer-Indian-Eskimo+0.225marital status=Married-spouse-absent+0.219Education=Preschool+0.217native country=Holand-Netherlands...
+              -0.314native country=Portugal-0.287Education=1st-4th-0.234Education=Assoc-acdm-0.23Education=10th+0.214occupation=Priv-house-serv...
+              0.301Education=Preschool+0.248native country=El-Salvador-0.243relationship=Other-relative+0.229Education=1st-4th-0.199native country=Vietnam...
+              0.315Education=12th+0.26 native country=Italy-0.195native country=Puerto-Rico+0.195occupation=Machine-op-inspct-0.194occupation=Tech-support...
+              0.434Education=9th+0.327Education=Assoc-acdm-0.278Education=Assoc-voc-0.177occupation=Transport-moving-0.177Education=10th...
+              -0.298Education=10th-0.281marital status=Separated-0.232native country=Columbia-0.21native country=Guatemala+0.209relationship=Other-relative...
+              0.338Education=9th+0.248Education=12th-0.241native country=England+0.228marital status=Separated+0.226native country=Trinadad&Tobago...
+              -0.407Education=10th+0.324Education=11th+0.321native country=Italy+0.287Education=12th+0.187native country=Scotland...
+              -0.306Education=12th+0.25 capital loss-0.249native country=Hong-0.244occupation=Handlers-cleaners-0.191native country=Thailand...
+              0.338Education=Assoc-acdm+0.327native country=Puerto-Rico-0.249Education=9th+0.219Education=7th-8th+0.211marital status=Separated...
+              -0.371native country=India+0.335workclass=Without-pay+0.283native country=Philippines+0.234capital loss-0.22native country=Vietnam...
+              -0.225native country=Germany-0.224occupation=Handlers-cleaners+0.22 native country=Poland-0.213Education=10th+0.2  occupation=Armed-Forces...
+              0.302native country=Vietnam+0.263native country=Honduras+0.257Education=11th+0.248native country=Ecuador-0.238Education=7th-8th...
+              -0.308native country=Hungary-0.274native country=Columbia+0.272workclass=Without-pay-0.267native country=Outlying-US(Guam-USVI-etc)+0.216native country=Philippines...
+              -0.359native country=Iran+0.302workclass=Never-worked+0.279native country=Cuba-0.253native country=Thailand-0.251native country=Japan...
+              0.333native country=Cuba+0.254native country=Japan-0.234native country=Nicaragua-0.233native country=Italy+0.226native country=Yugoslavia...
+              0.446native country=Thailand-0.433native country=Cuba-0.285native country=China+0.255marital status=Married-AF-spouse+0.251native country=Cambodia...
+              0.417native country=Germany-0.343native country=Vietnam-0.331native country=England+0.309native country=Ecuador-0.284native country=Canada...
+              0.36 native country=Greece+0.341native country=Outlying-US(Guam-USVI-etc)-0.302native country=France+0.265native country=Iran-0.253native country=Hungary...
+              0.403native country=Yugoslavia+0.376native country=Nicaragua-0.29native country=Poland+0.288native country=Haiti+0.261native country=Canada...
+              -0.525native country=France+0.475native country=England+0.332native country=Poland-0.277native country=Outlying-US(Guam-USVI-etc)+0.21 native country=Yugoslavia...
+              0.445native country=Haiti-0.347native country=Jamaica+0.31 native country=Japan-0.31native country=Outlying-US(Guam-USVI-etc)+0.26 native country=Hong...
+              0.392native country=Scotland+0.336native country=Hungary-0.319native country=Japan+0.233native country=Iran+0.216native country=Ireland...
+              -0.322native country=Thailand-0.315native country=Cuba+0.312native country=Peru+0.276native country=Yugoslavia-0.268native country=Ireland...
+              -0.466native country=Ireland+0.294native country=Cambodia-0.282native country=Taiwan+0.224native country=Scotland+0.215native country=Yugoslavia...
+              -0.427native country=Scotland+0.375native country=Trinadad&Tobago+0.272native country=Iran-0.266native country=Taiwan+0.224native country=Ireland...
+              -0.437marital status=Married-AF-spouse+0.4  native country=Peru-0.319native country=Japan+0.303native country=Thailand-0.215native country=Cambodia...
+              0.318workclass=Never-worked-0.266native country=Honduras-0.25native country=Germany-0.246marital status=Married-AF-spouse-0.237native country=Columbia...
+              0.409native country=Cambodia-0.33native country=Honduras+0.256native country=Columbia-0.25native country=Yugoslavia+0.217native country=Ireland...
+              0.347native country=Hungary-0.293native country=Outlying-US(Guam-USVI-etc)-0.287native country=Nicaragua-0.268native country=Yugoslavia-0.248native country=Trinadad&Tobago...
+              0.347native country=Hungary-0.283native country=South+0.274native country=Puerto-Rico-0.267native country=Dominican-Republic+0.247native country=China...
+              0.292native country=Greece-0.29native country=Ireland+0.269native country=Nicaragua-0.251native country=Outlying-US(Guam-USVI-etc)+0.251marital status=Married-AF-spouse...
+              -0.357native country=Greece+0.328marital status=Married-AF-spouse-0.279native country=Honduras-0.274native country=Hungary+0.262native country=Trinadad&Tobago...
+              0.373native country=South+0.358workclass=Without-pay-0.284native country=Columbia-0.24native country=Hong+0.213Education=10th...
+              -0.381native country=El-Salvador+0.34 native country=Poland-0.266marital status=Married-AF-spouse-0.216workclass=Never-worked+0.214native country=France...
+              -0.334native country=Iran+0.287marital status=Married-AF-spouse-0.287native country=Taiwan+0.261Education=Assoc-acdm+0.242native country=Vietnam...
+              0.42 workclass=Without-pay-0.26native country=Scotland+0.239native country=Nicaragua-0.239occupation=Handlers-cleaners-0.211native country=Canada...
+              0.357workclass=Never-worked+0.257marital status=Separated+0.251native country=Laos-0.241native country=Hong-0.232native country=Trinadad&Tobago...
+              0.308native country=Trinadad&Tobago-0.302native country=Italy+0.244native country=Scotland+0.241native country=Laos+0.24 Education=7th-8th...
+              0.32 native country=China+0.26 native country=Italy+0.255native country=Holand-Netherlands+0.226native country=Scotland+0.224Education=Assoc-voc...
+              -0.265Education=12th-0.259occupation=Handlers-cleaners-0.206capital loss+0.204native country=Peru-0.203native country=Yugoslavia...
+              0.267native country=Greece+0.254native country=Holand-Netherlands+0.251native country=Honduras-0.221native country=Yugoslavia+0.221native country=Taiwan...
+              -0.292Education=7th-8th+0.286native country=Puerto-Rico-0.28native country=India+0.236native country=Philippines+0.206native country=Laos...
+              0.363native country=Jamaica+0.351Education=9th+0.304capital loss-0.251native country=El-Salvador-0.214native country=Holand-Netherlands...
+              0.323capital loss+0.247Education=12th+0.234native country=Peru-0.218native country=Laos-0.215native country=Dominican-Republic...
+              -0.371occupation=Tech-support+0.269occupation=Armed-Forces+0.207Education=Assoc-voc+0.207native country=Trinadad&Tobago+0.196workclass=Never-worked...
+              0.427Education=Preschool-0.256native country=Laos+0.225native country=South+0.199native country=Haiti+0.196Education=12th...
+              -0.335Education=Preschool+0.329marital status=Married-spouse-absent+0.221occupation=Machine-op-inspct-0.206Education=7th-8th+0.205Education=Doctorate...
+              -0.357marital status=Married-spouse-absent+0.29 occupation=Priv-house-serv+0.253native country=China-0.217fnlwgt+0.205Education=5th-6th...
+              -0.379occupation=Armed-Forces+0.353relationship=Other-relative-0.23marital status=Married-spouse-absent+0.213workclass=Federal-gov+0.202Education=12th...
+              -0.373Education=Doctorate+0.285Education=Prof-school+0.277relationship=Other-relative+0.225capital loss-0.219native country=India...
+              0.346occupation=Tech-support-0.272occupation=Other-service-0.253native country=Guatemala+0.245relationship=Other-relative+0.214Education=Doctorate...
+              -0.44native country=Portugal+0.357Education=1st-4th-0.232Education=Preschool+0.212native country=Jamaica+0.209workclass=Self-emp-inc...
+              -0.48capital gain+0.285workclass=Self-emp-inc-0.243capital loss-0.207workclass=Federal-gov-0.203Education=Masters...
+              0.414occupation=Priv-house-serv-0.393native country=Guatemala+0.311marital status=Married-spouse-absent-0.264capital gain-0.193native country=Haiti...
+              -0.363occupation=Farming-fishing+0.22 native country=Jamaica+0.218workclass=Self-emp-not-inc-0.212workclass=Self-emp-inc-0.209race=Other...
+              0.436fnlwgt+0.301race=Amer-Indian-Eskimo+0.271native country=Dominican-Republic+0.254occupation=Farming-fishing-0.229Education=1st-4th...
+              -0.341occupation=Protective-serv-0.333hours per week-0.321workclass=Federal-gov+0.293occupation=Adm-clerical-0.229relationship=Wife...
+              -0.55race=Other+0.279native country=Dominican-Republic+0.26 native country=Ecuador+0.251hours per week+0.245native country=Puerto-Rico...
+              class
+Test mode:    evaluate on training data
+
+=== Classifier model (full training set) ===
+
+Sigmoid Node 0
+    Inputs    Weights
+    Threshold    -1.6681452531632086
+    Node 2    3.1290385206119713
+    Node 3    2.4839846869624016
+Sigmoid Node 1
+    Inputs    Weights
+    Threshold    1.6681452531632086
+    Node 2    -3.129038520611971
+    Node 3    -2.4839846869624016
+Sigmoid Node 2
+    Inputs    Weights
+    Threshold    3.8862479032866077
+    Attrib -0.425relationship=Husband-0.425marital status=Married-civ-spouse+0.326marital status=Never-married-0.273sex-0.232age...    22.11428870697121
+    Attrib 0.457education-num+0.248native country=United-States-0.228native country=Mexico+0.225Education=Bachelors+0.221occupation=Prof-specialty...    -15.433427991792925
+    Attrib -0.422race=Asian-Pac-Islander+0.419native country=United-States+0.387race=White-0.231native country=Philippines-0.166race=Black...    4.621308113791595
+    Attrib 0.353age+0.339relationship=Unmarried+0.339marital status=Divorced-0.333marital status=Never-married-0.318relationship=Own-child...    1.5045614397852765
+    Attrib 0.44 race=White-0.429race=Black+0.291native country=Mexico-0.289native country=United-States+0.233relationship=Not-in-family...    0.6942462482262912
+    Attrib -0.569workclass=Private+0.331workclass=Self-emp-not-inc+0.306workclass=Local-gov+0.253occupation=Farming-fishing+0.23 occupation=Protective-serv...    6.288986908297866
+    Attrib -0.386relationship=Wife+0.361relationship=Not-in-family+0.26 hours per week+0.246race=Asian-Pac-Islander-0.243occupation=Prof-specialty...    1.0259693141023407
+    Attrib 0.352race=Black-0.28race=Asian-Pac-Islander-0.273relationship=Wife+0.238fnlwgt-0.231occupation=Adm-clerical...    -8.027885739517767
+    Attrib 0.409occupation=Prof-specialty-0.347Education=Some-college-0.262occupation=Exec-managerial-0.254occupation=Adm-clerical+0.215Education=Prof-school...    -3.2944985735984793
+    Attrib -0.327occupation=Sales+0.308workclass=Local-gov+0.306occupation=Protective-serv+0.291Education=HS-grad-0.27workclass=Self-emp-inc...    5.071812161547501
+    Attrib 0.48 Education=HS-grad-0.445Education=Some-college+0.331relationship=Wife+0.195Education=Bachelors-0.181marital status=Divorced...    -0.21330027611711513
+    Attrib 0.342Education=Prof-school-0.31Education=Bachelors-0.258occupation=Exec-managerial+0.224relationship=Unmarried+0.213Education=Doctorate...    -18.455429975483494
+    Attrib -0.295relationship=Unmarried+0.259relationship=Not-in-family-0.242workclass=Self-emp-inc+0.242workclass=Federal-gov-0.218workclass=Local-gov...    -0.6477689071336181
+    Attrib 0.458race=Other+0.379native country=Dominican-Republic-0.262Education=5th-6th+0.254native country=Ecuador+0.249native country=Puerto-Rico...    5.864715799229778
+    Attrib 0.313Education=Assoc-voc+0.25 occupation=Craft-repair+0.247workclass=Self-emp-not-inc-0.232workclass=Self-emp-inc-0.212occupation=Adm-clerical...    13.685267735996261
+    Attrib 0.281marital status=Widowed-0.235occupation=Farming-fishing-0.228Education=Assoc-voc-0.207relationship=Unmarried+0.207native country=Jamaica...    -6.224917004857218
+    Attrib -0.375occupation=Sales+0.341occupation=Exec-managerial+0.265workclass=State-gov-0.244marital status=Widowed-0.205workclass=Local-gov...    -4.107353464131358
+    Attrib -0.423workclass=Federal-gov+0.301occupation=Sales-0.263occupation=Armed-Forces+0.245Education=Some-college-0.233occupation=Handlers-cleaners...    -14.407494965489978
+    Attrib -0.315Education=Doctorate+0.281Education=Prof-school-0.273workclass=State-gov+0.267capital gain-0.242Education=Bachelors...    -9.224795468009546
+    Attrib 0.324relationship=Other-relative+0.218occupation=Priv-house-serv+0.214workclass=State-gov+0.21 native country=Ecuador-0.189Education=7th-8th...    7.416152221261863
+    Attrib -0.406Education=Masters+0.251workclass=Self-emp-inc-0.218occupation=Handlers-cleaners+0.211workclass=State-gov-0.201occupation=Farming-fishing...    -14.439224034177505
+    Attrib 0.413native country=Guatemala+0.355occupation=Priv-house-serv-0.299occupation=Other-service+0.293native country=Portugal+0.275Education=1st-4th...    0.9167206819009217
+    Attrib -0.357Education=Assoc-acdm+0.28 race=Amer-Indian-Eskimo-0.264occupation=Tech-support+0.236Education=1st-4th+0.236Education=Bachelors...    -7.302296270600937
+    Attrib 0.479occupation=Transport-moving+0.269marital status=Married-spouse-absent-0.261occupation=Craft-repair-0.224occupation=Machine-op-inspct+0.19 occupation=Other-service...    -8.688269970587537
+    Attrib 0.298occupation=Machine-op-inspct-0.275occupation=Sales-0.234occupation=Craft-repair-0.23Education=11th-0.213Education=Assoc-acdm...    -9.229627453607105
+    Attrib -0.333race=Amer-Indian-Eskimo-0.295Education=Assoc-voc+0.244native country=Guatemala-0.23native country=Italy-0.202occupation=Sales...    6.638653931006603
+    Attrib 0.433marital status=Married-spouse-absent-0.321occupation=Transport-moving+0.218occupation=Craft-repair-0.2occupation=Armed-Forces+0.197native country=India...    9.328086520042842
+    Attrib -0.237Education=12th+0.227race=Amer-Indian-Eskimo+0.225marital status=Married-spouse-absent+0.219Education=Preschool+0.217native country=Holand-Netherlands...    -14.700133915696512
+    Attrib -0.314native country=Portugal-0.287Education=1st-4th-0.234Education=Assoc-acdm-0.23Education=10th+0.214occupation=Priv-house-serv...    -3.0127105165915316
+    Attrib 0.301Education=Preschool+0.248native country=El-Salvador-0.243relationship=Other-relative+0.229Education=1st-4th-0.199native country=Vietnam...    16.981810492704543
+    Attrib 0.315Education=12th+0.26 native country=Italy-0.195native country=Puerto-Rico+0.195occupation=Machine-op-inspct-0.194occupation=Tech-support...    6.984588142444793
+    Attrib 0.434Education=9th+0.327Education=Assoc-acdm-0.278Education=Assoc-voc-0.177occupation=Transport-moving-0.177Education=10th...    7.327863485000661
+    Attrib -0.298Education=10th-0.281marital status=Separated-0.232native country=Columbia-0.21native country=Guatemala+0.209relationship=Other-relative...    -11.162861561737738
+    Attrib 0.338Education=9th+0.248Education=12th-0.241native country=England+0.228marital status=Separated+0.226native country=Trinadad&Tobago...    6.091638410182236
+    Attrib -0.407Education=10th+0.324Education=11th+0.321native country=Italy+0.287Education=12th+0.187native country=Scotland...    5.88653755882323
+    Attrib -0.306Education=12th+0.25 capital loss-0.249native country=Hong-0.244occupation=Handlers-cleaners-0.191native country=Thailand...    17.06649455558108
+    Attrib 0.338Education=Assoc-acdm+0.327native country=Puerto-Rico-0.249Education=9th+0.219Education=7th-8th+0.211marital status=Separated...    -11.443109318731869
+    Attrib -0.371native country=India+0.335workclass=Without-pay+0.283native country=Philippines+0.234capital loss-0.22native country=Vietnam...    -8.99476812281676
+    Attrib -0.225native country=Germany-0.224occupation=Handlers-cleaners+0.22 native country=Poland-0.213Education=10th+0.2  occupation=Armed-Forces...    -10.491205016800588
+    Attrib 0.302native country=Vietnam+0.263native country=Honduras+0.257Education=11th+0.248native country=Ecuador-0.238Education=7th-8th...    2.790085244719689
+    Attrib -0.308native country=Hungary-0.274native country=Columbia+0.272workclass=Without-pay-0.267native country=Outlying-US(Guam-USVI-etc)+0.216native country=Philippines...    -16.273107930493037
+    Attrib -0.359native country=Iran+0.302workclass=Never-worked+0.279native country=Cuba-0.253native country=Thailand-0.251native country=Japan...    15.08650834514006
+    Attrib 0.333native country=Cuba+0.254native country=Japan-0.234native country=Nicaragua-0.233native country=Italy+0.226native country=Yugoslavia...    -0.011823933069440802
+    Attrib 0.446native country=Thailand-0.433native country=Cuba-0.285native country=China+0.255marital status=Married-AF-spouse+0.251native country=Cambodia...    1.8149513718692718
+    Attrib 0.417native country=Germany-0.343native country=Vietnam-0.331native country=England+0.309native country=Ecuador-0.284native country=Canada...    6.298481247386219
+    Attrib 0.36 native country=Greece+0.341native country=Outlying-US(Guam-USVI-etc)-0.302native country=France+0.265native country=Iran-0.253native country=Hungary...    0.9843590270931921
+    Attrib 0.403native country=Yugoslavia+0.376native country=Nicaragua-0.29native country=Poland+0.288native country=Haiti+0.261native country=Canada...    2.9450706423241755
+    Attrib -0.525native country=France+0.475native country=England+0.332native country=Poland-0.277native country=Outlying-US(Guam-USVI-etc)+0.21 native country=Yugoslavia...    -5.3770367571907585
+    Attrib 0.445native country=Haiti-0.347native country=Jamaica+0.31 native country=Japan-0.31native country=Outlying-US(Guam-USVI-etc)+0.26 native country=Hong...    4.424080005280881
+    Attrib 0.392native country=Scotland+0.336native country=Hungary-0.319native country=Japan+0.233native country=Iran+0.216native country=Ireland...    1.71751588833771
+    Attrib -0.322native country=Thailand-0.315native country=Cuba+0.312native country=Peru+0.276native country=Yugoslavia-0.268native country=Ireland...    4.03599623261721
+    Attrib -0.466native country=Ireland+0.294native country=Cambodia-0.282native country=Taiwan+0.224native country=Scotland+0.215native country=Yugoslavia...    -8.11474311311698
+    Attrib -0.427native country=Scotland+0.375native country=Trinadad&Tobago+0.272native country=Iran-0.266native country=Taiwan+0.224native country=Ireland...    -4.540815081350269
+    Attrib -0.437marital status=Married-AF-spouse+0.4  native country=Peru-0.319native country=Japan+0.303native country=Thailand-0.215native country=Cambodia...    -1.1259251858622177
+    Attrib 0.318workclass=Never-worked-0.266native country=Honduras-0.25native country=Germany-0.246marital status=Married-AF-spouse-0.237native country=Columbia...    -0.9568516414853147
+    Attrib 0.409native country=Cambodia-0.33native country=Honduras+0.256native country=Columbia-0.25native country=Yugoslavia+0.217native country=Ireland...    2.997404077785221
+    Attrib 0.347native country=Hungary-0.293native country=Outlying-US(Guam-USVI-etc)-0.287native country=Nicaragua-0.268native country=Yugoslavia-0.248native country=Trinadad&Tobago...    -2.0288794156643237
+    Attrib 0.347native country=Hungary-0.283native country=South+0.274native country=Puerto-Rico-0.267native country=Dominican-Republic+0.247native country=China...    -4.064279534796193
+    Attrib 0.292native country=Greece-0.29native country=Ireland+0.269native country=Nicaragua-0.251native country=Outlying-US(Guam-USVI-etc)+0.251marital status=Married-AF-spouse...    0.7864248348446641
+    Attrib -0.357native country=Greece+0.328marital status=Married-AF-spouse-0.279native country=Honduras-0.274native country=Hungary+0.262native country=Trinadad&Tobago...    2.259746518570511
+    Attrib 0.373native country=South+0.358workclass=Without-pay-0.284native country=Columbia-0.24native country=Hong+0.213Education=10th...    -0.6501110265126319
+    Attrib -0.381native country=El-Salvador+0.34 native country=Poland-0.266marital status=Married-AF-spouse-0.216workclass=Never-worked+0.214native country=France...    -4.535311420413867
+    Attrib -0.334native country=Iran+0.287marital status=Married-AF-spouse-0.287native country=Taiwan+0.261Education=Assoc-acdm+0.242native country=Vietnam...    4.893707046022633
+    Attrib 0.42 workclass=Without-pay-0.26native country=Scotland+0.239native country=Nicaragua-0.239occupation=Handlers-cleaners-0.211native country=Canada...    -0.8201571835181001
+    Attrib 0.357workclass=Never-worked+0.257marital status=Separated+0.251native country=Laos-0.241native country=Hong-0.232native country=Trinadad&Tobago...    8.384359137780063
+    Attrib 0.308native country=Trinadad&Tobago-0.302native country=Italy+0.244native country=Scotland+0.241native country=Laos+0.24 Education=7th-8th...    -3.3826710350356275
+    Attrib 0.32 native country=China+0.26 native country=Italy+0.255native country=Holand-Netherlands+0.226native country=Scotland+0.224Education=Assoc-voc...    -12.424359223124476
+    Attrib -0.265Education=12th-0.259occupation=Handlers-cleaners-0.206capital loss+0.204native country=Peru-0.203native country=Yugoslavia...    1.8085729124249788
+    Attrib 0.267native country=Greece+0.254native country=Holand-Netherlands+0.251native country=Honduras-0.221native country=Yugoslavia+0.221native country=Taiwan...    0.6668717622508333
+    Attrib -0.292Education=7th-8th+0.286native country=Puerto-Rico-0.28native country=India+0.236native country=Philippines+0.206native country=Laos...    4.984653594523577
+    Attrib 0.363native country=Jamaica+0.351Education=9th+0.304capital loss-0.251native country=El-Salvador-0.214native country=Holand-Netherlands...    6.416457488418246
+    Attrib 0.323capital loss+0.247Education=12th+0.234native country=Peru-0.218native country=Laos-0.215native country=Dominican-Republic...    5.294639287464908
+    Attrib -0.371occupation=Tech-support+0.269occupation=Armed-Forces+0.207Education=Assoc-voc+0.207native country=Trinadad&Tobago+0.196workclass=Never-worked...    -15.575397628282447
+    Attrib 0.427Education=Preschool-0.256native country=Laos+0.225native country=South+0.199native country=Haiti+0.196Education=12th...    8.91922720739548
+    Attrib -0.335Education=Preschool+0.329marital status=Married-spouse-absent+0.221occupation=Machine-op-inspct-0.206Education=7th-8th+0.205Education=Doctorate...    -15.247810192106137
+    Attrib -0.357marital status=Married-spouse-absent+0.29 occupation=Priv-house-serv+0.253native country=China-0.217fnlwgt+0.205Education=5th-6th...    10.002881966702512
+    Attrib -0.379occupation=Armed-Forces+0.353relationship=Other-relative-0.23marital status=Married-spouse-absent+0.213workclass=Federal-gov+0.202Education=12th...    9.854905627884126
+    Attrib -0.373Education=Doctorate+0.285Education=Prof-school+0.277relationship=Other-relative+0.225capital loss-0.219native country=India...    -3.4583277230469456
+    Attrib 0.346occupation=Tech-support-0.272occupation=Other-service-0.253native country=Guatemala+0.245relationship=Other-relative+0.214Education=Doctorate...    -12.816874473475611
+    Attrib -0.44native country=Portugal+0.357Education=1st-4th-0.232Education=Preschool+0.212native country=Jamaica+0.209workclass=Self-emp-inc...    -1.9153913673910516
+    Attrib -0.48capital gain+0.285workclass=Self-emp-inc-0.243capital loss-0.207workclass=Federal-gov-0.203Education=Masters...    22.827882277650783
+    Attrib 0.414occupation=Priv-house-serv-0.393native country=Guatemala+0.311marital status=Married-spouse-absent-0.264capital gain-0.193native country=Haiti...    20.89032311695933
+    Attrib -0.363occupation=Farming-fishing+0.22 native country=Jamaica+0.218workclass=Self-emp-not-inc-0.212workclass=Self-emp-inc-0.209race=Other...    -1.3969876180178848
+    Attrib 0.436fnlwgt+0.301race=Amer-Indian-Eskimo+0.271native country=Dominican-Republic+0.254occupation=Farming-fishing-0.229Education=1st-4th...    8.581224224441877
+    Attrib -0.341occupation=Protective-serv-0.333hours per week-0.321workclass=Federal-gov+0.293occupation=Adm-clerical-0.229relationship=Wife...    5.47678890554423
+    Attrib -0.55race=Other+0.279native country=Dominican-Republic+0.26 native country=Ecuador+0.251hours per week+0.245native country=Puerto-Rico...    -4.4027251264721885
+Sigmoid Node 3
+    Inputs    Weights
+    Threshold    -0.8646325951024013
+    Attrib -0.425relationship=Husband-0.425marital status=Married-civ-spouse+0.326marital status=Never-married-0.273sex-0.232age...    21.156186020235143
+    Attrib 0.457education-num+0.248native country=United-States-0.228native country=Mexico+0.225Education=Bachelors+0.221occupation=Prof-specialty...    -9.982673852038584
+    Attrib -0.422race=Asian-Pac-Islander+0.419native country=United-States+0.387race=White-0.231native country=Philippines-0.166race=Black...    7.229809825959841
+    Attrib 0.353age+0.339relationship=Unmarried+0.339marital status=Divorced-0.333marital status=Never-married-0.318relationship=Own-child...    3.0881828840208447
+    Attrib 0.44 race=White-0.429race=Black+0.291native country=Mexico-0.289native country=United-States+0.233relationship=Not-in-family...    -0.8383885250019131
+    Attrib -0.569workclass=Private+0.331workclass=Self-emp-not-inc+0.306workclass=Local-gov+0.253occupation=Farming-fishing+0.23 occupation=Protective-serv...    9.496993718745285
+    Attrib -0.386relationship=Wife+0.361relationship=Not-in-family+0.26 hours per week+0.246race=Asian-Pac-Islander-0.243occupation=Prof-specialty...    6.596845818260724
+    Attrib 0.352race=Black-0.28race=Asian-Pac-Islander-0.273relationship=Wife+0.238fnlwgt-0.231occupation=Adm-clerical...    -10.503136653888847
+    Attrib 0.409occupation=Prof-specialty-0.347Education=Some-college-0.262occupation=Exec-managerial-0.254occupation=Adm-clerical+0.215Education=Prof-school...    3.9723464346488226
+    Attrib -0.327occupation=Sales+0.308workclass=Local-gov+0.306occupation=Protective-serv+0.291Education=HS-grad-0.27workclass=Self-emp-inc...    3.3671013216559684
+    Attrib 0.48 Education=HS-grad-0.445Education=Some-college+0.331relationship=Wife+0.195Education=Bachelors-0.181marital status=Divorced...    1.2319884545411848
+    Attrib 0.342Education=Prof-school-0.31Education=Bachelors-0.258occupation=Exec-managerial+0.224relationship=Unmarried+0.213Education=Doctorate...    -9.172691737682769
+    Attrib -0.295relationship=Unmarried+0.259relationship=Not-in-family-0.242workclass=Self-emp-inc+0.242workclass=Federal-gov-0.218workclass=Local-gov...    -0.128223267066334
+    Attrib 0.458race=Other+0.379native country=Dominican-Republic-0.262Education=5th-6th+0.254native country=Ecuador+0.249native country=Puerto-Rico...    5.882452960846638
+    Attrib 0.313Education=Assoc-voc+0.25 occupation=Craft-repair+0.247workclass=Self-emp-not-inc-0.232workclass=Self-emp-inc-0.212occupation=Adm-clerical...    19.51844435754074
+    Attrib 0.281marital status=Widowed-0.235occupation=Farming-fishing-0.228Education=Assoc-voc-0.207relationship=Unmarried+0.207native country=Jamaica...    -0.1899916892432544
+    Attrib -0.375occupation=Sales+0.341occupation=Exec-managerial+0.265workclass=State-gov-0.244marital status=Widowed-0.205workclass=Local-gov...    3.2273463232074313
+    Attrib -0.423workclass=Federal-gov+0.301occupation=Sales-0.263occupation=Armed-Forces+0.245Education=Some-college-0.233occupation=Handlers-cleaners...    1.1285030416609307
+    Attrib -0.315Education=Doctorate+0.281Education=Prof-school-0.273workclass=State-gov+0.267capital gain-0.242Education=Bachelors...    -14.455935860405413
+    Attrib 0.324relationship=Other-relative+0.218occupation=Priv-house-serv+0.214workclass=State-gov+0.21 native country=Ecuador-0.189Education=7th-8th...    16.215882313378252
+    Attrib -0.406Education=Masters+0.251workclass=Self-emp-inc-0.218occupation=Handlers-cleaners+0.211workclass=State-gov-0.201occupation=Farming-fishing...    -16.34178077533341
+    Attrib 0.413native country=Guatemala+0.355occupation=Priv-house-serv-0.299occupation=Other-service+0.293native country=Portugal+0.275Education=1st-4th...    7.746577888933433
+    Attrib -0.357Education=Assoc-acdm+0.28 race=Amer-Indian-Eskimo-0.264occupation=Tech-support+0.236Education=1st-4th+0.236Education=Bachelors...    -3.11394867588164
+    Attrib 0.479occupation=Transport-moving+0.269marital status=Married-spouse-absent-0.261occupation=Craft-repair-0.224occupation=Machine-op-inspct+0.19 occupation=Other-service...    3.3066062019594806
+    Attrib 0.298occupation=Machine-op-inspct-0.275occupation=Sales-0.234occupation=Craft-repair-0.23Education=11th-0.213Education=Assoc-acdm...    4.492485693238183
+    Attrib -0.333race=Amer-Indian-Eskimo-0.295Education=Assoc-voc+0.244native country=Guatemala-0.23native country=Italy-0.202occupation=Sales...    7.004486284113163
+    Attrib 0.433marital status=Married-spouse-absent-0.321occupation=Transport-moving+0.218occupation=Craft-repair-0.2occupation=Armed-Forces+0.197native country=India...    -6.318383436287602
+    Attrib -0.237Education=12th+0.227race=Amer-Indian-Eskimo+0.225marital status=Married-spouse-absent+0.219Education=Preschool+0.217native country=Holand-Netherlands...    -11.68482485473747
+    Attrib -0.314native country=Portugal-0.287Education=1st-4th-0.234Education=Assoc-acdm-0.23Education=10th+0.214occupation=Priv-house-serv...    -9.21325586571091
+    Attrib 0.301Education=Preschool+0.248native country=El-Salvador-0.243relationship=Other-relative+0.229Education=1st-4th-0.199native country=Vietnam...    2.4901232319209243
+    Attrib 0.315Education=12th+0.26 native country=Italy-0.195native country=Puerto-Rico+0.195occupation=Machine-op-inspct-0.194occupation=Tech-support...    28.24405005350699
+    Attrib 0.434Education=9th+0.327Education=Assoc-acdm-0.278Education=Assoc-voc-0.177occupation=Transport-moving-0.177Education=10th...    4.046523289805761
+    Attrib -0.298Education=10th-0.281marital status=Separated-0.232native country=Columbia-0.21native country=Guatemala+0.209relationship=Other-relative...    3.1654658739304287
+    Attrib 0.338Education=9th+0.248Education=12th-0.241native country=England+0.228marital status=Separated+0.226native country=Trinadad&Tobago...    3.6362244088561453
+    Attrib -0.407Education=10th+0.324Education=11th+0.321native country=Italy+0.287Education=12th+0.187native country=Scotland...    1.8625858662216244
+    Attrib -0.306Education=12th+0.25 capital loss-0.249native country=Hong-0.244occupation=Handlers-cleaners-0.191native country=Thailand...    10.262117023291475
+    Attrib 0.338Education=Assoc-acdm+0.327native country=Puerto-Rico-0.249Education=9th+0.219Education=7th-8th+0.211marital status=Separated...    0.8130117194135654
+    Attrib -0.371native country=India+0.335workclass=Without-pay+0.283native country=Philippines+0.234capital loss-0.22native country=Vietnam...    -2.729948955429495
+    Attrib -0.225native country=Germany-0.224occupation=Handlers-cleaners+0.22 native country=Poland-0.213Education=10th+0.2  occupation=Armed-Forces...    -10.88868467035094
+    Attrib 0.302native country=Vietnam+0.263native country=Honduras+0.257Education=11th+0.248native country=Ecuador-0.238Education=7th-8th...    -1.3492822835491753
+    Attrib -0.308native country=Hungary-0.274native country=Columbia+0.272workclass=Without-pay-0.267native country=Outlying-US(Guam-USVI-etc)+0.216native country=Philippines...    -12.578803748226218
+    Attrib -0.359native country=Iran+0.302workclass=Never-worked+0.279native country=Cuba-0.253native country=Thailand-0.251native country=Japan...    1.480246666538959
+    Attrib 0.333native country=Cuba+0.254native country=Japan-0.234native country=Nicaragua-0.233native country=Italy+0.226native country=Yugoslavia...    1.1322596412810293
+    Attrib 0.446native country=Thailand-0.433native country=Cuba-0.285native country=China+0.255marital status=Married-AF-spouse+0.251native country=Cambodia...    -4.175153905196938
+    Attrib 0.417native country=Germany-0.343native country=Vietnam-0.331native country=England+0.309native country=Ecuador-0.284native country=Canada...    7.295884533409201
+    Attrib 0.36 native country=Greece+0.341native country=Outlying-US(Guam-USVI-etc)-0.302native country=France+0.265native country=Iran-0.253native country=Hungary...    -4.434375706968765
+    Attrib 0.403native country=Yugoslavia+0.376native country=Nicaragua-0.29native country=Poland+0.288native country=Haiti+0.261native country=Canada...    -5.162498085250354
+    Attrib -0.525native country=France+0.475native country=England+0.332native country=Poland-0.277native country=Outlying-US(Guam-USVI-etc)+0.21 native country=Yugoslavia...    5.792693326545514
+    Attrib 0.445native country=Haiti-0.347native country=Jamaica+0.31 native country=Japan-0.31native country=Outlying-US(Guam-USVI-etc)+0.26 native country=Hong...    -1.6121924686727365
+    Attrib 0.392native country=Scotland+0.336native country=Hungary-0.319native country=Japan+0.233native country=Iran+0.216native country=Ireland...    -2.0808931772562795
+    Attrib -0.322native country=Thailand-0.315native country=Cuba+0.312native country=Peru+0.276native country=Yugoslavia-0.268native country=Ireland...    4.891651542216526
+    Attrib -0.466native country=Ireland+0.294native country=Cambodia-0.282native country=Taiwan+0.224native country=Scotland+0.215native country=Yugoslavia...    -12.305067455529366
+    Attrib -0.427native country=Scotland+0.375native country=Trinadad&Tobago+0.272native country=Iran-0.266native country=Taiwan+0.224native country=Ireland...    -7.475567471116926
+    Attrib -0.437marital status=Married-AF-spouse+0.4  native country=Peru-0.319native country=Japan+0.303native country=Thailand-0.215native country=Cambodia...    -7.026945484614692
+    Attrib 0.318workclass=Never-worked-0.266native country=Honduras-0.25native country=Germany-0.246marital status=Married-AF-spouse-0.237native country=Columbia...    -8.980562002524461
+    Attrib 0.409native country=Cambodia-0.33native country=Honduras+0.256native country=Columbia-0.25native country=Yugoslavia+0.217native country=Ireland...    -1.2151687206743054
+    Attrib 0.347native country=Hungary-0.293native country=Outlying-US(Guam-USVI-etc)-0.287native country=Nicaragua-0.268native country=Yugoslavia-0.248native country=Trinadad&Tobago...    -3.706025843416389
+    Attrib 0.347native country=Hungary-0.283native country=South+0.274native country=Puerto-Rico-0.267native country=Dominican-Republic+0.247native country=China...    -9.061025656000712
+    Attrib 0.292native country=Greece-0.29native country=Ireland+0.269native country=Nicaragua-0.251native country=Outlying-US(Guam-USVI-etc)+0.251marital status=Married-AF-spouse...    4.991566302356516
+    Attrib -0.357native country=Greece+0.328marital status=Married-AF-spouse-0.279native country=Honduras-0.274native country=Hungary+0.262native country=Trinadad&Tobago...    3.5068119031243103
+    Attrib 0.373native country=South+0.358workclass=Without-pay-0.284native country=Columbia-0.24native country=Hong+0.213Education=10th...    9.071492718261377
+    Attrib -0.381native country=El-Salvador+0.34 native country=Poland-0.266marital status=Married-AF-spouse-0.216workclass=Never-worked+0.214native country=France...    -2.569424724508985
+    Attrib -0.334native country=Iran+0.287marital status=Married-AF-spouse-0.287native country=Taiwan+0.261Education=Assoc-acdm+0.242native country=Vietnam...    5.854264284120372
+    Attrib 0.42 workclass=Without-pay-0.26native country=Scotland+0.239native country=Nicaragua-0.239occupation=Handlers-cleaners-0.211native country=Canada...    -16.367738296731968
+    Attrib 0.357workclass=Never-worked+0.257marital status=Separated+0.251native country=Laos-0.241native country=Hong-0.232native country=Trinadad&Tobago...    10.367531992108175
+    Attrib 0.308native country=Trinadad&Tobago-0.302native country=Italy+0.244native country=Scotland+0.241native country=Laos+0.24 Education=7th-8th...    -2.8630156028799165
+    Attrib 0.32 native country=China+0.26 native country=Italy+0.255native country=Holand-Netherlands+0.226native country=Scotland+0.224Education=Assoc-voc...    -13.501580146375016
+    Attrib -0.265Education=12th-0.259occupation=Handlers-cleaners-0.206capital loss+0.204native country=Peru-0.203native country=Yugoslavia...    4.249969534802451
+    Attrib 0.267native country=Greece+0.254native country=Holand-Netherlands+0.251native country=Honduras-0.221native country=Yugoslavia+0.221native country=Taiwan...    -15.542734398742708
+    Attrib -0.292Education=7th-8th+0.286native country=Puerto-Rico-0.28native country=India+0.236native country=Philippines+0.206native country=Laos...    -0.19077133481759265
+    Attrib 0.363native country=Jamaica+0.351Education=9th+0.304capital loss-0.251native country=El-Salvador-0.214native country=Holand-Netherlands...    17.094338590277903
+    Attrib 0.323capital loss+0.247Education=12th+0.234native country=Peru-0.218native country=Laos-0.215native country=Dominican-Republic...    1.3237004225657476
+    Attrib -0.371occupation=Tech-support+0.269occupation=Armed-Forces+0.207Education=Assoc-voc+0.207native country=Trinadad&Tobago+0.196workclass=Never-worked...    -8.565069385537395
+    Attrib 0.427Education=Preschool-0.256native country=Laos+0.225native country=South+0.199native country=Haiti+0.196Education=12th...    -2.7409864771371346
+    Attrib -0.335Education=Preschool+0.329marital status=Married-spouse-absent+0.221occupation=Machine-op-inspct-0.206Education=7th-8th+0.205Education=Doctorate...    -7.8339315895434085
+    Attrib -0.357marital status=Married-spouse-absent+0.29 occupation=Priv-house-serv+0.253native country=China-0.217fnlwgt+0.205Education=5th-6th...    12.793640496578185
+    Attrib -0.379occupation=Armed-Forces+0.353relationship=Other-relative-0.23marital status=Married-spouse-absent+0.213workclass=Federal-gov+0.202Education=12th...    35.2594715491977
+    Attrib -0.373Education=Doctorate+0.285Education=Prof-school+0.277relationship=Other-relative+0.225capital loss-0.219native country=India...    -3.8350623768368566
+    Attrib 0.346occupation=Tech-support-0.272occupation=Other-service-0.253native country=Guatemala+0.245relationship=Other-relative+0.214Education=Doctorate...    -13.179278742158473
+    Attrib -0.44native country=Portugal+0.357Education=1st-4th-0.232Education=Preschool+0.212native country=Jamaica+0.209workclass=Self-emp-inc...    -0.08935639419490882
+    Attrib -0.48capital gain+0.285workclass=Self-emp-inc-0.243capital loss-0.207workclass=Federal-gov-0.203Education=Masters...    24.87772784941633
+    Attrib 0.414occupation=Priv-house-serv-0.393native country=Guatemala+0.311marital status=Married-spouse-absent-0.264capital gain-0.193native country=Haiti...    27.731846442301105
+    Attrib -0.363occupation=Farming-fishing+0.22 native country=Jamaica+0.218workclass=Self-emp-not-inc-0.212workclass=Self-emp-inc-0.209race=Other...    -1.6763490742920748
+    Attrib 0.436fnlwgt+0.301race=Amer-Indian-Eskimo+0.271native country=Dominican-Republic+0.254occupation=Farming-fishing-0.229Education=1st-4th...    23.196262554156597
+    Attrib -0.341occupation=Protective-serv-0.333hours per week-0.321workclass=Federal-gov+0.293occupation=Adm-clerical-0.229relationship=Wife...    -0.864125786877689
+    Attrib -0.55race=Other+0.279native country=Dominican-Republic+0.26 native country=Ecuador+0.251hours per week+0.245native country=Puerto-Rico...    5.655953229660958
+Class <=50K
+    Input
+    Node 0
+Class >50K
+    Input
+    Node 1
+
+
+Time taken to build model: 184.78 seconds
+
+=== Evaluation on training set ===
+
+Time taken to test model on training data: 1.33 seconds
+
+=== Summary ===
+
+Correctly Classified Instances       24901               84.9718 %
+Incorrectly Classified Instances      4404               15.0282 %
+Kappa statistic                          0.5694
+Mean absolute error                      0.2205
+Root mean squared error                  0.3274
+Relative absolute error                 60.4602 %
+Root relative squared error             76.6611 %
+Coverage of cases (0.95 level)          99.454  %
+Mean rel. region size (0.95 level)      79.4165 %
+Total Number of Instances            29305     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.921    0.376    0.886      0.921    0.903      0.572    0.904     0.967     <=50K
+                 0.624    0.079    0.714      0.624    0.666      0.572    0.904     0.758     >50K
+Weighted Avg.    0.850    0.305    0.845      0.850    0.846      0.572    0.904     0.917     
+
+=== Confusion Matrix ===
+
+     a     b   <-- classified as
+ 20514  1759 |     a = <=50K
+  2645  4387 |     b = >50K
+

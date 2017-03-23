@@ -1,0 +1,31 @@
+=== Run information ===
+
+Evaluator:    weka.attributeSelection.InfoGainAttributeEval 
+Search:       weka.attributeSelection.Ranker -T -1.7976931348623157E308 -N 3
+Relation:     Bank_Note_Authentication-weka.filters.unsupervised.instance.Randomize-S42-weka.filters.unsupervised.instance.RemovePercentage-P10.0
+Instances:    1235
+Attributes:   5
+              variance
+              skewness
+              curtosis
+              entropy
+              class
+Evaluation mode:    evaluate on all training data
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (supervised, Class (nominal): 5 class):
+	Information Gain Ranking Filter
+
+Ranked attributes:
+ 0.528  1 variance
+ 0.333  2 skewness
+ 0.152  3 curtosis
+
+Selected attributes: 1,2,3 : 3
+

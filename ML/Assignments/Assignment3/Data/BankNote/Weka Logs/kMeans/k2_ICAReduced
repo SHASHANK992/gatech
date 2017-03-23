@@ -1,0 +1,53 @@
+=== Run information ===
+
+Scheme:       weka.clusterers.SimpleKMeans -init 0 -max-candidates 100 -periodic-pruning 10000 -min-density 2.0 -t1 -1.25 -t2 -1.0 -N 2 -A "weka.core.EuclideanDistance -R first-last" -I 500 -num-slots 1 -S 10
+Relation:     Bank_Note_Authentication-weka.filters.unsupervised.instance.Randomize-S42-weka.filters.unsupervised.instance.RemovePercentage-P10.0_ICA-weka.filters.unsupervised.attribute.IndependentComponents-W-A5-N200-T1.0E-4
+Instances:    1235
+Attributes:   5
+              Source_0
+              Source_1
+              Source_2
+              Source_3
+              class
+Test mode:    evaluate on training data
+
+
+=== Clustering model (full training set) ===
+
+
+kMeans
+======
+
+Number of iterations: 2
+Within cluster sum of squared errors: 179.78709582116738
+
+Initial staring points (random):
+
+Cluster 0: -0.002832,-0.004079,0.12597,0.098211,1
+Cluster 1: -0.018189,0.021264,-0.022797,0.011601,0
+
+Missing values globally replaced with mean/mode
+
+Final cluster centroids:
+                         Cluster#
+Attribute    Full Data          0          1
+                (1235)      (552)      (683)
+============================================
+Source_0        0.0126     0.0237     0.0036
+Source_1       -0.0008     -0.009     0.0058
+Source_2       -0.1679     -0.202    -0.1404
+Source_3       -0.1838    -0.2617    -0.1207
+class                0          1          0
+
+
+
+
+Time taken to build model (full training data) : 0.02 seconds
+
+=== Model and evaluation on training set ===
+
+Clustered Instances
+
+0       552 ( 45%)
+1       683 ( 55%)
+

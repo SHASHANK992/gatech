@@ -1,0 +1,73 @@
+=== Run information ===
+
+Scheme:       weka.clusterers.SimpleKMeans -init 0 -max-candidates 100 -periodic-pruning 10000 -min-density 2.0 -t1 -1.25 -t2 -1.0 -N 2 -A "weka.core.EuclideanDistance -R first-last" -I 500 -num-slots 1 -S 10
+Relation:     Adult-Income-weka.filters.unsupervised.instance.RemovePercentage-P10.0
+Instances:    29305
+Attributes:   15
+              age
+              workclass
+              fnlwgt
+              Education
+              education-num
+              marital status
+              occupation
+              relationship
+              race
+              sex
+              capital gain
+              capital loss
+              hours per week
+              native country
+              class
+Test mode:    evaluate on training data
+
+
+=== Clustering model (full training set) ===
+
+
+kMeans
+======
+
+Number of iterations: 8
+Within cluster sum of squared errors: 91377.94570468509
+
+Initial staring points (random):
+
+Cluster 0: 25,Private,165622,Masters,14,Never-married,Sales,Not-in-family,White,Male,0,0,55,United-States,<=50K
+Cluster 1: 19,Private,86150,11th,7,Never-married,Sales,Own-child,Asian-Pac-Islander,Female,0,0,19,Philippines,<=50K
+
+Missing values globally replaced with mean/mode
+
+Final cluster centroids:
+                                                           Cluster#
+Attribute                              Full Data                  0                  1
+                                         (29305)            (15543)            (13762)
+======================================================================================
+age                                       38.548            43.5098             32.944
+workclass                                Private            Private            Private
+fnlwgt                               189742.2531        186758.1258        193112.5692
+Education                                HS-grad            HS-grad            HS-grad
+education-num                            10.0787            10.3536             9.7681
+marital status                Married-civ-spouse Married-civ-spouse      Never-married
+occupation                        Prof-specialty     Prof-specialty       Adm-clerical
+relationship                             Husband            Husband      Not-in-family
+race                                       White              White              White
+sex                                         Male               Male             Female
+capital gain                           1081.9606          1691.9873           392.9876
+capital loss                             86.0891           116.4138            51.8399
+hours per week                           40.4164            43.4196            37.0246
+native country                     United-States      United-States      United-States
+class                                      <=50K              <=50K              <=50K
+
+
+
+
+Time taken to build model (full training data) : 3.07 seconds
+
+=== Model and evaluation on training set ===
+
+Clustered Instances
+
+0      15543 ( 53%)
+1      13762 ( 47%)
+

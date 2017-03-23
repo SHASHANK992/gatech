@@ -1,0 +1,62 @@
+=== Run information ===
+
+Scheme:       weka.clusterers.EM -I 100 -N -1 -X 10 -max 2 -ll-cv 1.0E-6 -ll-iter 1.0E-6 -M 1.0E-6 -num-slots 1 -S 100
+Relation:     Bank_Note_Authentication-weka.filters.unsupervised.instance.Randomize-S42-weka.filters.unsupervised.instance.RemovePercentage-P10.0_ICA-weka.filters.unsupervised.attribute.IndependentComponents-W-A5-N200-T1.0E-4
+Instances:    1235
+Attributes:   5
+              Source_0
+              Source_1
+              Source_2
+              Source_3
+              class
+Test mode:    evaluate on training data
+
+
+=== Clustering model (full training set) ===
+
+
+EM
+==
+
+Number of clusters selected by cross validation: 2
+Number of iterations performed: 32
+
+
+             Cluster
+Attribute          0        1
+              (0.36)   (0.64)
+==============================
+Source_0
+  mean         0.0466  -0.0069
+  std. dev.    0.0369   0.0251
+
+Source_1
+  mean         0.0117  -0.0079
+  std. dev.    0.0319   0.0226
+
+Source_2
+  mean        -0.4033  -0.0331
+  std. dev.    0.1802     0.09
+
+Source_3
+  mean        -0.4504  -0.0311
+  std. dev.    0.2013   0.1133
+
+class
+  0          196.5236 488.4764
+  1          255.1881 298.8119
+  [total]    451.7117 787.2883
+
+
+Time taken to build model (full training data) : 3.35 seconds
+
+=== Model and evaluation on training set ===
+
+Clustered Instances
+
+0       448 ( 36%)
+1       787 ( 64%)
+
+
+Log likelihood: 4.4112
+

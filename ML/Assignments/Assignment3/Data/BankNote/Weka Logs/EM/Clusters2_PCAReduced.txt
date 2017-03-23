@@ -1,0 +1,57 @@
+=== Run information ===
+
+Scheme:       weka.clusterers.EM -I 100 -N -1 -X 10 -max 2 -ll-cv 1.0E-6 -ll-iter 1.0E-6 -M 1.0E-6 -num-slots 1 -S 100
+Relation:     AT: Bank_Note_Authentication-weka.filters.unsupervised.instance.Randomize-S42-weka.filters.unsupervised.instance.RemovePercentage-P10.0-weka.filters.unsupervised.attribute.ReplaceMissingValues-weka.filters.unsupervised.attribute.NominalToBinary-Rfirst-last-weka.filters.unsupervised.attribute.Remove-R5-weka.filters.unsupervised.attribute.Standardize_principal components
+Instances:    1235
+Attributes:   4
+              -0.642skewness+0.613curtosis+0.395entropy-0.238variance
+              0.757variance+0.632entropy-0.161curtosis-0.046skewness
+              0.604variance-0.597entropy+0.52 curtosis-0.094skewness
+              class
+Test mode:    evaluate on training data
+
+
+=== Clustering model (full training set) ===
+
+
+EM
+==
+
+Number of clusters selected by cross validation: 2
+Number of iterations performed: 0
+
+
+                                                          Cluster
+Attribute                                                       0       1
+                                                           (0.55)  (0.45)
+==========================================================================
+-0.642skewness+0.613curtosis+0.395entropy-0.238variance
+  mean                                                      -0.492  0.6088
+  std. dev.                                                 1.2269  1.5232
+
+0.757variance+0.632entropy-0.161curtosis-0.046skewness
+  mean                                                      0.5076 -0.6281
+  std. dev.                                                 1.0301  0.9516
+
+0.604variance-0.597entropy+0.52 curtosis-0.094skewness
+  mean                                                      0.2698 -0.3339
+  std. dev.                                                 0.4246  0.5916
+
+class
+  0                                                            684       1
+  1                                                              1     553
+  [total]                                                      685     554
+
+
+Time taken to build model (full training data) : 1.67 seconds
+
+=== Model and evaluation on training set ===
+
+Clustered Instances
+
+0       683 ( 55%)
+1       552 ( 45%)
+
+
+Log likelihood: -4.52985
+

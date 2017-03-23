@@ -1,0 +1,65 @@
+=== Run information ===
+
+Scheme:       weka.clusterers.SimpleKMeans -init 0 -max-candidates 100 -periodic-pruning 10000 -min-density 2.0 -t1 -1.25 -t2 -1.0 -N 2 -A "weka.core.EuclideanDistance -R first-last" -I 500 -num-slots 1 -S 10
+Relation:     AT: Adult-Income-weka.filters.unsupervised.instance.RemovePercentage-P10.0-weka.filters.unsupervised.attribute.ReplaceMissingValues-weka.filters.unsupervised.attribute.NominalToBinary-Rfirst-last-weka.filters.unsupervised.attribute.Remove-R105-weka.filters.unsupervised.attribute.Standardize_principal components-weka.filters.unsupervised.attribute.Remove-R11-86
+Instances:    29305
+Attributes:   11
+              -0.425relationship=Husband-0.425marital status=Married-civ-spouse+0.326marital status=Never-married-0.273sex-0.232age...
+              0.457education-num+0.248native country=United-States-0.228native country=Mexico+0.225Education=Bachelors+0.221occupation=Prof-specialty...
+              -0.422race=Asian-Pac-Islander+0.419native country=United-States+0.387race=White-0.231native country=Philippines-0.166race=Black...
+              0.353age+0.339relationship=Unmarried+0.339marital status=Divorced-0.333marital status=Never-married-0.318relationship=Own-child...
+              0.44 race=White-0.429race=Black+0.291native country=Mexico-0.289native country=United-States+0.233relationship=Not-in-family...
+              -0.569workclass=Private+0.331workclass=Self-emp-not-inc+0.306workclass=Local-gov+0.253occupation=Farming-fishing+0.23 occupation=Protective-serv...
+              -0.386relationship=Wife+0.361relationship=Not-in-family+0.26 hours per week+0.246race=Asian-Pac-Islander-0.243occupation=Prof-specialty...
+              0.352race=Black-0.28race=Asian-Pac-Islander-0.273relationship=Wife+0.238fnlwgt-0.231occupation=Adm-clerical...
+              0.409occupation=Prof-specialty-0.347Education=Some-college-0.262occupation=Exec-managerial-0.254occupation=Adm-clerical+0.215Education=Prof-school...
+              -0.327occupation=Sales+0.308workclass=Local-gov+0.306occupation=Protective-serv+0.291Education=HS-grad-0.27workclass=Self-emp-inc...
+              class
+Test mode:    evaluate on training data
+
+
+=== Clustering model (full training set) ===
+
+
+kMeans
+======
+
+Number of iterations: 25
+Within cluster sum of squared errors: 11410.544314209474
+
+Initial staring points (random):
+
+Cluster 0: 0.563178,2.067348,0.447792,-1.558119,1.135956,-0.377005,1.315083,1.295251,0.199708,-0.194328,<=50K
+Cluster 1: 3.91073,-2.319295,-6.075935,-4.470086,-1.640614,-1.041688,2.129057,-4.758635,1.521219,-0.886059,<=50K
+
+Missing values globally replaced with mean/mode
+
+Final cluster centroids:
+                                                                                                                                                                     Cluster#
+Attribute                                                                                                                                                Full Data          0          1
+                                                                                                                                                           (29305)    (28357)      (948)
+========================================================================================================================================================================================
+-0.425relationship=Husband-0.425marital status=Married-civ-spouse+0.326marital status=Never-married-0.273sex-0.232age...                                         0    -0.0115     0.3429
+0.457education-num+0.248native country=United-States-0.228native country=Mexico+0.225Education=Bachelors+0.221occupation=Prof-specialty...                       0     0.0279    -0.8336
+-0.422race=Asian-Pac-Islander+0.419native country=United-States+0.387race=White-0.231native country=Philippines-0.166race=Black...                               0     0.2006    -6.0003
+0.353age+0.339relationship=Unmarried+0.339marital status=Divorced-0.333marital status=Never-married-0.318relationship=Own-child...                               0     0.0726    -2.1717
+0.44 race=White-0.429race=Black+0.291native country=Mexico-0.289native country=United-States+0.233relationship=Not-in-family...                                  0     0.0384    -1.1492
+-0.569workclass=Private+0.331workclass=Self-emp-not-inc+0.306workclass=Local-gov+0.253occupation=Farming-fishing+0.23 occupation=Protective-serv...              0     0.0331    -0.9897
+-0.386relationship=Wife+0.361relationship=Not-in-family+0.26 hours per week+0.246race=Asian-Pac-Islander-0.243occupation=Prof-specialty...                       0    -0.0714     2.1349
+0.352race=Black-0.28race=Asian-Pac-Islander-0.273relationship=Wife+0.238fnlwgt-0.231occupation=Adm-clerical...                                                   0     0.0777    -2.3251
+0.409occupation=Prof-specialty-0.347Education=Some-college-0.262occupation=Exec-managerial-0.254occupation=Adm-clerical+0.215Education=Prof-school...            0    -0.0316     0.9444
+-0.327occupation=Sales+0.308workclass=Local-gov+0.306occupation=Protective-serv+0.291Education=HS-grad-0.27workclass=Self-emp-inc...                             0    -0.0152     0.4557
+class                                                                                                                                                        <=50K      <=50K      <=50K
+
+
+
+
+Time taken to build model (full training data) : 7.82 seconds
+
+=== Model and evaluation on training set ===
+
+Clustered Instances
+
+0      28357 ( 97%)
+1        948 (  3%)
+
