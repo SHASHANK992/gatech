@@ -1,0 +1,99 @@
+from Xing Feng to Everyone:
+Hi, today we will talk about HW5. If you have questions, please ask.
+from Bhavin Thaker to Everyone:
+Q4: Could you explain how we got the values of m()?
+from Xing Feng to Everyone:
+I think that's what you should work out
+from Bhavin Thaker to Everyone:
+m(c) is defined as the function but the values do not seem to match the function...
+from Bhavin Thaker to Everyone:
+Questions a, b, c are different from working out what is m.
+from Xing Feng to Everyone:
+m(c) is the number of (a,b) pair that sum to c
+from Xing Feng to Everyone:
+a,b is calculating sum set C
+from Jacob Kilver to Everyone:
+I have a question on problem 1. I have a solution that runs in O(n^3) time, but we need it to run in O(n^2) time. I fill out a table like the matrix multiplication example from lecture (two for loops so n^2 time). I can't figure out how to eliminate the third, innermost for loop
+from Bhavin Thaker to Everyone:
+I understood how C is formed. Could you explain how do we get m(3) = 2 ?
+from Xing Feng to Everyone:
+Notice there is a | | in defining m(c)
+from Xing Feng to Everyone:
+m(3) = 2 ,because we can select(2,1),(3,0) to get 3
+from Xing Feng to Everyone:
+For question 1, try a one dimension array
+from Bhavin Thaker to Everyone:
+oh it got it. Thanks Xing.
+from Jacob Kilver to Everyone:
+Ok. I saw some people in the forum talk about a 1D array
+from Xing Feng to Everyone:
+Charles just posted a hint on Q1 on piaza
+from Jacob Kilver to Everyone:
+Ok
+from Bhavin Thaker to Everyone:
+For Q3, what does it mean: "It is okay if it is faster than O(n^3 logn) -- does it mean there is some way to solve it in O(n^3) way? But if somebody does that, then there is only solution for Q3 and the Bonus question?
+from Xing Feng to Everyone:
+if you give the O(n^3) method, you will get both credits for Q3 and the bonus
+from Bhavin Thaker to Everyone:
+ok. thx
+from Xing Feng to Everyone:
+: )
+from Bhavin Thaker to Everyone:
+So from the comments in the source file for Q3, it seems like Horner's rule is the solution for Q3 and FFT is the solution for Q3 Bonus, correct?
+from Bhavin Thaker to Everyone:
+See the comment on "Two possible strategies include ..."
+from Xing Feng to Everyone:
+Not necessarily..
+from Xing Feng to Everyone:
+But for bonus, you should try fft
+from Bhavin Thaker to Everyone:
+ok. thx.
+from Bhavin Thaker to Everyone:
+This question is to use FFT function directly and NOT implement FFT -- just ensuring that I am not misunderstanding something ... is that correct?
+from Xing Feng to Everyone:
+I think post @779 explainsQ3  clearly
+from Xing Feng to Everyone:
+You can just give one method
+from Bhavin Thaker to Everyone:
+Great. Thanks for the pointer to the Piazza post. 
+from Bhavin Thaker to Everyone:
+I am trying to understand how to use polyval. What is the 2nd argument -- is it an array in which to get the value representation of the points?
+from Bhavin Thaker to Everyone:
+http://docs.scipy.org/doc/numpy/reference/generated/numpy.polyval.html#r65
+from Bhavin Thaker to Everyone:
+x : array_like or poly1d object
+A number, a 1D array of numbers, or an instance of poly1d, “at” which to evaluate p.
+from Xing Feng to Everyone:
+np.polyval 
+from Xing Feng to Everyone:
+?
+from Xing Feng to Everyone:
+sorry, i overlook your question
+from Xing Feng to Everyone:
+Yes, it's an array 
+from Bhavin Thaker to Everyone:
+hmm, but the 2nd argument requires some value ...  what is the correct usage of the 2nd value?
+from Bhavin Thaker to Everyone:
+np.polyval(A, np.poly1d(5))?
+from Xing Feng to Everyone:
+Do you see the post@779?
+from Bhavin Thaker to Everyone:
+Yes, I read @779. Understood that, but the syntax of polyval is what I am trying to understand ...
+from Xing Feng to Everyone:
+the second step is ' Evaluate A at the output values from evaluating B'. We should use it here
+from Xing Feng to Everyone:
+you store the result of evaluating B in an array, say x. 
+from Xing Feng to Everyone:
+then you can use x in polyval()
+from Bhavin Thaker to Everyone:
+using ... np.polyval(B, x)?
+from Xing Feng to Everyone:
+that's evaluating B for points in x
+from Bhavin Thaker to Everyone:
+what is the call to evaluate B in an array x?
+from Xing Feng to Everyone:
+np.polyval(p,x) p is the polynomial. x is the array of points we want to evaluate p at.
+from Xing Feng to Everyone:
+for example, x = [x1,x2..] then np.polyval(p,x) returns the result of evaluating p(x1),p(x2)..
+from Xing Feng to Everyone:
+is it clear?

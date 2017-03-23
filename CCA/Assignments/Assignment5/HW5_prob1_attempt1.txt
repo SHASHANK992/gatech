@@ -1,0 +1,15 @@
+    for a in x:
+        # Determine if a is in A*
+        # if it is, remove it from x
+        # otherwise, try to see if the remaining substring matches A
+        if inA(a):
+            x = x[1:]
+        else
+            b = 1
+            while b < len(x):
+                if inA(x[0:b]):
+                    #we have a match
+                    x = x[b+1:]
+                    break
+                b += 1
+			
